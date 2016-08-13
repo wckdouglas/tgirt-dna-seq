@@ -1,0 +1,1 @@
+/stor/work/Lambowitz/cdw2854/src/miniconda2/bin/python DNAmapping.py --fq1=/stor/scratch/Lambowitz/cdw2854/genomeDNA/rawData/clipped/merged_R1_001.fastq.gz --outdir=/stor/scratch/Lambowitz/cdw2854/genomeDNA --index=/stor/work/Lambowitz/ref/hg19/Sequence/WholeGenomeFasta/genome.fa --threads=12 --adaptor=adaptors.fa

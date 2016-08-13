@@ -1,0 +1,1 @@
+/work/02727/cdw2854/lonestar/src/miniconda2/bin/python DNAmapping.py --fq1=/scratch/02727/cdw2854/plasmaDNA/rawData/DB-20X-1-errorFree_R1_001.fastq.gz --outdir=/scratch/02727/cdw2854/plasmaDNA --index=/corral-repl/utexas/2013lambowitz/Ref/GRCh38/hg38_rDNA/genome_rDNA --threads=12 --adaptor=adaptors.fa

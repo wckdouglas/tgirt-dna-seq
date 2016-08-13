@@ -1,0 +1,19 @@
+using /stor/work/Lambowitz/cdw2854/reference/hg38/CTCF_regions.bed 
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/RNA-OCD.bed with insert size boundary: (120, 180)
+Used existing bamfile: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/RNA-OCD.sorted.bam
+Parsing 5000 genes
+Parsing 10000 genes
+Parsing 15000 genes
+Parsing 20000 genes
+Parsing 25000 genes
+Parsing 30000 genes
+Parsing 35000 genes
+Parsing 40000 genes
+Parsing 45000 genes
+Parsing 50000 genes
+Parsing 55000 genes
+Parsing 60000 genes
+Parsing 65000 genes
+nes
+s
+saved /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/CTCFwps.png
