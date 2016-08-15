@@ -1,0 +1,9 @@
+{
+	"filters":[
+		{ "id":"firstPairForward",
+			"alignmentFlag" : "99" },
+		{"id":"secondPairReverse",
+			"alignmentFlag" : "147"}
+	],
+	"rule": "firstPairForward | secondPairReverse "
+}

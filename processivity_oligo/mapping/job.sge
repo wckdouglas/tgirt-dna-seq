@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+#$ -N BWAmap
+#$ -pe 1way 48
+#$ -q normal
+#$ -o BWAmap.o$JOB_ID
+#$ -l h_rt=1:00:00
+#$ -V
+#$ -cwd
+#$ -A Exosome-RNA-seq
+#------------------------------------------------------
+module load launcher  gcc/4.7.1 bwa/0.7.7
+export EXECUTABLE=$TACC_LAUNCHER_DIR/init_launcher 
+export CONTROL_FILE=command.sh
+export WORKDIR=.
+
+cd $WORKDIR/
+
+$TACC_LAUNCHER_DIR/paramrun $EXECUTABLE $CONTROL_FILE
