@@ -1,7 +1,7 @@
 #!/bin/bash
 
-PROJECTPATH=$SCRATCH/plasmaDNA
-DATAPATH=$PROJECTPATH/rawData/clipped
+PROJECTPATH=$WORK/cdw2854/plasmaDNA
+DATAPATH=/stor/work/Lambowitz/Data/NGS/JA16466/clipped/combined
 INDEXPATH=$REF/GRCh38/hg38_rDNA
 INDEX=$INDEXPATH/genome_rDNA
 PYTHON=$(which python)

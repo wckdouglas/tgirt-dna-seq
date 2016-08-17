@@ -20,10 +20,12 @@ rename <- function(x){
 insert_df <- insert_data_path %>%
     stri_c('isizeTable.tsv',sep='/') %>%
     read_tsv()%>%
-    filter(samplename %in% c('SRR2130052','PD-20X-errorFree'))  %>%
+    filter(grepl('SRR2130052|PD-18X|PD-20X$|PD-15X',samplename))  %>%
 #    filter(chrom == 'Autosomal and Sex Chromosome') %>%
     mutate(samplename = rename(samplename))  %>%
-#    group_by(chrom,samplename) %>%
+    group_by(isize,samplename) %>%
+    summarize(count = sum(count)) %>%
+    ungroup() %>%
     group_by(samplename) %>%
     do(data_frame(count = .$count/sum(.$count),
                   isize = .$isize)) %>% 
@@ -41,6 +43,6 @@ insert_p <- ggplot(data = insert_df, aes(x=isize, y=count*100)) +
     theme(text = element_text(size=35, face='bold',family = 'Arial'))+
     labs(x='Insert Size (bp)',y='Percent reads')+
     scale_x_continuous(breaks=seq(0,400,50)) +
-    geom_vline(data = peaks_df, aes(xintercept = peak, color = colors), linetype= 2, size=1.5) +
+    geom_vline(data = peaks_df, aes(xintercept = peak, color = colors), linetype= 2, size=1) +
     theme(legend.position='none') +
     scale_color_manual(values = c('green','grey'))

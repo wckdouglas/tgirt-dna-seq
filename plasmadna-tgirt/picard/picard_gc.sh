@@ -16,7 +16,7 @@ mkdir -p ${RESULT_PATH} ${FIGURES_PATH} ${SORTED_BAM_PATH}
 
 echo Using project directory: $PROJECT_PATH
 echo Running $SAMPLENAME
-
+#
 SORTED_BAM=${SORTED_BAM_PATH}/${SAMPLENAME}.sorted.bam 
 picard SortSam \
 	INPUT=${BAM} \
@@ -29,18 +29,19 @@ picard MarkDuplicates \
 	INPUT=$SORTED_BAM \
 	OUTPUT=$RMDUP_BAM \
 	METRICS_FILE=${RESULT_PATH}/${SAMPLENAME}.duplicate.txt \
-	REMOVE_DUPLICATES=True \
+	REMOVE_DUPLICATES=False\
 	ASSUME_SORTED=true 
-echo Removed duplicates $SAMPLENAME
+echo Marked duplicates $SAMPLENAME
 
 echo Collecting Bias
 picard CollectGcBiasMetrics \
 	VALIDATION_STRINGENCY=LENIENT \
 	SCAN_WINDOW_SIZE=100 \
-	INPUT=$RMDUP_BAM \
+	INPUT=$BAM \
 	CHART_OUTPUT=${FIGURES_PATH}/${SAMPLENAME}.pdf  \
 	OUTPUT=${RESULT_PATH}/${SAMPLENAME}.txt \
 	SUMMARY_OUTPUT=${RESULT_PATH}/${SAMPLENAME}.GC.summary  \
 	REFERENCE_SEQUENCE=$REF \
 	ASSUME_SORTED=true 
+	INPUT=$RMDUP_BAM \
 echo Finished $SAMPLENAME

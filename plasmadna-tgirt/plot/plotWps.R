@@ -25,7 +25,7 @@ rename <- function(x){
 ctcf_df <- wps_data_path %>%
     stri_c('CTCFwps.tsv',sep='/') %>%
     read_tsv() %>%
-    filter(samplename %in% c('SRR2130051','PD-20X-errorFree'))  %>%
+    filter(samplename %in% c('SRR2130051','PD-merged'))  %>%
     mutate(samplename = rename(samplename)) %>%
     group_by(position, samplename, type) %>%
     summarize(wps = sum(wps)) %>%

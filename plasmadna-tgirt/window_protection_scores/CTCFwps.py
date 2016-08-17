@@ -126,6 +126,7 @@ def main():
     projectPath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     referencePath = '/stor/work/Lambowitz/ref/GRCh38/hg38_rDNA'
     bedPath = projectPath + '/rmdup_bed'
+    bedPath = projectPath + '/bedFiles'
     resultPath = projectPath + '/wpsCTCF'
     makedir(resultPath)
     set_tempdir(resultPath)
@@ -145,11 +146,11 @@ def main():
     #run files
     halfTSSwindow = (windowSize-1)/2
     ctcfBed = BedTool(makeCTCFbed(genesGTF, halfTSSwindow))
-    pool = Pool(threads)
+    p = Pool(threads)
     processFileFunc = partial(runFile, ctcfBed, genome, windowSize)
-    wpsDF = pool.map(processFileFunc, bedFiles)
-    pool.close()
-    pool.join()
+    wpsDF = p.map(processFileFunc, bedFiles)
+    p.close()
+    p.join()
     df = pd.concat(wpsDF)
     df.to_csv(tablename, sep='\t', index=False)
     plotResult(df, figurename)

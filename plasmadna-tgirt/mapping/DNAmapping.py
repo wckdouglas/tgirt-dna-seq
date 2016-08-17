@@ -34,7 +34,7 @@ def trimming(fq1, threads, trim_path, samplename, adaptor):
         '-basein %s ' %(fq1) + \
         '-baseout %s/%s.fq.gz ' %(trim_path, samplename) + \
         options
-    runProcess(command,samplename)
+    #runProcess(command,samplename)
     return 0
 
 #MAPPING
@@ -43,8 +43,8 @@ def mappingProcess(samplename, trim_path, index, threads, bam_path):
     file1 = trim_path + '/' + samplename + '_1P.fq.gz'
     file2 = file1.replace('1P','2P')
     bam_file = '%s/%s.bam' %(bam_path, samplename)
-    command = 'bwa mem -t %i ' %(threads)+\
-	    '%s %s %s ' %(index, file1, file2 ) +\
+    command = 'bowtie2 --threads %i --no-discordant  --local ' %(threads)+\
+	    '--no-mixed -x %s -1 %s -2 %s ' %(index, file1, file2 ) +\
             '| samtools view -@ %i -b ' %(threads) +\
             '> %s' %bam_file
     runProcess(command, samplename)

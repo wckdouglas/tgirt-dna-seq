@@ -29,5 +29,5 @@ p <- ggplot(data = df, aes(x= seq_length, y = gc)) +
 	labs(y = 'GC %',x = 'Insert size', color = 'log2(Count)')+
 	theme(panel.background = element_rect(colour = low_color,fill=low_color))
 figurename <- str_c(figure_path, '/gc_length.jpg')
-ggsave(p, file = figurename, height=7,width=7)
+ggsave(p, file = figurename, height=5,width=7)
 message('Plotted ' , figurename)

@@ -33,6 +33,7 @@ def plotFigure(figurename, df):
     print 'Normalized counts'
     with sns.plotting_context('paper', font_scale=1.7):
         p = sns.FacetGrid(data=df, col = 'enzyme', row = 'substrate', margin_titles=True)
+    [ax.axvline(x=74,color='r',linewidth=0.5) for ax in p.axes.flat]
     p.map(plt.plot, 'size', 'normCount')
     p.map(plt.fill_between, 'size', 'normCount')
     [plt.setp(ax.texts, text="") for ax in p.axes.flat]
@@ -80,7 +81,7 @@ def main():
             .reset_index()
     tablename = bampath + '/isizeTable.tsv'
     df.to_csv(tablename, sep='\t', index=False)
-    figurename = figurepath + 'isizeTable.png'
+    figurename = figurepath + '/isizeTable_oligo.png'
     plotFigure(figurename, df)
     print 'Time lapsed: %.3f sec' %(time.time() - start)
 
