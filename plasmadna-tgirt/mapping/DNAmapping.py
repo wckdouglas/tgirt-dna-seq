@@ -53,7 +53,7 @@ def mappingProcess(samplename, trim_path, index, threads, bam_path):
 def makeBed(bam_file, samplename, bed_path):
     sys.stderr.write('Running post mapping processes with %s\n' %samplename)
     bed_file = '%s/%s.bed' %(bed_path, samplename)
-    command = 'bamtools filter -script filterCriteria.json -in %s' %(bam_file)+\
+    command = 'bamtools filter -script flag_filter.json -in %s' %(bam_file)+\
 	'| samtools fixmate -r - -' + \
         '| bedtools bamtobed -mate1 -bedpe '+\
         '| python bedpetobed.py - '+\

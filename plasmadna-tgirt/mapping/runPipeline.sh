@@ -1,27 +1,25 @@
 #!/bin/bash
 
-PROJECTPATH=$WORK/cdw2854/plasmaDNA
-DATAPATH=/stor/work/Lambowitz/Data/NGS/JA16466/clipped/combined
+PROJECTPATH=$SCRATCH/plasmaDNA
+DATAPATH=$PROJECTPATH/rawData
 INDEXPATH=$REF/GRCh38/hg38_rDNA
 INDEX=$INDEXPATH/genome_rDNA
 PYTHON=$(which python)
-CORES=12
+CORES=24
 
-for FQ in `ls $DATAPATH/*R1_001.fastq.gz $DATAPATH/*R1_001.fq.gz | grep 'GJ\|RNA\|ref' -v`
+for FQ in `ls $DATAPATH/*R1_001.fastq.gz $DATAPATH/*R1_001.fq.gz | grep 'GJ\|RNA\|ref\|error' -v`
 do
 	SAMPLENAME=$(basename $FQ)
 	if [[ $SAMPLENAME == SRR* ]]
 	then
 		ADAPTORS=TruSeq2-PE.fa
-	#elif [[ $SAMPLENAME == DB* ]]
-	#then
-	#	ADAPTORS=double_indexed_adaptors.fa
-	#elif [[ $SAMPLENAME == *errorFree* ]]
-	#then
-	#	ADAPTORS=indexed_adaptors.fa
 	else
 		ADAPTORS=adaptors.fa
 	fi
-	echo $PYTHON DNAmapping.py --fq1=$FQ --outdir=$PROJECTPATH --index=$INDEX \
-						--threads=$CORES --adaptor=$ADAPTORS 
+	echo $PYTHON DNAmapping.py \
+		--fq1=$FQ \
+		--outdir=$PROJECTPATH \
+		--index=$INDEX \
+		--threads=$CORES \
+		--adaptor=$ADAPTORS 
 done 
