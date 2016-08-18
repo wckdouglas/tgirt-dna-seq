@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECTPATH=$SCRATCH/genomeDNA
+PROJECTPATH=$WORK/$USER/genomeDNA
 DATAPATH=$PROJECTPATH/rawData/clipped
 INDEXPATH=$REF/hg19/Sequence/WholeGenomeFasta
 INDEX=$INDEXPATH/genome.fa

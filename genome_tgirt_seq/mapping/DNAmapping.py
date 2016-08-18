@@ -26,9 +26,7 @@ def trimming(fq1, threads, trim_path, samplename, adaptor):
     sys.stderr.write('Running trim process with %s\n' %samplename)
     #ILLUMINACLIP:<fastaWithAdaptersEtc>:<seed mismatches>:<palindrome clip
     #       threshold>:<simple clip threshold>:<minAdapterLength>:<keepBothReads>
-    options='ILLUMINACLIP:%s:2:10:10:1:true ' %(adaptor)+\
-	    'LEADING:10 TRAILING:10 '  +\
-	    'SLIDINGWINDOW:4:8  MINLEN:18  AVGQUAL:15'
+    options='ILLUMINACLIP:%s:2:10:10:1:true MINLEN:20' %(adaptor)
     command = 'time trimmomatic ' +\
         'PE -threads %i '  %(threads)+\
         '-basein %s ' %(fq1) + \
@@ -43,8 +41,8 @@ def mappingProcess(samplename, trim_path, index, threads, bam_path):
     file1 = trim_path + '/' + samplename + '_1P.fq.gz'
     file2 = file1.replace('1P','2P')
     bam_file = '%s/%s.bam' %(bam_path, samplename)
-    command = 'bwa mem -t %i ' %(threads)+\
-	    '%s %s %s ' %(index, file1, file2 ) +\
+    command = 'bowtie2 --threads %i --very-sensitive-local --maxins 1000 ' %(threads)+\
+	    '-x %s -1 %s -2 %s ' %(index, file1, file2 ) +\
             '| samtools view -@ %i -b ' %(threads) +\
             '> %s' %bam_file
     runProcess(command, samplename)
@@ -57,22 +55,9 @@ def makeRmdupBam(bam_file, samplename, rmdup_bam_path):
     command = 'bamtools filter -script flag_filter.json -in %s' %(bam_file)+\
 	    '| samtools fixmate -r - -' +\
         '| samtools sort -T %s/%s -O bam ' %(rmdup_bam_path, samplename) +\
-        '| samtools rmdup - - ' +\
         '> %s ' %(rmdup_bam)
     runProcess(command,samplename)
     return rmdup_bam
-
-def makeBed(rmdup_bam, samplename, bed_path):
-    sys.stderr.write('Running post mapping processes with %s\n' %samplename)
-    bed_file = ' %s/%s.bed' %(bed_path, samplename)
-    command = 'cat %s ' %rmdup_bam +\
-        '| samtools sort -T %s/%s -O bam -n ' %(bed_path, samplename) +\
-	    '| samtools fixmate -r - -' +\
-        '| bedtools bamtobed -mate1 -bedpe -i - ' +\
-        '| python bedpetobed.py - '+\
-        '> %s' %(bed_file)
-    runProcess(command,samplename)
-    return bed_file
 
 def makedir(directory):
     if not os.path.isdir(directory):
@@ -93,16 +78,12 @@ def main(args):
     #makedir
     trim_path= outdir + '/trimmedFiles'
     bam_path= outdir + '/bamFiles'
-    rmdup_bam_path = outdir + '/rmdup_bam'
-    bed_path = outdir + '/bedFiles'
-    map(makedir,[trim_path, bam_path, rmdup_bam_path, bed_path])
+    map(makedir,[trim_path, bam_path])
 
     #trim
     trim = trimming(fq1, threads, trim_path, samplename, adaptor)
     #map
     bam_file = mappingProcess(samplename, trim_path, index, threads, bam_path)
-    rmdup_bam = makeRmdupBam(bam_file, samplename, rmdup_bam_path)
-    makeBed(rmdup_bam, samplename, bed_path)
     sys.stderr.write('Finished mapping %s\n' %samplename)
     return 0
 

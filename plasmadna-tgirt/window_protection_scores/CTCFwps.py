@@ -126,7 +126,7 @@ def main():
     projectPath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     referencePath = '/stor/work/Lambowitz/ref/GRCh38/hg38_rDNA'
     bedPath = projectPath + '/rmdup_bed'
-    bedPath = projectPath + '/bedFiles'
+    #bedPath = projectPath + '/bedFiles'
     resultPath = projectPath + '/wpsCTCF'
     makedir(resultPath)
     set_tempdir(resultPath)
