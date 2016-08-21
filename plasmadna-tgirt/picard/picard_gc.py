@@ -27,19 +27,19 @@ def MarkDuplicates(in_bam, outNameFunc):
         'ASSUME_SORT_ORDER=coordinate ' +\
         'CREATE_INDEX=true '+\
 	'METRICS_FILE=%s ' %(out_bam.replace('bam','duplicate.metric'))
-    #runProcess(command)
+    runProcess(command)
     return out_bam
 
 def sortBam(in_bam, outNameFunc):
     out_bam = outNameFunc('sorted')
     command = 'samtools sort -@ 12 -T %s -O bam %s ' %(out_bam, in_bam) +\
             '>  %s' %(out_bam)
-    #runProcess(command)
+    runProcess(command)
     return out_bam
 
 def gcCollect(in_bam, figures_path, samplename, result_path, ref):
     command = 'picard CollectGcBiasMetrics '+\
-	'SCAN_WINDOW_SIZE=50 ' + \
+	'SCAN_WINDOW_SIZE=100 ' + \
 	'INPUT=%s ' %(in_bam) +\
         'CHART_OUTPUT=%s/%s.pdf '  %(figures_path, samplename) + \
         'OUTPUT=%s/%s.txt ' %(result_path, samplename) +\
@@ -63,12 +63,12 @@ def pipeline(result_path, figures_path, ref, bam_file):
     return 0
 
 def main():
-    project_path = '/stor/work/Lambowitz/cdw2854/genomeDNA'
+    project_path = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     bam_path= project_path + '/bamFiles'
     result_path = project_path + '/picard_results'
     figures_path = project_path + '/figures'
-    ref_path = '/stor/work/Lambowitz/ref/hg19/Sequence/WholeGenomeFasta'
-    ref = ref_path + '/genome.fa'
+    ref_path = '/stor/work/Lambowitz/ref/GRCh38/hg38_rDNA'
+    ref = ref_path + '/genome_rDNA.fa'
     for path in [result_path, figures_path]:
         if not os.path.isdir(path):
             os.makedirs(path)

@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 from multiprocessing import Pool
+from functools import partial
 sns.set_style('white')
 
 def parse_fastq(fastq_file):
@@ -17,7 +18,7 @@ def parse_fastq(fastq_file):
     member = []
     with gzip.open(fastq_file,'rb') as fq:
         for id_line, seq, qual in FastqGeneralIterator(fq):
-            line = id_line.split(' ')
+            line = id_line.split('_')
             id_array.append(line[0])
             member.append(line[1])
     df = pd.DataFrame({'id':id_array,'member_count':member})
@@ -36,8 +37,7 @@ def parse_bam(bam_file):
         .pipe(lambda x: x[x['isize']>10])
     return df
 
-def make_df(args):
-    samplename, bam_path, fastq_path, suffix = args
+def make_df(bam_path, fastq_path, suffix, samplename):
     fastq_file = fastq_path + '/' + samplename + suffix
     bam_file = bam_path + '/' + samplename + '_0.bam'
     fastq_df = parse_fastq(fastq_file)
@@ -46,31 +46,24 @@ def make_df(args):
     df['name'] = samplename
     return df
 
-def plot_amplification(df, figurename):
-    with sns.plotting_context('paper',font_scale=1.3):
-	ax = sns.kdeplot(data = df['isize'],data2=df['member_count'],shade=True, cmap='Reds')
-    ax.set(xlabel = 'Insert Size',ylabel = 'Barcode Family Member')
-    plt.savefig(figurename)
-    print 'Written %s' %figurename
-
 def main():
-    project_path = '/scratch/02727/cdw2854/jurkatCells'
-    fastq_path = project_path + '/splitted'
+    project_path = '/stor/work/Lambowitz/cdw2854/jurkatCells'
+    fastq_path = '/stor/work/Lambowitz/Data/NGS/JA16381/combined/splitted'
     bam_path = project_path + '/bamFiles'
     table_path = project_path + '/figures'
     table_name = table_path + '/amplification_table.tsv'
-    figure_name = table_name.replace('.tsv','.pdf')
     suffix = '_R1_001.fastq.gz'
-    fastqs = glob.glob(fastq_path + '/*' + suffix)
+    fastqs = glob.glob(fastq_path + '/DB*' + suffix)
     samplenames = map(lambda x: os.path.basename(x).replace(suffix,''), fastqs)
-    args = map(lambda x: (x,bam_path, fastq_path,suffix),samplenames)
-    df = Pool(24).map(make_df, args)
+    func = partial(make_df, bam_path, fastq_path, suffix)
+    p = Pool(24)
+    df = map(func, samplenames)
+    p.close()
+    p.join()
     df = pd.concat(df,axis=0)
     df.to_csv(table_name, sep='\t', index=False)
     print 'written %s' %table_name
     df = pd.read_table(table_name,sep='\t')
-    plot_amplification(df, figure_name)
-
 
 if __name__ == '__main__':
     main()

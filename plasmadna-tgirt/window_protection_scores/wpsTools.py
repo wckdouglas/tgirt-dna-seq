@@ -17,8 +17,6 @@ def makeBamFilterShortRNA(inFile,outprefix, genome):
     index the bam file finally
     '''
     bamFolder = '/'.join(outprefix.split('/')[:-1]) +'/bamFiles'
-    if not os.path.isdir(bamFolder):
-        os.makedirs(bamFolder)
     tempBam = bamFolder + '/' + outprefix.split('/')[-1] + '.filtered.sorted.bam'
     index_name = tempBam + '.bai'
     small_RNA = '/Users/wckdouglas/plasmaDNA/reference/smallRNA.bed'
@@ -67,8 +65,6 @@ def makeBam(inFile, samplename, genome):
     '''
     bamFolder = os.path.dirname(inFile) + '/bamFiles'
     tempBam = bamFolder + '/' + samplename + '.sorted.bam'
-    if not os.path.isdir(bamFolder):
-        os.makedirs(bamFolder)
     if not os.path.isfile(tempBam):
         writeBam(inFile, tempBam, genome)
     else:

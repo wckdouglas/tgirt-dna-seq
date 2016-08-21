@@ -129,6 +129,7 @@ def main():
     #bedPath = projectPath + '/bedFiles'
     resultPath = projectPath + '/wpsCTCF'
     makedir(resultPath)
+    makedir(bedPath + '/bamFiles')
     set_tempdir(resultPath)
 
     #define reference files

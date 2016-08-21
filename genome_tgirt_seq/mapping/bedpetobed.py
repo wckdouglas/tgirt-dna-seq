@@ -27,7 +27,7 @@ def main():
         sys.exit('usage: python %s <bamfile> /dev/stdin for stdin' %args[0])
     min_length = 10
     max_length = 10000
-    bed_file = args[1] 
+    bed_file = args[1]
     bed_file = bed_file if bed_file != '/dev/stdin' and bed_file != '-' else sys.stdin
     for frag in BedTool(bed_file) \
         .each(filter_bed, min_length, max_length):
