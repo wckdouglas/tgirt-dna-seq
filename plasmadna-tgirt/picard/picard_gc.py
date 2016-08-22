@@ -16,7 +16,7 @@ def outBamName(result_path, samplename, analysis_type):
 def filterBam(in_bam, outNameFunc):
     out_bam = outNameFunc('filter')
     command = 'bamtools filter -script flag_filter.json -in %s > %s' %(in_bam,out_bam)
-    #runProcess(command)
+    runProcess(command)
     return out_bam
 
 def MarkDuplicates(in_bam, outNameFunc):
@@ -74,6 +74,8 @@ def main():
             os.makedirs(path)
 
     bam_files = glob.glob(bam_path + '/*bam')
+    bam_files = ['RNase-I.bam','NT.bam','SRR2130051.bam','SRR2130052.bam']
+    bam_files = [bam_path + '/'+a for a in bam_files]
     picard_func = partial(pipeline, result_path, figures_path, ref)
     p = Pool(12)
     p.map(picard_func, bam_files)
