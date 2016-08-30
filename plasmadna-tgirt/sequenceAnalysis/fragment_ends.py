@@ -76,6 +76,7 @@ def runFile(nucleotides_half_window, ref_fasta, outputpath, bedFile):
     seq_count = 0
     for seq in BedTool(bedFile)\
             .filter(lambda x: x.chrom in regularChromosome)\
+            .filter(lambda frag: 150 < int(frag.end) - int(frag.start) < 190)\
             .each(makeBedLineWindow, nucleotides_half_window) \
             .nucleotide_content(fi=ref_fasta, seq=True, s= True):
         sequence = seq.fields[-1]

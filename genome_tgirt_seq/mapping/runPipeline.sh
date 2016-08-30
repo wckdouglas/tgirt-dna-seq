@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECTPATH=$WORK/$USER/genomeDNA
-DATAPATH=$PROJECTPATH/rawData/clipped
+DATAPATH=$PROJECTPATH/rawData
 INDEXPATH=$REF/hg19/Sequence/WholeGenomeFasta
 INDEX=$INDEXPATH/genome.fa
 PYTHON=$(which python)

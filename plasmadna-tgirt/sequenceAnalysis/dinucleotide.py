@@ -152,7 +152,7 @@ def main():
     makedir(outputpath)
     set_tempdir(outputpath)
     bedFiles = glob.glob(bedFilePath + '/*bed')
-    bedFiles = filter(lambda x:re.search('SRR|NT|RNase|PD',x), bedFiles)
+    bedFiles = filter(lambda x:re.search('DB|SRR|NT|RNase|PD',x), bedFiles)
     outputprefix = outputpath + '/dinucleotides'
     tablename = outputprefix + '.tsv'
     figurename = outputprefix + '.pdf'

@@ -63,7 +63,6 @@ def main():
     df = pd.concat(df,axis=0)
     df.to_csv(table_name, sep='\t', index=False)
     print 'written %s' %table_name
-    df = pd.read_table(table_name,sep='\t')
 
 if __name__ == '__main__':
     main()
