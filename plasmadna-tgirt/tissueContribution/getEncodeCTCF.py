@@ -57,9 +57,7 @@ def readTable(cleanTablename, bedFilename, cellTablename):
     print 'Written %s' %bedFilename
 
 def main():
-    datapath = '/scratch/02727/cdw2854/plasmaDNA/ctcfData'
-    datapath = '/Users/wckdouglas/plasmaDNA/reference/ctcfData'
-    datapath = '/scratch/cdw2854/plasmaDNA/CTCFdata'
+    datapath = '/stor/work/Lambowitz/ref/ctcfData'
     cleanTablename = datapath + '/cleanedCTCF.tsv'
     bedFilename = datapath + '/cellCTCF.bed'
     cellTablename = datapath + '/cellType.tsv'

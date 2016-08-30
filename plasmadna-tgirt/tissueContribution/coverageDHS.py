@@ -23,14 +23,14 @@ def coverage(args):
     return 0
 
 def main():
-    projectpath = '/scratch/cdw2854/plasmaDNA'
+    projectpath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     bedpath = projectpath + '/bedFiles'
     resultpath = projectpath + '/tissueContribution'
     os.system('mkdir -p %s' %resultpath)
-    refpath = '/scratch/cdw2854/plasmaDNA/CTCFdata'
+    refpath = '/stor/work/Lambowitz/ref/ctcfData'
     refBed = refpath + '/cellCTCF.bed'
     bedFiles = glob.glob(bedpath + '/*.bed')
-    bedFiles = filter(lambda x: re.search('NT|SRR|RNase|RNA-OCD|refA1',x),bedFiles)
+    bedFiles = filter(lambda x: re.search('NT|SRR|RNase|PD',x),bedFiles)
     Pool(14).map(coverage,[(bedFile, resultpath, refBed) for bedFile in bedFiles])
     return 0
 

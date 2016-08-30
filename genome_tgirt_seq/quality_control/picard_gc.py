@@ -16,7 +16,7 @@ def outBamName(result_path, samplename, analysis_type):
 def filterBam(in_bam, outNameFunc):
     out_bam = outNameFunc('filter')
     command = 'bamtools filter -script flag_filter.json -in %s > %s' %(in_bam,out_bam)
-    #runProcess(command)
+    runProcess(command)
     return out_bam
 
 def MarkDuplicates(in_bam, outNameFunc):
@@ -27,14 +27,14 @@ def MarkDuplicates(in_bam, outNameFunc):
         'ASSUME_SORT_ORDER=coordinate ' +\
         'CREATE_INDEX=true '+\
 	'METRICS_FILE=%s ' %(out_bam.replace('bam','duplicate.metric'))
-    #runProcess(command)
+    runProcess(command)
     return out_bam
 
 def sortBam(in_bam, outNameFunc):
     out_bam = outNameFunc('sorted')
     command = 'samtools sort -@ 12 -T %s -O bam %s ' %(out_bam, in_bam) +\
             '>  %s' %(out_bam)
-    #runProcess(command)
+    runProcess(command)
     return out_bam
 
 def gcCollect(in_bam, figures_path, samplename, result_path, ref):

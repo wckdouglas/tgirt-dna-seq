@@ -45,7 +45,6 @@ readFile <- function(filename, filepath){
 }
 
 main <- function(){
-	filepath <- '/scratch/02727/cdw2854/plasmaDNA/tissueContribution'
 	filepath <- '/scratch/cdw2854/plasmaDNA/tissueContribution'
 	figurepath <- '/scratch/02727/cdw2854/plasmaDNA/figures'
 	figurepath <- '/scratch/cdw2854/plasmaDNA/figures'
