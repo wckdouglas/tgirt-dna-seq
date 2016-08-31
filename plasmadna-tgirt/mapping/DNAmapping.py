@@ -34,7 +34,7 @@ def trimming(fq1, threads, trim_path, samplename, adaptor):
         '-basein %s ' %(fq1) + \
         '-baseout %s/%s.fq.gz ' %(trim_path, samplename) + \
         options
-    #runProcess(command,samplename)
+    runProcess(command,samplename)
     return 0
 
 #MAPPING
