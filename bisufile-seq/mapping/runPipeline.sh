@@ -11,7 +11,7 @@ MEMORY=1g
 for FQ in $DATAPATH/PDB*R1_001.fastq.gz
 do
 	SAMPLENAME=$(basename $FQ)
-	echo python DNAmapping.py --fq1=$FQ --outdir=$PROJECTPATH --index=$INDEX \
-		--threads=$CORES --adaptor=$ADAPTORS \
-		--memory=$MEMORY
+	echo python DNAmapping.py --fq1=$FQ \
+		--outdir=$PROJECTPATH --index=$INDEX \
+		--threads=$CORES --adaptor=$ADAPTORS 
 done 
