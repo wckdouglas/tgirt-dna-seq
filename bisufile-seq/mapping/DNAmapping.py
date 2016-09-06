@@ -64,7 +64,6 @@ def postProcess(picard, memory, bamFile, samplename, bed_path):
 	    '| tee %s/%s.bam ' %(bam_path, samplename) + \
             '| picard MarkDuplicatesWithMateCigar ' + \
             	'ASSUME_SORTED=true ' +\
-                'REMOVE_DUPLICATES=true' +\
 	        'INPUT=/dev/stdin ' +\
     	        'METRICS_FILE=%s/%s.txt ' %(rmdup_bam_path, samplename) +\
 	        'OUTPUT=%s/%s.bam ' %(rmdup_bam_path, samplename)
