@@ -18,15 +18,15 @@ def readFile(bedFile):
     samplename = basename.split('.')[0]
     chromosome = basename.split('.')[-3]
     print 'Reading %s for chr: %s ' %(samplename, chromosome)
-    columnNames = ['chrom','start','end','name','center','strand']
-    df = pd.read_csv(bedFile,sep='\t', names=columnNames)
-    df['nucleosome'] = np.abs(df['end'] - df['start'])
-    df = df[(df['nucleosome'] >= 50) & (df['nucleosome'] <= 500)]
-    df['peakNext'] = np.abs(shift(df.center,-1) - df.center)
-    df['peakPrevious'] = np.abs(shift(df.center,1) - df.center)
-    df['distance'] = df[['peakNext','peakPrevious']].min(axis=1)
-    matrix = np.array([df['distance'], np.repeat(samplename,len(df))])
-    df = pd.DataFrame(matrix.transpose(), columns = ['distance','samplename'])
+    column_names = ['chrom','start','end','name','center','strand','intensity']
+    df = pd.read_table(bedFile, names=column_names,) \
+        .assign(peak_width = lambda d: np.abs(d['end'] - d['start']))\
+        .pipe(lambda d: d[(d['peak_width'] >= 50) & (d['peak_width'] <= 500)])\
+        .assign(peak_next = lambda d:  np.abs(shift(d['center'],-1) - d['center']))\
+        .assign(peak_previous = lambda d: np.abs(shift(d['center'],1) - d['center']))\
+        .assign(distance = lambda d: d[['peak_next','peak_previous']].min(axis=1))\
+        .assign(samplename = samplename) \
+        .pipe(lambda d: d[['distance','samplename']])
     return df
 
 def plotDistance(df, figurename):
@@ -34,7 +34,7 @@ def plotDistance(df, figurename):
     df['distance'] = np.asarray(df['distance'], dtype=int)
     df = df[(df['distance'] <  lowerBound)] 
     df.columns = ['distance','Sample']
-    df['plotTitle'] = np.repeat('Nearest nucleosome call',len(df))
+    df['plotTitle'] = 'Nearest nucleosome call'
     with sns.plotting_context('paper',font_scale=1.3):
         p = sns.FacetGrid(data = df, hue='Sample',aspect = 1.6, legend_out=False)
         p.map(sns.distplot,'distance',hist=False,bins=1)
@@ -48,7 +48,7 @@ def plotDistance(df, figurename):
     print 'Saved %s' %figurename
 
 def main():
-    projectPath = '/scratch/cdw2854/plasmaDNA'
+    projectPath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     datapath = projectPath + '/genomeWPS'
     resultpath = projectPath + '/figures'
     figurename = resultpath + '/peakDistance.pdf'
@@ -59,7 +59,10 @@ def main():
     chromosomes = np.array(map(lambda x: x.split('.')[-3], bedFiles),dtype='string')
     bedFiles = bedFiles[(np.in1d(chromosomes,np.arange(23)))]
     bedFiles = filter(lambda x: re.search('SRR|NT|PD|RNa',x), bedFiles )
-    dfs = Pool(24).map_async(readFile, bedFiles).get()
+    p = Pool(12)
+    dfs = map(readFile, bedFiles)
+    p.close()
+    p.join()
     df = pd.concat(dfs)
     df.to_csv(tablename,sep='\t',index=False)
     df = pd.read_csv(tablename,sep='\t')

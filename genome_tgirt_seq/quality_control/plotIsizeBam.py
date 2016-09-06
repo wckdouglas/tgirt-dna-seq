@@ -32,10 +32,11 @@ def plotFigure(figurename, df):
     with sns.plotting_context('paper',font_scale=1.5):
         plt.figure()
         print 'Normalized counts'
-        p = sns.FacetGrid(data=df, col = 'samplename', col_wrap = 4,sharey=False)
+        p = sns.FacetGrid(data=df, col = 'samplename', col_wrap = 5,sharey=False)
         p.map(plt.plot, 'isize', 'normCount')
         p.map(plt.fill_between, 'isize', 'normCount')
         p.set_titles('{col_name}')
+        p.set(xlabel='Insert size',ylabel='Normalized count')
         p.savefig(figurename)
         print 'Saved %s' %figurename
     return 0

@@ -11,6 +11,7 @@ import os
 import pandas as pd
 import time
 from multiprocessing import Pool
+from functools import partial
 sns.set_style('white')
 
 def plottingFigure(figurename, df):
@@ -35,8 +36,7 @@ def parseClosetLine(closestLine):
     distance = center2 - center1
     return distance
 
-def closestPeak(args):
-    bedpath, file1, file2, chromosome = args
+def closestPeak(bedpath, file1, file2, chromosome):
     print 'Running chromosome: %s' %chromosome
     bedFile1 = '%s/%s.%s.Long.bed' %(bedpath, file1, chromosome)
     bedFile2 = bedFile1.replace(file1,file2)
@@ -44,9 +44,9 @@ def closestPeak(args):
         bed1 = BedTool(bedFile1)
         bed2 = BedTool(bedFile2)
         centerDistance = np.array([parseClosetLine(line) for line in BedTool(bed1).closest(bed2)])
-        centerDistance = centerDistance[(centerDistance < 1000) & (centerDistance > -1000)]
+        centerDistance = centerDistance[(-1000 < centerDistance) & (centerDistance< 1000)]
         df = pd.DataFrame(centerDistance, columns=['distance'])
-        df['chrom'] = np.repeat(chromosome,len(df))
+        df['chrom'] = chromosome
         return df
 
 def makeDir(directory):
@@ -56,21 +56,23 @@ def makeDir(directory):
 
 def main():
     start = time.time()
-    projectpath = '/scratch/cdw2854/plasmaDNA'
+    projectpath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     bedpath = projectpath + '/genomeWPS'
-    figurepath = projectpath + 'figures'
+    figurepath = projectpath + '/figures'
     figurename = figurepath + '/predictedNucleosomeDistance.pdf'
     tablename = figurename.replace('pdf','tsv')
     makeDir(figurepath)
-    file1 = 'NT'
+    file1 = 'PD-merged'
     file2 = 'SRR2130051'
     chromosomes = map(str,np.arange(1,23))
     chromosomes = np.concatenate([chromosomes,['X','Y']])
-    dfs = Pool(24).map_async(closestPeak,[(bedpath, file1, file2, chrom) for chrom in chromosomes]).get()
+    closestPeakFunc = partial(closestPeak, bedpath, file1, file2)
+    p = Pool(24)
+    dfs = p.map(closestPeakFunc, chromosomes)
     dfs = [df for df in dfs if df is not None]
     df = pd.concat(dfs)
-    plottingFigure(figurename, df)
     df.to_csv(tablename, index=False)
+    plottingFigure(figurename, df)
     print 'Writtten %s in %.3f min' %(tablename, np.true_divide(time.time() - start,60))
     return 0
 

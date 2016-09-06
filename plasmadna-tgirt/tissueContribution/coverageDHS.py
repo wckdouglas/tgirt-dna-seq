@@ -1,25 +1,23 @@
 #!/usr/bin/env python
 
-from pybedtools import BedTool
+from pybedtools import BedTool, set_tempdir
 import os
 import glob
 from multiprocessing import Pool
 import re
+from functools import partial
 
-def coverage(args):
-    bedFile, resultpath, refBed = args
+def coverage(resultpath, ref_bed_name, header, bedFile):
     samplename = os.path.basename(bedFile).split('.')[0]
     print 'Running %s..' %samplename
     outFile = resultpath + '/' + samplename + '.tsv'
-    bedString = open(refBed,'ru').readlines()
-    refBed = BedTool(('\n'.join(bedString[1:])),from_string=True)
-    coverageBed = BedTool(refBed).coverage(counts=True,b=bedFile)
-    with open(outFile,'w') as ofile:
-        header = bedString[0].strip() + '\t' + 'coverage\n'
-        ofile.write(header)
-        for line in coverageBed:
-            ofile.write('\t'.join(line.fields).strip() + '\n')
-        print 'Written %s' %ofile.name
+    sorted_bed =  BedTool(bedFile).sort()
+    with open(outFile,'w') as out_file:
+        out_file.write(header)
+        for line in BedTool(ref_bed_name)\
+                .coverage(b = sorted_bed.fn, counts=True, f=0.8, r=True, sorted=True):
+            out_file.write('\t'.join(line.fields).strip() + '\n')
+        print 'Written %s' %out_file.name
     return 0
 
 def main():
@@ -27,11 +25,20 @@ def main():
     bedpath = projectpath + '/bedFiles'
     resultpath = projectpath + '/tissueContribution'
     os.system('mkdir -p %s' %resultpath)
+    set_tempdir(resultpath)
     refpath = '/stor/work/Lambowitz/ref/ctcfData'
     refBed = refpath + '/cellCTCF.bed'
     bedFiles = glob.glob(bedpath + '/*.bed')
     bedFiles = filter(lambda x: re.search('NT|SRR|RNase|PD',x),bedFiles)
-    Pool(14).map(coverage,[(bedFile, resultpath, refBed) for bedFile in bedFiles])
+
+    #process reference bed
+    bedString = open(refBed,'ru').readlines()
+    ref_bed_name = resultpath + '/dhs_ref.bed'
+    BedTool(('\n'.join(bedString[1:])),from_string=True).sort().moveto(ref_bed_name)
+    header = bedString[0].strip() + '\t' + 'coverage\n'
+
+    coverage_func = partial(coverage, resultpath, ref_bed_name, header)
+    Pool(12).map(coverage_func, bedFiles)
     return 0
 
 

@@ -17,7 +17,7 @@ figurepath <- str_c(project_path,'/figures')
 df <- data_path %>%
     str_c('/dinucleotides.tsv') %>%
     read_tsv()  %>%
-    filter(samplename %in%  c('SRR2130052','PD-20X-errorFree')) %>%
+    filter(grepl('52|PD',samplename)) %>%
     mutate( name = rename(samplename)) %>%
     filter(position > -120) %>%
     filter(position < 120) %>%

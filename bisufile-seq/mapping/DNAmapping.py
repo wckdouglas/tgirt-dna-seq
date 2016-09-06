@@ -9,7 +9,7 @@ def getOpt():
     parser = argparse.ArgumentParser(description='Pipeline for trimming, mapping paired end plasma DNA')
     parser.add_argument('-1','--fq1',required=True, help='read1 fastqfile [string]')
     parser.add_argument('-o','--outdir',required=True, help='output directory')
-    parser.add_argument('-x','--index',required=True, help='bwa index or hisat2 index')
+    parser.add_argument('-x','--index',required=True, help='bwa ')
     parser.add_argument('-a','--adaptor', default='adaptor.fa', help='Fasta file containing adaptor sequneces (default: adaptor.fa)')
     parser.add_argument('-t','--threads',default=1, type=int, help='Threads to be used (default=: 1)')
     parser.add_argument('-M','--memory', default='1g', help='Memory allocation for java machine (defulat = 1g)')

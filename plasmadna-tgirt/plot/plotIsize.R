@@ -13,7 +13,7 @@ project_path <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/'
 insert_data_path <- stri_c(project_path,'/bamFiles')
 
 rename <- function(x){
-    y = ifelse(grepl('PD',x),'TGIRT-ssDNA-seq','ssDNA-seq')
+    y = ifelse(grepl('PD',x),'TGIRT-seq','ssDNA-seq')
     return(y)
 }
 
