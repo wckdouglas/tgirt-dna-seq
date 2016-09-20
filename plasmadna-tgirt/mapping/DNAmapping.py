@@ -43,8 +43,8 @@ def mappingProcess(samplename, trim_path, index, threads, bam_path):
     file1 = trim_path + '/' + samplename + '_1P.fq.gz'
     file2 = file1.replace('1P','2P')
     bam_file = '%s/%s.bam' %(bam_path, samplename)
-    command = 'bowtie2 --threads %i --no-discordant  --local ' %(threads)+\
-	    '--no-mixed -x %s -1 %s -2 %s ' %(index, file1, file2 ) +\
+    command = 'bwa mem -t %i ' %(threads)+\
+	    '%s %s %s ' %(index, file1, file2 ) +\
             '| samtools view -@ %i -b ' %(threads) +\
             '> %s' %bam_file
     runProcess(command, samplename)

@@ -12,13 +12,13 @@ library(broom)
 filepath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/tissueContribution'
 figurepath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/figures'
 files <- list.files(path=filepath, pattern = '.tsv')
-files <- files[grepl('RNase|52|PD|NT',files)]
+files <- files[grepl('RNase|52',files)]
 
 
 readTable <- function(filename){
     df <- filepath %>%
         str_c(filename,sep='/') %>%
-        read_tsv() %>%
+        read_tsv(col_types = 'cnncncnnnnnnnnnnnnnnnnnnn') %>%
         select(coverage) %>%
         setNames(filename)
 }
@@ -26,6 +26,7 @@ readTable <- function(filename){
 df <- files %>%
     map(readTable) %>%
     reduce(cbind) %>%
+    filter(rowSums(.)!=0) %>%
     tbl_df
 
 cor_df <-df %>% 
@@ -46,13 +47,17 @@ df[df<5 ] = 0
 correlation = cor(df$`RNase-I.tsv`,df$`SRR2130052.tsv`)
 correlation <- signif(correlation,3)
 
+low_color <- 'yellow'
+high_color <- 'red'
 p <- ggplot(data =df, aes(x=`SRR2130052.tsv` ,y = `RNase-I.tsv` ))+
-    geom_point() +
+    geom_bin2d(bins=40) +
     scale_x_log10(limits=c(5,1000)) +
     scale_y_log10(limits=c(5,1000)) +
     labs(x = 'TGIRT-seq',y = 'ssDNA-seq (ref 1)', titles='TF Binding Sites') +
     annotate('text',x = 10,y=900, label=str_c('r = ',correlation),size=12) +
     geom_abline(intercept=0, slope=1, color='red') +
     theme(text = element_text(size=20, face='bold')) +
-    theme(plot.title = element_text(size=25, face='bold')) 
+    theme(plot.title = element_text(size=25, face='bold'))  +
+    scale_fill_gradient(low = low_color, high = high_color) +
+    theme(panel.background = element_rect(fill = low_color))
 ggsave(p, file= str_c(figure_path,'/scatter_plot_dhs.png'),dpi=700, h = 5000, w = 2000,type = "cairo-png")

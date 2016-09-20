@@ -39,10 +39,10 @@ insert_p <- ggplot(data = insert_df, aes(x=isize, y=count*100)) +
     geom_bar(stat='identity', color = 'dark blue') + 
     facet_grid(.~samplename)   + 
     theme(axis.text.y = element_text(size=35,face='plain',family = 'Arial')) +
-    theme(axis.text.x = element_text(angle=35,hjust=1,size=35, face='plain',family = 'Arial')) +
+    theme(axis.text.x = element_text(angle=50,hjust=1,size=30, face='plain',family = 'Arial')) +
     theme(text = element_text(size=35, face='bold',family = 'Arial'))+
     labs(x='Insert Size (bp)',y='Percent reads')+
-    scale_x_continuous(breaks=seq(0,400,50)) +
+    scale_x_continuous(breaks=seq(0,401,50), limits=c(0,400)) +
     geom_vline(data = peaks_df, aes(xintercept = peak, color = colors), linetype= 2, size=1) +
     theme(legend.position='none') +
     scale_color_manual(values = c('green','grey'))

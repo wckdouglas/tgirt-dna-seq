@@ -12,6 +12,7 @@ loadfonts()
 
 source('/stor/home/cdw2854/tgirt-dna-seq/plasmadna-tgirt/plot/plotDinucleotides.R')
 source('/stor/home/cdw2854/tgirt-dna-seq/plasmadna-tgirt/plot/plotIsize.R')
+source('/stor/home/cdw2854/tgirt-dna-seq/plasmadna-tgirt/plot/plot_wps_intersample.R')
 project_path <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/'
 wps_data_path <- stri_c(project_path,'/wpsCTCF')
 figure_path <- stri_c(project_path,'/figures')
@@ -42,7 +43,7 @@ wpsPlot <- function(sample){
         labs(x= ' ', y =' ')+
         theme(text = element_text(size=35, face='bold', family = 'Arial'))+
         scale_x_continuous(breaks=seq(-1000,1000,200)) +
-        theme(axis.text.x = element_text(size=35, angle=45, hjust=1, face='plain',family = 'Arial'))+
+        theme(axis.text.x = element_text(size=35, angle=50, hjust=1, face='plain',family = 'Arial'))+
         theme(axis.text.y = element_text(size=35,face='plain',family = 'Arial')) 
     return (p)
 }
@@ -55,7 +56,8 @@ wps_p <- plot_grid(plotlist=wps_ps) +
 p <- ggdraw() + 
     draw_plot(insert_p, x= 0.05,y=0.8, width = 0.95, height=0.199) +
     draw_plot(wps_p, x= 0.02,y=0.3, width = 0.98, height=0.49)  +
-    draw_plot(dinucleotide_p + 
+    #draw_plot(dinucleotide_p + 
+    draw_plot(nucleo_p + 
                 theme(strip.background = element_blank()) + 
                 theme(strip.text.x = element_blank()), x= 0.02,y=0.0, width = 0.98, height=0.28)  +
         draw_plot_label(c('(a)','(b)','(c)'),x = c(0,0,0), y =c(1,0.8,0.315), size=35,family = 'Arial')
