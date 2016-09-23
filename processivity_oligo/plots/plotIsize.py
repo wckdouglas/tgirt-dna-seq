@@ -67,6 +67,7 @@ def normCount(df):
 def main():
     start = time.time()
     bampath = '/stor/work/Lambowitz/cdw2854/processivity/filtered_bams'
+    bampath = '/stor/work/Lambowitz/cdw2854/processivity/bamFile'
     figurepath = bampath
     bamFiles = glob.glob(bampath + '/*.bam')
     if len(bamFiles) == 0:
@@ -79,9 +80,9 @@ def main():
             .groupby(['enzyme','substrate']) \
             .apply(normCount)\
             .reset_index()
-    tablename = bampath + '/isizeTable.tsv'
+    tablename = bampath + '/isizeTable_nofilter.tsv'
     df.to_csv(tablename, sep='\t', index=False)
-    figurename = figurepath + '/isizeTable_oligo.png'
+    figurename = figurepath + '/isizeTable_oligo_nofilter.png'
     plotFigure(figurename, df)
     print 'Time lapsed: %.3f sec' %(time.time() - start)
 
