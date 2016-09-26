@@ -16,7 +16,7 @@ def outBamName(result_path, samplename, analysis_type):
 def filterBam(in_bam, outNameFunc):
     out_bam = outNameFunc('filter')
     command = 'bamtools filter -script flag_filter.json -in %s > %s' %(in_bam,out_bam)
-    runProcess(command)
+    #runProcess(command)
     return out_bam
 
 def MarkDuplicates(in_bam, outNameFunc):
@@ -34,12 +34,12 @@ def sortBam(in_bam, outNameFunc):
     out_bam = outNameFunc('sorted')
     command = 'samtools sort -@ 12 -T %s -O bam %s ' %(out_bam, in_bam) +\
             '>  %s' %(out_bam)
-    runProcess(command)
+    #runProcess(command)
     return out_bam
 
 def gcCollect(in_bam, figures_path, samplename, result_path, ref):
     command = 'picard CollectGcBiasMetrics '+\
-	'SCAN_WINDOW_SIZE=50 ' + \
+	'SCAN_WINDOW_SIZE=150 ' + \
 	'INPUT=%s ' %(in_bam) +\
         'CHART_OUTPUT=%s/%s.pdf '  %(figures_path, samplename) + \
         'OUTPUT=%s/%s.txt ' %(result_path, samplename) +\
@@ -55,8 +55,9 @@ def pipeline(result_path, figures_path, ref, bam_file):
     outNameFunc = partial(outBamName,result_path, samplename)
     filtered_bam = filterBam(bam_file, outNameFunc)
     sorted_bam = sortBam(filtered_bam, outNameFunc)
-    dedup_bam = MarkDuplicates(sorted_bam, outNameFunc)
-    gcCollect(dedup_bam, figures_path, samplename, result_path, ref)
+    #dedup_bam = MarkDuplicates(sorted_bam, outNameFunc)
+    #gcCollect(dedup_bam, figures_path, samplename, result_path, ref)
+    gcCollect(sorted_bam, figures_path, samplename, result_path, ref)
     end = time.time()
     time_lapsed = (end - start)/float(60)
     print 'Finished %s in %.3f min' %(samplename, time_lapsed)

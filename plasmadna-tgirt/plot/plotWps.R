@@ -19,7 +19,7 @@ figure_path <- stri_c(project_path,'/figures')
 figurename <- stri_c(figure_path,'/wps_distribution.pdf')
 
 rename <- function(x){
-    y = ifelse(grepl('PD',x),'TGIRT-seq','ssDNA-seq')
+    y = ifelse(grepl('^P',x),'TGIRT-seq','ssDNA-seq')
     return(y)
 }
 

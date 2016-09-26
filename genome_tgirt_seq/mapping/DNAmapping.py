@@ -82,7 +82,7 @@ def main(args):
     map(makedir,[trim_path, bam_path])
 
     #trim
-    trim = trimming(fq1, threads, trim_path, samplename, adaptor)
+    #trim = trimming(fq1, threads, trim_path, samplename, adaptor)
     #map
     bam_file = mappingProcess(samplename, trim_path, index, threads, bam_path)
     sys.stderr.write('Finished mapping %s\n' %samplename)
