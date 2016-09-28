@@ -1,32 +1,23 @@
 #!/usr/bin/env python
 
+import pyximport
 import pysam
+pyximport.install(setup_args={
+        'extra_link_args':pysam.get_libraries(),
+        'include_dirs':pysam.get_include(),
+        'define_macros':pysam.get_defines()
+        })
 from functools import partial
 from multiprocessing import Pool
 import os
 import glob
-
-def clusterCount(aln):
-    name = aln.query_name
-    return int(name.split('_')[-2])
-
-def filterBam(result_path, min_read_cluster,bam_file):
-    samplename = bam_file.split('/')[-1].split('.')[0]
-    filtered_bam = result_path + '/' + samplename + '.filtered.bam'
-
-    with pysam.Samfile(bam_file,'rb') as in_bam:
-        with pysam.Samfile(filtered_bam,'wb',template = in_bam) as out_bam:
-            [out_bam.write(aln) for aln in in_bam if clusterCount(aln) >= min_read_cluster]
-    print 'Written %s' %filtered_bam
-    os.system('samtools index %s' %filtered_bam)
-    print 'Indexed %s' %filtered_bam
-    return 0
+from cluster_filter import filterBam
 
 def main():
     project_path = '/stor/work/Lambowitz/cdw2854/target-seq'
     bam_path = project_path + '/bamFiles'
     result_path = project_path + '/filtered_bams'
-    min_read_cluster = 5
+    min_read_cluster = 4
 
     if not os.path.isdir(result_path):
         os.mkdir(result_path)

@@ -15,4 +15,5 @@ if len(arguments) != 3:
     sys.exit('[usage]: python %s <in_bam> <out_bam>' %arguments[0])
 infile = arguments[1]
 outfile = arguments[2]
-filterBAM(infile, outfile)
+count = filterBAM(infile, outfile)
+print 'Written %i alignments' %(count)

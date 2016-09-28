@@ -37,10 +37,11 @@ assignFilter <- function(x){
     ifelse(grepl('filtered',x),'>= 3 cluster','No filter')
 }
 
+figurename <- str_c(table_dir, '/mismatch.pdf')
 merge_df <- tables %>%
     map(read_file) %>%
     reduce(rbind)  %>%
-#    filter(!grepl('bayesian',samplename)) %>%
+    filter(grepl('bayesian',samplename)) %>%
     filter(grepl('filter',samplename)) %>%
     tbl_df
 
@@ -147,7 +148,6 @@ p <- ggdraw() +
 #                    x = c(0,0,0),
 #                    y = c(1,0.666,0.333), 
 #                    size = 20)
-figurename <- str_c(table_dir, '/mismatch.pdf')
 ggsave(p , file = figurename, width = 10, height = 15)
 message('Plotted: ',figurename)
 
