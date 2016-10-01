@@ -1,13 +1,13 @@
 #!/bin/bash
 
 PROJECTPATH=$SCRATCH/plasmaDNA
-DATAPATH=$PROJECTPATH/rawData
-INDEXPATH=$REF/GRCh38
-INDEX=$INDEXPATH/genome
+DATAPATH=$PROJECTPATH/rawData/split
+INDEXPATH=$REF/GRCh38/hg38_rDNA
+INDEX=$INDEXPATH/genome_rDNA
 PYTHON=$(which python)
-CORES=24
+CORES=8
 
-for FQ in `ls $DATAPATH/*R1_001.fastq.gz $DATAPATH/*R1_001.fq.gz | grep 'GJ\|RNA\|ref\|error' -v`
+for FQ in `ls $DATAPATH/*R1*.fastq.gz $DATAPATH/*R1_001.fq.gz | grep 'PD\|SR\|NA'|grep -v 'DB\|NT\|RN' `
 do
 	SAMPLENAME=$(basename $FQ)
 	if [[ $SAMPLENAME == SRR* ]]

@@ -28,7 +28,7 @@ def trimming(fq1, threads, trim_path, samplename, adaptor):
     #       threshold>:<simple clip threshold>:<minAdapterLength>:<keepBothReads>
     options='ILLUMINACLIP:%s:2:10:10:1:true ' %(adaptor)+\
 	    'LEADING:10 TRAILING:10 '  +\
-	    'SLIDINGWINDOW:4:8  MINLEN:18  AVGQUAL:15'
+	    'SLIDINGWINDOW:4:8  MINLEN:15  AVGQUAL:15'
     command = 'time trimmomatic ' +\
         'PE -threads %i '  %(threads)+\
         '-basein %s ' %(fq1) + \
@@ -86,7 +86,7 @@ def main(args):
     threads = args.threads
     # set up variables
     suffix = '.'.join(fq1.split('.')[-2:]) if fq1.split('.')[-1] == 'gz' else fq1.split('.')[-1]
-    samplename = os.path.basename(fq1).replace('_R1_001','').split('.')[0]
+    samplename = os.path.basename(fq1).replace('_R1','').replace('_001','').split('.')[0]
 
     #makedir
     trim_path= outdir + '/trimmedFiles'

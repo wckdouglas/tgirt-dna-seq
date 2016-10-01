@@ -26,6 +26,10 @@ mkdir -p $DESTINATION
 #mv $DESTINATION/SRR2129993_2.fastq.gz $DESTINATION/SRR2129993_R2_001.fq.gz
 #mv $DESTINATION/SRR2129993_1.fastq.gz $DESTINATION/SRR2129993_R1_001.fq.gz
 
-DATAPATH=/corral-repl/utexas/2013lambowitz/Work/douglas/rawData/jurkatCells/mydata/experiments/preincubation_with_zymol
-cp $DATAPATH/G0-* $DESTINATION
-cp $DATAPATH/G7-* $DESTINATION
+#DATAPATH=/corral-repl/utexas/2013lambowitz/Work/douglas/rawData/jurkatCells/mydata/experiments/preincubation_with_zymol
+#cp $DATAPATH/G0-* $DESTINATION
+#cp $DATAPATH/G7-* $DESTINATION
+
+# douglas plasma and genome
+scp cdw2854@lambcomp01.ccbb.utexas.edu:/stor/work/Lambowitz/Data/NGS/SA16172/dna_plasma_genome/clipped/*gz $DESTINATION
+
