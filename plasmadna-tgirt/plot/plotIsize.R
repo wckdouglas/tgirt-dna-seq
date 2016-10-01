@@ -13,14 +13,14 @@ project_path <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/'
 insert_data_path <- stri_c(project_path,'/bamFiles')
 
 rename <- function(x){
-    y = ifelse(grepl('PD',x),'TGIRT-seq','ssDNA-seq')
+    y = ifelse(grepl('^P',x),'TGIRT-seq','ssDNA-seq')
     return(y)
 }
 
 insert_df <- insert_data_path %>%
     stri_c('isizeTable.tsv',sep='/') %>%
     read_tsv()%>%
-    filter(grepl('SRR2130052|PD-18X|PD-20X$|PD-15X',samplename))  %>%
+    filter(grepl('SRR2130052|P1203-SQ',samplename))  %>%
 #    filter(chrom == 'Autosomal and Sex Chromosome') %>%
     mutate(samplename = rename(samplename))  %>%
     group_by(isize,samplename) %>%

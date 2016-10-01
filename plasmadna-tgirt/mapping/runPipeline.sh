@@ -1,5 +1,6 @@
 #!/bin/bash
 
+<<<<<<< HEAD
 PROJECTPATH=$SCRATCH/plasmaDNA
 DATAPATH=$PROJECTPATH/rawData/split
 INDEXPATH=$REF/GRCh38/hg38_rDNA

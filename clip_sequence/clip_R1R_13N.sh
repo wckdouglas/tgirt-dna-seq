@@ -1,10 +1,10 @@
 #!/bin/bash
 
-DATAPATH=$DATA/JA16493
+DATAPATH=$DATA/SA16172/dna_plasma_genome
 CLIPPED_PATH=$DATAPATH/clipped
 mkdir -p $CLIPPED_PATH
 
-for FQ1 in $DATAPATH/[g]*R1_001.fastq.gz
+for FQ1 in $DATAPATH/*R1_001.fastq.gz
 do
 	R1_NAME=$(basename $FQ1)
 	FQ2=${FQ1/R1/R2}

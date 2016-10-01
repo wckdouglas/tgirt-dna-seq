@@ -1,18 +1,15 @@
 #!/usr/bin/bash
 
-PROJECT_PATH=/stor/scratch/Lambowitz/cdw2854/plasmaDNA
-BAM_PATH=$PROJECT_PATH/bamFiles
+PROJECT_PATH=${WORK}/cdw2854/genomeDNA
 PICARD_PATH=$PROJECT_PATH/picard_results
-REF_PATH=$REF/GRCh38/hg38_rDNA
+REF_PATH=$REF/hg19/Sequence/WholeGenomeFasta
+GENOME=$REF_PATH/genome.fa
 
-for BAM in $BAM_PATH/*bam
+for BAM in $PICARD_PATH/*.sorted.bam
 do
-	SAMPLE_NAME=$(basename ${BAM%.bam})
-	echo picard  SortSam INPUT=$BAM \
-		OUTPUT=/dev/stdout \
-		SORT_ORDER=coordinate \
-	  \| picard CollectRawWgsMetrics INPUT=/dev/stdin \
+	SAMPLE_NAME=$(basename ${BAM%.sorted.bam})
+	echo  picard CollectRawWgsMetrics INPUT=${BAM} \
 		OUTPUT=$PICARD_PATH/${SAMPLE_NAME}.wgs.metrics \
-		REFERENCE_SEQUENCE=$REF_PATH/genome_rDNA.fa \
+		REFERENCE_SEQUENCE=$GENOME \
 		INCLUDE_BQ_HISTOGRAM=true
 done
