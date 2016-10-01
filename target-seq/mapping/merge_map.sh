@@ -8,6 +8,7 @@ INDEX_PATH=${REF}/targeted_gene
 ADAPTOR=adaptors.fa
 SUFFIX=_R1_001.fastq.gz
 CORES=12
+MIN_CLUSTER=4
 mkdir -p ${BAM_PATH} ${NAME_SORT_BAM_PATH} ${TRIM_PATH} ${MERGE_PATH}
 
 for READ1 in ${SPLIT_DATA}/*${SUFFIX}
@@ -30,7 +31,8 @@ do
 	#SORT BAM
 	samtools index ${BAM_PATH}/${SAMPLE_NAME}.bam
 done
-python filtering.py
+python filtering.py  4
+python filtering.py  3
 #		${INDEX_PATH}/hist1h3b.fa \
 #		${INDEX_PATH}/hist1h3.fa \
 bash ../mismatch/extract_base.sh

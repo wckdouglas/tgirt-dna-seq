@@ -20,17 +20,13 @@ cpdef int filterBAM(infile, outfile):
         AlignedSegment aln
         int count
 
-    in_bam = pysam.Samfile(infile,'rb')
-    out_bam = pysam.Samfile(outfile,'wb', template = in_bam)
+    with pysam.AlignmentFile(infile,'rb') as in_bam:
+        with pysam.AlignmentFile(outfile,'wb', template = in_bam) as out_bam:
 
-    count = 0
-    for aln in in_bam:
-        if not aln.is_unmapped:
-            if validateAlignment(aln):
-                out_bam.write(aln)
-                count += 1
-
-    
-    in_bam.close()
-    out_bam.close()
+            count = 0
+            for aln in in_bam:
+                if not aln.is_unmapped:
+                    if validateAlignment(aln):
+                        out_bam.write(aln)
+                        count += 1
     return count

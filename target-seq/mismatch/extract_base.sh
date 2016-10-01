@@ -13,9 +13,7 @@ for BAM in $FILTERED_BAM_PATH/*bam
 do
 	SAMPLENAME=$(basename ${BAM%.bam})
 	OUT_BAM=$BASE_PATH/${SAMPLENAME}.bam
-#	\| python filter_bam.py  \
-	echo cat $BAM \
-	\| python ${SCRIPT_PATH}/filter_bam.py - ${OUT_BAM}';' \
+	echo python ${SCRIPT_PATH}/filter_bam.py ${BAM} ${OUT_BAM}';' \
 	samtools mpileup \
 		--max-depth 10000000 \
 		-f $INDEX \
