@@ -1,9 +1,9 @@
 #!/bin/bash
 
-PROJECTPATH=$WORK/$USER/genomeDNA
+PROJECTPATH=$WORK/cdw2854/ecoli_genome
 DATAPATH=$PROJECTPATH/rawData
-INDEXPATH=$REF/hg19/Sequence/WholeGenomeFasta
-INDEX=$INDEXPATH/genome.fa
+INDEXPATH=$REF/Ecoli
+INDEX=$INDEXPATH/b_strain.fa
 PYTHON=$(which python)
 ADAPTORS=adaptors.fa
 CORES=12

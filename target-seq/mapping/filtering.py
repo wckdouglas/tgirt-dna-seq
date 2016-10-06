@@ -4,9 +4,7 @@ import pyximport
 import pysam
 import numpy as np
 pyximport.install(setup_args={
-        'extra_link_args':pysam.get_libraries(),
         'include_dirs':pysam.get_include(),
-        'define_macros':pysam.get_defines()
         })
 from functools import partial
 from multiprocessing import Pool

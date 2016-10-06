@@ -16,7 +16,7 @@ def outBamName(result_path, samplename, analysis_type):
 def filterBam(in_bam, outNameFunc):
     out_bam = outNameFunc('filter')
     command = 'bamtools filter -script flag_filter.json -in %s > %s' %(in_bam,out_bam)
-    #runProcess(command)
+    runProcess(command)
     return out_bam
 
 def MarkDuplicates(in_bam, outNameFunc):
@@ -28,13 +28,6 @@ def MarkDuplicates(in_bam, outNameFunc):
         'CREATE_INDEX=true '+\
 	'METRICS_FILE=%s ' %(out_bam.replace('bam','duplicate.metric'))
     runProcess(command)
-    return out_bam
-
-def sortBam(in_bam, outNameFunc):
-    out_bam = outNameFunc('sorted')
-    command = 'samtools sort -@ 12 -T %s -O bam %s ' %(out_bam, in_bam) +\
-            '>  %s' %(out_bam)
-    #runProcess(command)
     return out_bam
 
 def gcCollect(in_bam, figures_path, samplename, result_path, ref):
@@ -54,22 +47,20 @@ def pipeline(result_path, figures_path, ref, bam_file):
     samplename = os.path.basename(bam_file).replace('.bam','')
     outNameFunc = partial(outBamName,result_path, samplename)
     filtered_bam = filterBam(bam_file, outNameFunc)
-    sorted_bam = sortBam(filtered_bam, outNameFunc)
-    #dedup_bam = MarkDuplicates(sorted_bam, outNameFunc)
-    #gcCollect(dedup_bam, figures_path, samplename, result_path, ref)
-    gcCollect(sorted_bam, figures_path, samplename, result_path, ref)
+    dedup_bam = MarkDuplicates(filtered_bam, outNameFunc)
+    gcCollect(dedup_bam, figures_path, samplename, result_path, ref)
     end = time.time()
     time_lapsed = (end - start)/float(60)
     print 'Finished %s in %.3f min' %(samplename, time_lapsed)
     return 0
 
 def main():
-    project_path = '/stor/work/Lambowitz/cdw2854/genomeDNA'
+    project_path = '/stor/work/Lambowitz/cdw2854/ecoli_genome'
     bam_path= project_path + '/bamFiles'
     result_path = project_path + '/picard_results'
     figures_path = project_path + '/figures'
-    ref_path = '/stor/work/Lambowitz/ref/hg19/Sequence/WholeGenomeFasta'
-    ref = ref_path + '/genome.fa'
+    ref_path = '/stor/work/Lambowitz/ref/Ecoli'
+    ref = ref_path + '/b_strain.fa'
     for path in [result_path, figures_path]:
         if not os.path.isdir(path):
             os.makedirs(path)

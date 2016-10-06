@@ -12,20 +12,24 @@ def getopt():
     parser = argparse.ArgumentParser(description = 'Pipeline for demultiplex subclones from R1R_index')
     parser.add_argument('-p', '--path', required=True, help = 'file path')
     parser.add_argument('-s', '--suffix', required=True, choices = ['fastq.gz','fastq','bed','bam'], help = 'file suffix')
-    parser.add_argument('-d','--dry', action='store_true')
+    parser.add_argument('-d','--dry', action='store_true', help = 'print out commands to be run')
+    parser.add_argument('-r','--rmdup', action='store_true', help ='Only work for bed file')
     args = parser.parse_args()
     return args
 
 def get_group(y):
     return map(lambda x: re.sub('^[0-9]+-','',os.path.basename(x)), y)
 
+def make_dir(directory):
+    if not os.path.isdir(directory):
+        os.mkdir(directory)
+
 def main():
     args = getopt()
     path = args.path
     outpath = path + '/merged'
     file_type = args.suffix
-    if not os.path.isdir(outpath):
-        os.mkdir(outpath)
+    make_dir(outpath)
 
 
     map_files = glob(path + '/*' + file_type)
@@ -39,8 +43,17 @@ def main():
         joined_files = ' '.join(files)
         if file_type == 'bam':
             command = 'samtools cat %s > %s/%s ' %(joined_files, outpath, group)
-        else:
+        elif not args.rmdup:
             command = 'cat %s > %s/%s ' %(joined_files, outpath, group)
+        elif args.rmdup and file_type == 'bed':
+            temp_dir = ('%s/%s' %(outpath, group)).replace('.bed')
+            
+            command = 'cat %s ' %(joined_files) + \
+                    '| sort -k1,1 -k2,2n -k3,3n -k6,6 '+\
+                        '--temporary-directory=%s -u ' %(temp_dir)  +\
+                    '> %s/%s ' %(outpath, group)
+        else:
+            sys.exit('Cannot run rmdup with files other than BED')
         if not args.dry:
             os.system(command)
         print command

@@ -72,6 +72,7 @@ plot_mismatch <- function(clean_mismatch_df){
         labs(x = ' ', y = 'Fractions', fill = ' ') +
         theme(axis.text.x = element_text(size = 20, angle = 90, hjust = 1, vjust =0.5)) +
         theme(text = element_text(size = 20, face='bold')) +
+        theme(axis.text = element_text(size = 18, face='bold')) +
         panel_border() +
         theme(legend.position = 'bottom')
 	return (mismatch_p)
@@ -91,6 +92,7 @@ plot_cov <- function(merge_df){
         geom_bar(stat='identity',fill='grey') +
         facet_grid(template~gene_name, scale = 'free_y') +
         theme(text = element_text(size = 20, face='bold')) +
+        theme(axis.text = element_text(size = 18, face='bold')) +
         labs(x = ' ', y = 'High Quality Base Coverage')
 	return(cov_p)
 }
@@ -111,6 +113,7 @@ plot_pos_mismatch <- function(clean_mismatch_df){
         geom_bar(stat='identity') +
         facet_grid(template~., scale = 'free_y') +
         theme(text = element_text(size = 20, face='bold')) +
+        theme(axis.text = element_text(size = 18, face='bold')) +
         labs(x = 'Position on GOI', y = 'Mismatch count', fill= ' ') +
         theme(legend.position ='top')
 	return(pos_p)
@@ -142,14 +145,15 @@ make_diff_fig <- function(correct_method, filter_member, merge_df){
 	cov_p <- plot_cov(merge_df)
 	pos_p <- plot_pos_mismatch(clean_mismatch_df)
     
-    p <- ggdraw() +
-        draw_plot(cov_p, 0, 0.666, 1, 0.333) +
-        draw_plot(pos_p, 0.02, 0.333, 0.98, 0.333) +
-        draw_plot(mismatch_p, 0, 0, 1, 0.333) 
+    #p <- ggdraw() +
+    #    draw_plot(cov_p, 0, 0.666, 1, 0.333) +
+    #    draw_plot(pos_p, 0.02, 0.333, 0.98, 0.333) +
+    #    draw_plot(mismatch_p, 0, 0, 1, 0.333) 
     #    draw_plot_label(label = c('(B)','(C)','(D)'), 
     #                    x = c(0,0,0),
     #                    y = c(1,0.666,0.333), 
     #                    size = 20)
+	p <- plot_grid(pos_p, mismatch_p, ncol=1)
     ggsave(p , file = figurename, width = 10, height = 15)
     message('Plotted: ',figurename)
 }

@@ -10,7 +10,7 @@ library(extrafont)
 loadfonts()
 
 
-source('/stor/home/cdw2854/tgirt-dna-seq/plasmadna-tgirt/plot/plotDinucleotides.R')
+#source('/stor/home/cdw2854/tgirt-dna-seq/plasmadna-tgirt/plot/plotDinucleotides.R')
 source('/stor/home/cdw2854/tgirt-dna-seq/plasmadna-tgirt/plot/plotIsize.R')
 source('/stor/home/cdw2854/tgirt-dna-seq/plasmadna-tgirt/plot/plot_wps_intersample.R')
 project_path <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/'
@@ -26,12 +26,16 @@ rename <- function(x){
 ctcf_df <- wps_data_path %>%
     stri_c('CTCFwps.tsv',sep='/') %>%
     read_tsv() %>%
-    filter(samplename %in% c('SRR2130051','PD-merged'))  %>%
+    filter(samplename %in% c('SRR2130052','PD-merged'))  %>%
     mutate(samplename = rename(samplename)) %>%
     group_by(position, samplename, type) %>%
     summarize(wps = sum(wps)) %>%
     ungroup() %>%
     tbl_df
+
+reduce_digit <- function(x){
+    x/1000
+}
 
 wpsPlot <- function(sample){
     p <- ctcf_df %>%
@@ -44,14 +48,15 @@ wpsPlot <- function(sample){
         theme(text = element_text(size=35, face='bold', family = 'Arial'))+
         scale_x_continuous(breaks=seq(-1000,1000,200)) +
         theme(axis.text.x = element_text(size=35, angle=50, hjust=1, face='plain',family = 'Arial'))+
-        theme(axis.text.y = element_text(size=35,face='plain',family = 'Arial')) 
+        theme(axis.text.y = element_text(size=35,face='plain',family = 'Arial'))  #+
+        scale_y_continuous(labels=reduce_digit)
     return (p)
 }
 
 wps_ps <- lapply(unique(ctcf_df$samplename),wpsPlot)
 wps_p <- plot_grid(plotlist=wps_ps) +
     draw_label( 'Distance to CTCF start site (bp)', x = 0.5, y = 0.05, fontface = 'bold',fontfamily='Arial',size = 35)+
-    draw_label( 'Adjusted WPS', y = 0.6, x = 0.02, fontface = 'bold',fontfamily='Arial',size = 35, angle=90)
+    draw_label( 'Adjusted WPS (x 1000)', y = 0.6, x = 0.02, fontface = 'bold',fontfamily='Arial',size = 35, angle=90)
 
 p <- ggdraw() + 
     draw_plot(insert_p, x= 0.05,y=0.8, width = 0.95, height=0.199) +

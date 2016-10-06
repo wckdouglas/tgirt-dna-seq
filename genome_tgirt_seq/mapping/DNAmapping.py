@@ -44,21 +44,10 @@ def mappingProcess(samplename, trim_path, index, threads, bam_path):
     bam_file = '%s/%s.bam' %(bam_path, samplename)
     command = 'bwa mem -t%i  ' %(threads)+\
 	    '%s %s %s ' %(index, file1, file2 ) +\
-            '| samtools view -@ %i -b ' %(threads) +\
+            '| samtools sort -@ %i -O BAM -T %s ' %(threads, bam_file.replace('.bam','')) +\
             '> %s' %bam_file
     runProcess(command, samplename)
     return bam_file
-
-def makeRmdupBam(bam_file, samplename, rmdup_bam_path):
-    sys.stderr.write('Running post mapping processes with %s\n' %samplename)
-    result_file = '%s/%s' %(rmdup_bam_path, samplename)
-    rmdup_bam = result_file + '.bam'
-    command = 'bamtools filter -script flag_filter.json -in %s' %(bam_file)+\
-	    '| samtools fixmate -r - -' +\
-        '| samtools sort -T %s/%s -O bam ' %(rmdup_bam_path, samplename) +\
-        '> %s ' %(rmdup_bam)
-    runProcess(command,samplename)
-    return rmdup_bam
 
 def makedir(directory):
     if not os.path.isdir(directory):
@@ -82,7 +71,7 @@ def main(args):
     map(makedir,[trim_path, bam_path])
 
     #trim
-    #trim = trimming(fq1, threads, trim_path, samplename, adaptor)
+    trim = trimming(fq1, threads, trim_path, samplename, adaptor)
     #map
     bam_file = mappingProcess(samplename, trim_path, index, threads, bam_path)
     sys.stderr.write('Finished mapping %s\n' %samplename)

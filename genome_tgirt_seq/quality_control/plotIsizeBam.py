@@ -60,7 +60,7 @@ def main(bamFile):
 
 if __name__ == '__main__':
     start = time.time()
-    project_path = '/stor/work/Lambowitz/cdw2854/genomeDNA'
+    project_path = '/stor/work/Lambowitz/cdw2854/ecoli_genome'
     datapath = project_path + '/bamFiles'
     figurepath = datapath
     figurename = figurepath + '/isizeTable.png'

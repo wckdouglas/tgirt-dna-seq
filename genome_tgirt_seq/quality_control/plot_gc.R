@@ -1,33 +1,45 @@
-#!/usr/bin/env Rscript
+#!/usr/bin/env python
 
+library(stringr)
+library(zoo)
 library(readr)
 library(dplyr)
 library(cowplot)
 library(purrr)
-library(stringr)
-library(RColorBrewer)
 
-project_path <- '/stor/work/Lambowitz/cdw2854/plasmaDNA'
-data_path <- str_c(project_path, 'gc_length',sep='/')
-figure_path <- str_c(project_path, 'figures',sep='/')
-files <- list.files(path = data_path, pattern = 'DB', full.names = T)
+read_gc_table <- function(filename, datapath){
 
-df <- files %>%
-    map(read_tsv) %>%
-    reduce(rbind) %>%
-    mutate(gc = round((gc * 100),digits=0)) %>%
-    mutate(seq_lengtg  = round(seq_length,digits=1)) %>%
-    group_by(seq_length, gc) %>%
-    summarize(count = sum(count)) %>%
-    tbl_df
+    samplename = str_split(filename,'\\.')[[1]][1]
+    df <- datapath %>%
+		str_c(filename, sep='/') %>%
+		read_tsv(skip = 6) %>%
+        mutate(samplename = samplename) %>%
+        mutate(normalize_windows = WINDOWS/sum(WINDOWS, na.rm=T))
+    return(df)
+}
 
-colors <- rev(brewer.pal(9,"Spectral"))
-low_color <- colors[1]
-p <- ggplot(data = df, aes(x= seq_length, y = gc)) + 
-    geom_raster(aes(fill = log2(count)),interpolate = T) +
-    scale_fill_gradientn(colors = colors) +
-	labs(y = 'GC %',x = 'Insert size', color = 'log2(Count)')+
-	theme(panel.background = element_rect(colour = low_color,fill=low_color))
-figurename <- str_c(figure_path, '/gc_length.jpg')
-ggsave(p, file = figurename, height=5,width=7)
-message('Plotted ' , figurename)
+
+project_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/'
+picard_path <- str_c( project_path, '/picard_results')
+figure_path  <- str_c(project_path, '/figures')
+figurename <- str_c(figure_path, '/gc_plot.pdf')
+table_names <- list.files(path = picard_path, pattern = '.txt')
+df <- table_names %>%
+	map(read_gc_table, picard_path) %>%
+	reduce(rbind)
+
+windows_df <- df %>% 
+	filter(samplename == unique(.$samplename)[1]) %>%
+	mutate(rol_window = normalize_windows * 10) %>%
+	mutate(roll_mean_window = rollmean(rol_window, k = 10,fill=0, align='center'))
+
+gc_p <- ggplot(data = df, aes(color = samplename , x = GC, y = NORMALIZED_COVERAGE)) +
+	geom_line(size = 1.3) +
+	geom_hline(yintercept = 1, linetype = 2, alpha = 0.9) +
+	geom_bar(data = windows_df, aes(x = GC, y = roll_mean_window), 
+			 stat='identity', fill='salmon', alpha = 1)  +
+	theme(text = element_text(size = 20)) +
+	theme(axis.text = element_text(size = 18)) +
+	labs(x = 'GC %', y = 'Normalized Coverage', color = ' ') 
+ggsave(gc_p, file= figurename)
+message( 'Saved: ' ,figurename)

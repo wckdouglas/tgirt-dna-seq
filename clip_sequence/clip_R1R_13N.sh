@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DATAPATH=$DATA/SA16172/dna_plasma_genome
+DATAPATH=$DATA/JA16613
 CLIPPED_PATH=$DATAPATH/clipped
 mkdir -p $CLIPPED_PATH
 

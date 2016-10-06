@@ -68,6 +68,7 @@ def main():
     start = time.time()
     bampath = '/stor/work/Lambowitz/cdw2854/processivity/filtered_bams'
     bampath = '/stor/work/Lambowitz/cdw2854/processivity/bamFile'
+    bampath = '/stor/work/Lambowitz/cdw2854/processivity/new_map/clustered_map'
     figurepath = bampath
     bamFiles = glob.glob(bampath + '/*.bam')
     if len(bamFiles) == 0:
