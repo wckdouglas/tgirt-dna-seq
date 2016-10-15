@@ -1,10 +1,10 @@
 #!/bin/bash
 
 PROJECTPATH=/scratch/02727/cdw2854/plasmaDNA
-BEDPATH=${PROJECTPATH}/bedFiles
+BEDPATH=${PROJECTPATH}/bedFiles/merged
 SPLITBED=${BEDPATH}/splittedBed
 mkdir -p ${SPLITBED}
-rm ${SPLITBED}/*bed
+rm -f ${SPLITBED}/*bed
 
 for BED in ${BEDPATH}/*.bed
 do
