@@ -32,7 +32,7 @@ def MarkDuplicates(in_bam, outNameFunc):
 
 def gcCollect(in_bam, figures_path, samplename, result_path, ref):
     command = 'picard CollectGcBiasMetrics '+\
-	'SCAN_WINDOW_SIZE=150 ' + \
+	'SCAN_WINDOW_SIZE=100 ' + \
 	'INPUT=%s ' %(in_bam) +\
         'CHART_OUTPUT=%s/%s.pdf '  %(figures_path, samplename) + \
         'OUTPUT=%s/%s.txt ' %(result_path, samplename) +\
@@ -49,6 +49,7 @@ def pipeline(result_path, figures_path, ref, bam_file):
     filtered_bam = filterBam(bam_file, outNameFunc)
     dedup_bam = MarkDuplicates(filtered_bam, outNameFunc)
     gcCollect(dedup_bam, figures_path, samplename, result_path, ref)
+    #gcCollect(bam_file, figures_path, samplename, result_path, ref)
     end = time.time()
     time_lapsed = (end - start)/float(60)
     print 'Finished %s in %.3f min' %(samplename, time_lapsed)
@@ -56,7 +57,7 @@ def pipeline(result_path, figures_path, ref, bam_file):
 
 def main():
     project_path = '/stor/work/Lambowitz/cdw2854/ecoli_genome'
-    bam_path= project_path + '/bamFiles'
+    bam_path= project_path + '/bamFiles/subsampled_1M'
     result_path = project_path + '/picard_results'
     figures_path = project_path + '/figures'
     ref_path = '/stor/work/Lambowitz/ref/Ecoli'

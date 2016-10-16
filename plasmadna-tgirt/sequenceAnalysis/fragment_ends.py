@@ -82,7 +82,7 @@ def runFile(nucleotides_half_window, ref_fasta, outputpath, bedFile):
         sequence = seq.fields[-1]
         seq_mat = caluculateEndsNucleotide(sequence, seq_mat, window_size, iter_window)
         seq_count += 1
-        if seq_count % 100000 == 0:
+        if seq_count % 10000000 == 0:
             print 'Parsed %i fragments from %s' %(seq_count, samplename)
     dfs = [makeDF(seq_mat[end], end, nucleotides_half_window) for end in seq_mat.keys()]
     df = pd.concat(dfs)
@@ -107,7 +107,6 @@ def main():
     tablename = outputprefix + '.tsv'
     figurename = outputprefix + '.pdf'
     bedFiles = glob.glob(bedFilePath + '/*bed')
-    bedFiles = filter(lambda x: re.search('SRR|RNase|NT|PD',x),bedFiles)
     nucleotides_half_window = 20
     makedir(outputpath)
     set_tempdir(outputpath)

@@ -14,7 +14,8 @@ read_gc_table <- function(filename, datapath){
 		str_c(filename, sep='/') %>%
 		read_tsv(skip = 6) %>%
         mutate(samplename = samplename) %>%
-        mutate(normalize_windows = WINDOWS/sum(WINDOWS, na.rm=T))
+        mutate(normalize_windows = WINDOWS/sum(WINDOWS, na.rm=T)) %>%
+        mutate(subsampled = ifelse(grepl('subsample',filename),'Yes','No'))
     return(df)
 }
 
@@ -33,13 +34,14 @@ windows_df <- df %>%
 	mutate(rol_window = normalize_windows * 10) %>%
 	mutate(roll_mean_window = rollmean(rol_window, k = 10,fill=0, align='center'))
 
-gc_p <- ggplot(data = df, aes(color = samplename , x = GC, y = NORMALIZED_COVERAGE)) +
-	geom_line(size = 1.3) +
+gc_p <- ggplot(data = df, aes(x = GC, y = NORMALIZED_COVERAGE)) +
+	geom_line(size = 1.3, aes(color = samplename)) +
 	geom_hline(yintercept = 1, linetype = 2, alpha = 0.9) +
 	geom_bar(data = windows_df, aes(x = GC, y = roll_mean_window), 
 			 stat='identity', fill='salmon', alpha = 1)  +
 	theme(text = element_text(size = 20)) +
 	theme(axis.text = element_text(size = 18)) +
+    theme(legend.position =  'None') +
 	labs(x = 'GC %', y = 'Normalized Coverage', color = ' ') 
-ggsave(gc_p, file= figurename)
-message( 'Saved: ' ,figurename)
+#ggsave(gc_p, file= figurename)
+#message( 'Saved: ' ,figurename)
