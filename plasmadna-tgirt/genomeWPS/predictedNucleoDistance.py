@@ -62,7 +62,7 @@ def main():
     figurename = figurepath + '/predictedNucleosomeDistance.pdf'
     tablename = figurename.replace('pdf','tsv')
     makeDir(figurepath)
-    file1 = 'PD-merged'
+    file1 = 'PD_merged'
     file2 = 'SRR2130051'
     chromosomes = map(str,np.arange(1,23))
     chromosomes = np.concatenate([chromosomes,['X','Y']])
@@ -71,7 +71,7 @@ def main():
     dfs = p.map(closestPeakFunc, chromosomes)
     dfs = [df for df in dfs if df is not None]
     df = pd.concat(dfs)
-    df.to_csv(tablename, index=False)
+    df.to_csv(tablename, index=False, sep = '\t')
     plottingFigure(figurename, df)
     print 'Writtten %s in %.3f min' %(tablename, np.true_divide(time.time() - start,60))
     return 0

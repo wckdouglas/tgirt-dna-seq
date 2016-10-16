@@ -38,4 +38,5 @@ do
 	samtools index ${BAM_PATH}/${SAMPLE_NAME}.bam
 done
 
-python filtering.py
+python filtering.py 3
+python filtering.py 4

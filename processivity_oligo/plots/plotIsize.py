@@ -49,7 +49,7 @@ def plotFigure(figurename, df):
 
 def bamToDF(bamFile):
     samplename = os.path.basename(bamFile).split('.')[0].split('_')[0]
-    enzyme = 'TeI4c' if samplename[0] == 'T'  else 'GsI-IIc'
+    enzyme = 'TeI4c' if samplename[0] == 'T'  else 'GsI-IIC'
     substrate = 'DNA' if samplename[1] == 'D'  else 'RNA'
     isize = getIsize(bamFile, samplename)
     size, count = np.unique(isize, return_counts=True)

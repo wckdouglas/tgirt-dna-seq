@@ -6,6 +6,7 @@ library(readr)
 library(dplyr)
 library(purrr)
 library(tidyr)
+library(openxlsx)
 
 table_dir <- '/stor/work/Lambowitz/cdw2854/target-seq/base_tables'
 tables <- list.files(path = table_dir, pattern = '.tsv')
@@ -106,26 +107,33 @@ lambowitz_table <- merge_df %>%
     group_by(samplename) %>%
     summarize(deletions = sum(deletions),
               insertions = sum(insertions)) %>%
+	mutate(indel = deletions + insertions) %>%
     inner_join(total_base)  %>%
     mutate(deletion_rate = deletions / total_base) %>%
     mutate(insertion_rate = insertions / total_base) %>%
+	mutate(indel_rate = deletion_rate + insertion_rate ) %>%
     inner_join(error_DF %>% select(samplename, error_rate)) %>%
     mutate(template = assignTemplate(samplename)) %>%
     mutate(method = assignMethod(samplename)) %>%
     mutate(filter_member = assignFilter(samplename)) %>%
+	mutate(mismatch_rate = error_rate - insertion_rate - deletion_rate) %>%
     gather(errors, count,-samplename) %>%
     spread(samplename, count) %>%
     mutate(errors = str_replace_all(errors,'-',' ')) %>%
     mutate(errors = as.factor(errors)) %>%
     mutate(errors = relevel(errors, 'deletions')) %>%
     mutate(errors = relevel(errors, 'insertions')) %>%
+    mutate(errors = relevel(errors, 'indel')) %>%
     mutate(errors = relevel(errors, 'deletion_rate')) %>%
     mutate(errors = relevel(errors, 'insertion_rate')) %>%
+    mutate(errors = relevel(errors, 'indel_rate')) %>%
+    mutate(errors = relevel(errors, 'mismatch_rate')) %>%
     mutate(errors = relevel(errors, 'error_rate')) %>%
     mutate(errors = relevel(errors, 'total_base')) %>%
     mutate(errors = relevel(errors, 'template')) %>%
     mutate(errors = relevel(errors, 'filter_member')) %>%
     mutate(errors = relevel(errors, 'method')) %>%
+#	mutate(errors = str_replace_all(errors, '_',' ')) %>%
     arrange(errors) %>%
     write_csv(tablename)
 message('Written ',tablename)

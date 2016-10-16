@@ -1,13 +1,14 @@
 #!/bin/bash
 
-PROJECTPATH=$SCRATCH/plasmaDNA
+PROJECTPATH=$WORK/cdw2854/plasmaDNA
 DATAPATH=$PROJECTPATH/rawData/split
+DATAPATH=$DATA/SA16172/dna_plasma_genome/clipped_id
 INDEXPATH=$REF/GRCh38/hg38_rDNA
 INDEX=$INDEXPATH/genome_rDNA
 PYTHON=$(which python)
 CORES=12
 
-for FQ in `ls $DATAPATH/*R1*.fastq.gz | grep 51 -v `
+for FQ in $DATAPATH/*R1*.fq.gz 
 do
 	SAMPLENAME=$(basename $FQ)
 	if [[ $SAMPLENAME == SRR* ]]

@@ -5,7 +5,7 @@ PICARD_PATH=$PROJECT_PATH/picard_results
 REF_PATH=$REF/Ecoli
 GENOME=$REF_PATH/b_strain.fa
 
-for BAM in $PICARD_PATH/*.MarkDuplicate.bam
+for BAM in $PICARD_PATH/*.MarkDuplicate*.bam
 do
 	SAMPLE_NAME=$(basename ${BAM%.sorted.bam})
 	echo  picard CollectRawWgsMetrics INPUT=${BAM} \

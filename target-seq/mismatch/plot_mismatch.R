@@ -25,7 +25,7 @@ read_file <- function(tablename){
     return (df)
 }
 
-transition <- c('A-to-G','G-to-A','C-to-T','T-to-C')
+transition <- c('A -> G','G -> A','C -> T','T -> C')
 
 assignTemplate <- function(x){
     ifelse(grepl('^H',x),'RNA','DNA')
@@ -44,7 +44,7 @@ plot_mismatch <- function(clean_mismatch_df){
         group_by(samplename, base, ref_base) %>%
         summarize(count = sum(count)) %>%
         ungroup() %>% 
-        mutate(mutation = str_c(ref_base, '-to-', base)) %>%
+        mutate(mutation = str_c(ref_base, ' -> ', base)) %>%
         group_by(samplename) %>%
         do(data_frame(
             count = .$count/sum(.$count),
@@ -66,7 +66,7 @@ plot_mismatch <- function(clean_mismatch_df){
 #        tbl_df
         
     
-    mismatch_p <- ggplot(data = mismatch_df, aes(x = mutations, y = count, fill = label_mutation)) +
+mismatch_p <- ggplot(data = mismatch_df, aes(x = mutations, y = count, fill = label_mutation)) +
         geom_bar(stat='identity') + 
         facet_grid(template~ref, scale='free') +
         labs(x = ' ', y = 'Fractions', fill = ' ') +
@@ -99,9 +99,13 @@ plot_cov <- function(merge_df){
 
 plot_pos_mismatch <- function(clean_mismatch_df){
     pos_mismatch <- clean_mismatch_df %>%
+		group_by(samplename, start, ref_base) %>%
+		do(data_frame(base = .$base,
+					  percentage = .$count/sum(.$count))) %>%
+		ungroup() %>%
         filter(ref_base != base) %>%
         group_by(samplename, start, ref_base) %>%
-        summarize(count = sum(count))   %>%
+        summarize(percentage = sum(percentage) * 100 )   %>%
         ungroup() %>%
         mutate(gene_name = 'HIST1H3B') %>%
         mutate(filter_data = assignFilter(samplename)) %>%
@@ -109,18 +113,18 @@ plot_pos_mismatch <- function(clean_mismatch_df){
         mutate(samplename = str_c(template, ' (',filter_data, ')')) %>%
         tbl_df
     
-    pos_p <- ggplot(data = pos_mismatch, aes(x = start, y = count, fill=ref_base)) +
+    pos_p <- ggplot(data = pos_mismatch, aes(x = start, y = percentage, fill=ref_base)) +
         geom_bar(stat='identity') +
         facet_grid(template~., scale = 'free_y') +
         theme(text = element_text(size = 20, face='bold')) +
         theme(axis.text = element_text(size = 18, face='bold')) +
-        labs(x = 'Position on GOI', y = 'Mismatch count', fill= ' ') +
+        labs(x = 'Position on GOI', y = '% of Mismatch', fill= ' ') +
         theme(legend.position ='top')
 	return(pos_p)
 }
 
 make_diff_fig <- function(correct_method, filter_member, merge_df){
-	member <- ifelse(filter_member == 3, '> 3 member','> 4 member')
+	member <- ifelse(filter_member == 4, '> 3 member','> 4 member')
 
 	merge_df <-	merge_df %>% 
 		mutate(filter_data = assignFilter(samplename)) %>%
