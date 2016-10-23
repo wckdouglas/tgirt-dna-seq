@@ -56,17 +56,20 @@ def pipeline(result_path, figures_path, ref, bam_file):
     return 0
 
 def main():
-    project_path = '/stor/work/Lambowitz/cdw2854/ecoli_genome'
-    bam_path= project_path + '/bamFiles/subsampled_1M'
+    #project_path = '/stor/work/Lambowitz/cdw2854/ecoli_genome'
+    #bam_path= project_path + '/bamFiles/subsampled_1M'
+    project_path = '/stor/work/Lambowitz/cdw2854/genomeDNA'
+    bam_path = '/stor/work/Lambowitz/cdw2854/genomeDNA/clustered_map'
     result_path = project_path + '/picard_results'
     figures_path = project_path + '/figures'
-    ref_path = '/stor/work/Lambowitz/ref/Ecoli'
-    ref = ref_path + '/b_strain.fa'
+    #ref_path = '/stor/work/Lambowitz/ref/Ecoli'
+    #ref = ref_path + '/b_strain.fa'
+    ref = '/stor/work/Lambowitz/ref/hg19/Sequence/WholeGenomeFasta/hg19_herpes.fa'
     for path in [result_path, figures_path]:
         if not os.path.isdir(path):
             os.makedirs(path)
 
-    bam_files = glob.glob(bam_path + '/*bam')
+    bam_files = glob.glob(bam_path + '/*.bam')
     picard_func = partial(pipeline, result_path, figures_path, ref)
     p = Pool(12)
     p.map(picard_func, bam_files)

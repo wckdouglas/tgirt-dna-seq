@@ -12,7 +12,6 @@ library(broom)
 filepath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/tissueContribution'
 figurepath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/figures'
 files <- list.files(path=filepath, pattern = '.tsv')
-files <- files[grepl('RNase|52',files)]
 
 
 readTable <- function(filename){
@@ -44,12 +43,12 @@ figurename <- str_c(figure_path,'/cor_plot_dhs.pdf')
 ggsave(p,file=figurename)
 
 df[df<5 ] = 0
-correlation = cor(df$`RNase-I.tsv`,df$`SRR2130052.tsv`)
+correlation = cor(df$PD_merged.tsv,df$SRR2130052.tsv)
 correlation <- signif(correlation,3)
 
 low_color <- 'yellow'
 high_color <- 'red'
-p <- ggplot(data =df, aes(x=`SRR2130052.tsv` ,y = `RNase-I.tsv` ))+
+p <- ggplot(data =df, aes(y=PD_merged.tsv, x=SRR2130052.tsv ))+
     geom_bin2d(bins=40) +
     scale_x_log10(limits=c(5,1000)) +
     scale_y_log10(limits=c(5,1000)) +
