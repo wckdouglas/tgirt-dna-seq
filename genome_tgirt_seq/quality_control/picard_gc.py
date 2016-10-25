@@ -15,8 +15,13 @@ def outBamName(result_path, samplename, analysis_type):
 
 def filterBam(in_bam, outNameFunc):
     out_bam = outNameFunc('filter')
-    command = 'bamtools filter -script flag_filter.json -in %s > %s' %(in_bam,out_bam)
-    runProcess(command)
+    command = 'bamtools filter -script flag_filter.json ' +\
+                '-in %s ' %(in_bam)+\
+            '| samtools sort -O bam -T %s ' %out_bam.replace('.bam','')+\
+            '> %s' %(out_bam)
+    command2 = 'samtools index %s' %(out_bam)
+    #runProcess(command)
+    #runProcess(command2)
     return out_bam
 
 def MarkDuplicates(in_bam, outNameFunc):
@@ -27,7 +32,7 @@ def MarkDuplicates(in_bam, outNameFunc):
         'ASSUME_SORT_ORDER=coordinate ' +\
         'CREATE_INDEX=true '+\
 	'METRICS_FILE=%s ' %(out_bam.replace('bam','duplicate.metric'))
-    runProcess(command)
+    #runProcess(command)
     return out_bam
 
 def gcCollect(in_bam, figures_path, samplename, result_path, ref):
@@ -38,7 +43,8 @@ def gcCollect(in_bam, figures_path, samplename, result_path, ref):
         'OUTPUT=%s/%s.txt ' %(result_path, samplename) +\
 	'SUMMARY_OUTPUT=%s/%s.summary ' %(result_path, samplename) +\
 	'REFERENCE_SEQUENCE=%s ' %ref +\
-	'ASSUME_SORTED=true ' 
+	'ASSUME_SORTED=true ' +\
+        'VALIDATION_STRINGENCY=SILENT'
     runProcess(command)
 
 
@@ -48,7 +54,7 @@ def pipeline(result_path, figures_path, ref, bam_file):
     outNameFunc = partial(outBamName,result_path, samplename)
     filtered_bam = filterBam(bam_file, outNameFunc)
     dedup_bam = MarkDuplicates(filtered_bam, outNameFunc)
-    gcCollect(dedup_bam, figures_path, samplename, result_path, ref)
+    gcCollect(filtered_bam, figures_path, samplename, result_path, ref)
     #gcCollect(bam_file, figures_path, samplename, result_path, ref)
     end = time.time()
     time_lapsed = (end - start)/float(60)
@@ -64,7 +70,7 @@ def main():
     figures_path = project_path + '/figures'
     #ref_path = '/stor/work/Lambowitz/ref/Ecoli'
     #ref = ref_path + '/b_strain.fa'
-    ref = '/stor/work/Lambowitz/ref/hg19/Sequence/WholeGenomeFasta/hg19_herpes.fa'
+    ref = '/stor/work/Lambowitz/ref/hg19/Sequence/all_seq/reference.fasta'
     for path in [result_path, figures_path]:
         if not os.path.isdir(path):
             os.makedirs(path)
