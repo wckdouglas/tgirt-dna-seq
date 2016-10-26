@@ -48,7 +48,6 @@ readFile <- function(filename, filepath){
 filepath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/tissueContribution'
 figurepath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/figures'
 files <- list.files(path=filepath, pattern = '.tsv')
-files <- files[grepl('RNase|52',files)]
 
 df <- files %>%
     map(readFile, filepath) %>%

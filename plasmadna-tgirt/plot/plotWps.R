@@ -29,15 +29,16 @@ ctcf_df <- wps_data_path %>%
     stri_c('CTCFwps.tsv',sep='/') %>%
     read_tsv() %>%
     filter(samplename %in% c('SRR2130051','PD_merged'))  %>%
+    group_by(samplename) %>%
+    do(data_frame(wps = as.vector(scale(.$wps)),
+                  position = .$position,
+                  type = .$type)) %>%
+    ungroup() %>%
     mutate(samplename = rename(samplename)) %>%
     group_by(position, samplename, type) %>%
     summarize(wps = sum(wps)) %>%
     ungroup() %>%
     tbl_df
-
-reduce_digit <- function(x){
-    x/1000
-}
 
 wpsPlot <- function(sample){
     p <- ctcf_df %>%
@@ -59,7 +60,7 @@ wpsPlot <- function(sample){
 wps_ps <- lapply(unique(ctcf_df$samplename),wpsPlot)
 wps_p <- plot_grid(plotlist=wps_ps) +
     draw_label( 'Distance to CTCF start site (bp)', x = 0.5, y = 0.05, fontface = 'bold',fontfamily='Arial',size = 35)+
-    draw_label( 'Adjusted WPS (x 1000)', y = 0.6, x = 0.02, fontface = 'bold',fontfamily='Arial',size = 35, angle=90)
+    draw_label( 'Scaled WPS', y = 0.6, x = 0.02, fontface = 'bold',fontfamily='Arial',size = 35, angle=90)
 
 message('Start plotting')
 p <- ggdraw() + 
