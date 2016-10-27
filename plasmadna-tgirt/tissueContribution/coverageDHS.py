@@ -29,12 +29,14 @@ def main():
     refpath = '/stor/work/Lambowitz/ref/ctcfData'
     refBed = refpath + '/cellCTCF.bed'
     bedFiles = glob.glob(bedpath + '/*.bed')
-    bedFiles = filter(lambda x: re.search('NT|SRR|RNase|PD',x),bedFiles)
+    bedFiles = filter(lambda x: re.search('SRR|PD',x),bedFiles)
 
     #process reference bed
     bedString = open(refBed,'ru').readlines()
     ref_bed_name = resultpath + '/dhs_ref.bed'
-    BedTool(('\n'.join(bedString[1:])),from_string=True).sort().moveto(ref_bed_name)
+    BedTool(('\n'.join(bedString[1:])),from_string=True)\
+        .sort()\
+        .moveto(ref_bed_name)
     header = bedString[0].strip() + '\t' + 'coverage\n'
 
     coverage_func = partial(coverage, resultpath, ref_bed_name, header)
