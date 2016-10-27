@@ -9,5 +9,5 @@ rm -f ${SPLITBED}/*bed
 for BED in ${BEDPATH}/*.bed
 do
 	SAMPLENAME=$(basename ${BED%.bed})
-	echo awk \'\$1~/^\[1-9\]+$\|^\[XY\]$/ \{print \$0 \>\> \"${SPLITBED}/${SAMPLENAME}.\"\$1\".bed\"}\' ${BED}
+	echo awk \'\$1~/^\[0-9\]+$\|^\[XY\]$/ \{print \$0 \>\> \"${SPLITBED}/${SAMPLENAME}.\"\$1\".bed\"}\' ${BED}
 done

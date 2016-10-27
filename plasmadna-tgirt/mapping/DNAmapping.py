@@ -26,9 +26,7 @@ def trimming(fq1, threads, trim_path, samplename, adaptor):
     sys.stderr.write('Running trim process with %s\n' %samplename)
     #ILLUMINACLIP:<fastaWithAdaptersEtc>:<seed mismatches>:<palindrome clip
     #       threshold>:<simple clip threshold>:<minAdapterLength>:<keepBothReads>
-    options='ILLUMINACLIP:%s:2:10:10:1:true ' %(adaptor)+\
-	    'LEADING:10 TRAILING:10 '  +\
-	    'SLIDINGWINDOW:4:8  MINLEN:15  AVGQUAL:15'
+    options='ILLUMINACLIP:%s:2:10:10:1:true MINLEN:15' %(adaptor)
     command = 'time trimmomatic ' +\
         'PE -threads %i '  %(threads)+\
         '-basein %s ' %(fq1) + \

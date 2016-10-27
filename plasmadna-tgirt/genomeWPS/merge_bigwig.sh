@@ -8,12 +8,16 @@ for SAMPLENAME in $(ls $BW_PATH/*.bigWig | cut -d'.' -f1 | uniq)
 do
 	for LENGTH in Short Long
 	do
+		BED_GRAPH=$MERGE_BW_PATH/$(basename ${SAMPLENAME}).bedGraph
+		MERGED_BW=${BED_GRAPH/.bedGraph/.bigWig}
 		echo bigWigMerge \
-			${SAMPLENAME}.*.${LENGTH}.bigWig \
+			${SAMPLENAME}.\*.${LENGTH}.bigWig \
 			/dev/stdout \
-		\| bedGraphToBigWig \
-			/dev/stdin \
+			\| sort -k1,1 -k2,2n \
+			\> $BED_GRAPH\
+		\;bedGraphToBigWig \
+			$BED_GRAPH \
 			${CHROM_SIZE_TSV} \
-			${MERGE_BW_PATH}/${SAMPLENAME}.bigWig
+			$MERGED_BW
 	done
 done
