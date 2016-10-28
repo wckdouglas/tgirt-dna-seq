@@ -23,7 +23,6 @@ import glob
 from scipy.signal import medfilt
 from functools import partial
 from itertools import product
-from sklearn.preprocess import scale
 sns.set_style('white')
 
 def CTCFline(feature, half_window):
@@ -97,7 +96,6 @@ def runBoundaries(samplename, bedFile, bam, windowSize, ctcfBed, boundary):
     #run wpsTools function and filter signalm funally make data frame
     wps = extractTSSaln(bam, ctcfBed, windowSize, wpsWindow, halfWPSwindow, upperBound, lowerBound)
     wps = wps - medfilt(wps,201)
-    wps = scale(wps)
     wpsDF = pd.DataFrame({'position':np.arange(windowSize)-windowSize/2,
                           'wps':wps})
     wpsDF['samplename'] = samplename

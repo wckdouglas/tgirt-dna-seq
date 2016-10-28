@@ -29,7 +29,7 @@ def reverse_complement(sequence):
 
 
 def extract_interval(ref_fasta, seq_length_dict, insert_dist, base_dist,
-                    outputprefix, chrom):
+                    outputprefix, fold, chrom):
     sys.stderr.write('Simulating from chrom: %s\n' %(chrom))
     fasta = Fasta(ref_fasta)
     seq_count = 0
@@ -37,43 +37,44 @@ def extract_interval(ref_fasta, seq_length_dict, insert_dist, base_dist,
     starts = np.linspace(1, total_length, total_length / 1e6)
     ends = starts[1:]
     filename = outputprefix + '_' + chrom + '.bed'
-#    outfile = open(filename,'w')
-#    for s, e in izip(starts, ends):
-#        sys.stderr.write('Parsing %s: %i-%i\n' %(chrom,s,e))
-#        sequence = fasta.get_seq(chrom, int(s), int(e))
-#        for i in xrange(len(sequence) - 2 + 1):
-#            di_nucleotide_5 = str(sequence[i:i+ 2])
-#            out, out_rev = 0, 0
-#            if 'N' not in di_nucleotide_5:
-#                strand_watson = random.binomial(1, p = 0.5)
-#                strand_creek = random.binomial(1, p = 0.5)
-#                if strand_watson == 0:
-#                    out = random.binomial(1, p = base_dist["5'"][di_nucleotide_5])
-#                elif strand_creek == 0:
-#                    out_rev = random.binomial(1, p = base_dist["5'"][reverse_complement(di_nucleotide_5)])
-#
-#                if out > 0:
-#                    insert_size = insert_dist.rvs()
-#                    start_site = s + i - 1
-#                    end_site = int(start_site + insert_size -1)
-#                    di_nucleotide_3 = str(fasta.get_seq(chrom, end_site, end_site + 1))
-#                    if 'N' not in di_nucleotide_3:
-#                        if random.binomial(1, p = base_dist["3'"][di_nucleotide_3]) == 1:
-#                            outfile.write( '%s\t%i\t%i\tSeq_%s_%i\t%i\t+\n' %(chrom, start_site, end_site,
-#                                                        chrom, seq_count, insert_size))
-#                            seq_count += 1
-#
-#                if out_rev > 0:
-#                    insert_size = insert_dist.rvs()
-#                    end_site = s + i 
-#                    start_site = int(end_site - insert_size -1)
-#                    di_nucleotide_3 = str(fasta.get_seq(chrom, start_site, start_site + 1))
-#                    if 'N' not in di_nucleotide_3:
-#                        if random.binomial(1, p = base_dist["3'"][di_nucleotide_3]) == 1:
-#                            outfile.write('%s\t%i\t%i\tSeq_%s_%i\t%i\t-\n' %(chrom, start_site, end_site,
-#                                                        chrom, seq_count, insert_size))
-#                            seq_count += 1
-#    outfile.close()
+    outfile = open(filename,'w')
+    for s, e in izip(starts, ends):
+        sys.stderr.write('Parsing %s: %i-%i\n' %(chrom,s,e))
+        sequence = fasta.get_seq(chrom, int(s), int(e))
+        for i in xrange(len(sequence) - 2 + 1):
+            di_nucleotide_5 = str(sequence[i:i+ 2])
+            out, out_rev = 0, 0
+            if 'N' not in di_nucleotide_5:
+                for cov in xrange(fold):
+                    strand_watson = random.binomial(1, p = 0.5)
+                    strand_creek = random.binomial(1, p = 0.5)
+                    if strand_watson == 0:
+                        out = random.binomial(1, p = base_dist["5'"][di_nucleotide_5])
+                    elif strand_creek == 0:
+                        out_rev = random.binomial(1, p = base_dist["5'"][reverse_complement(di_nucleotide_5)])
+
+                    if out > 0:
+                        insert_size = insert_dist.rvs()
+                        start_site = s + i - 1
+                        end_site = int(start_site + insert_size -1)
+                        di_nucleotide_3 = str(fasta.get_seq(chrom, end_site, end_site + 1))
+                        if 'N' not in di_nucleotide_3:
+                            if random.binomial(1, p = base_dist["3'"][di_nucleotide_3]) == 1:
+                                outfile.write( '%s\t%i\t%i\tSeq_%s_%i\t%i\t+\n' %(chrom, start_site, end_site,
+                                                            chrom, seq_count, insert_size))
+                                seq_count += 1
+
+                    if out_rev > 0:
+                        insert_size = insert_dist.rvs()
+                        end_site = s + i 
+                        start_site = int(end_site - insert_size -1)
+                        di_nucleotide_3 = str(fasta.get_seq(chrom, start_site, start_site + 1))
+                        if 'N' not in di_nucleotide_3:
+                            if random.binomial(1, p = base_dist["3'"][di_nucleotide_3]) == 1:
+                                outfile.write('%s\t%i\t%i\tSeq_%s_%i\t%i\t-\n' %(chrom, start_site, end_site,
+                                                            chrom, seq_count, insert_size))
+                                seq_count += 1
+    outfile.close()
     sys.stderr.write('Written: %i for chrom: %s\n' %(seq_count, chrom))
     return filename
 
@@ -125,12 +126,15 @@ def main():
     seq_count = 0
 
     per_chrom_simulation = partial(extract_interval, ref_fasta, seq_length_dict,
-                                insert_dist, base_dist, args.outprefix)
+                                insert_dist, base_dist, args.outprefix, fold)
     p = Pool(args.threads)
     outfiles = p.map(per_chrom_simulation, seq_ids)
     p.close()
     p.join()
-    command = 'cat %s > %s.bed' %(' '.join(outfiles), args.outprefix)
+    all_files = ' '.join(outfiles)
+    command = 'cat %s > %s.bed' %(all_files, args.outprefix)
+    os.system(command)
+    command = 'rm %s' %(all_files)
     os.system(command)
     print 'Merged'
 
