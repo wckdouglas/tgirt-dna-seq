@@ -99,7 +99,7 @@ def runBoundaries(samplename, bedFile, bam, windowSize, ctcfBed, boundary):
     wps = wps - medfilt(wps,201)
     wps = scale(wps)
     wpsDF = pd.DataFrame({'position':np.arange(windowSize)-windowSize/2,
-                          ,'wps':wps})
+                          'wps':wps})
     wpsDF['samplename'] = samplename
     wpsDF['type'] = typename
     return wpsDF
