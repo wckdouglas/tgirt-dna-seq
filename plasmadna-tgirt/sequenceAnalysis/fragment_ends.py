@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 import matplotlib
@@ -9,11 +10,20 @@ import matplotlib.pyplot as plt
 import os
 import glob
 from multiprocessing import Pool
-import re
 from pybedtools import BedTool, set_tempdir
 from pybedtools.cbedtools import Interval
 from functools import partial
+from itertools import izip
 sns.set_style('white')
+
+
+def reverse_end(end, sample):
+    if 'SRR' in sample and end == "5'":
+        return "3'"
+    elif 'SRR' in sample and end == "3'":
+        return "5'"
+    else:
+        return end
 
 def baseCountDict():
     baseDict = {base : 0 for base in ['A','C','T','G','N']}
@@ -33,10 +43,12 @@ def makeDF(seq_count_matrix, end, nucleotides_half_window):
     return df
 
 def plotNucleotideFreq(df, figurename):
-    df = pd.melt(df, id_vars = ['index','End','sample'], 
-            value_vars=['A','C','T','G'], 
-            var_name='Base', 
-            value_name = 'fraction')
+    df = pd.melt(df, id_vars = ['index','End','sample'],
+            value_vars=['A','C','T','G'],
+            var_name='Base',
+            value_name = 'fraction') \
+        .assign(End = lambda d: map(reverse_end, d.End, d['sample']))
+
     plt.figure(figsize=(15, 20))
     with sns.plotting_context('paper', font_scale=1.5):
         p = sns.FacetGrid(data=df, row='End', hue = 'Base', col = 'sample')
@@ -58,25 +70,23 @@ def makeBedLineWindow(bed_record, nucleotides_half_window):
 def caluculateEndsNucleotide(sequence, seq_mat, window_size, iter_window):
     seq5 = sequence[:window_size]
     seq3 = sequence[-window_size:]
-    for base_5, base_3, i in zip(seq5, seq3, iter_window):
+    for base_5, base_3, i in izip(seq5, seq3, iter_window):
         seq_mat["5'"][i][base_5] += 1
         seq_mat["3'"][i][base_3] += 1
     return seq_mat
 
-def runFile(nucleotides_half_window, ref_fasta, outputpath, bedFile):
+def runFile(nucleotides_half_window, ref_fasta, outputpath, regularChromosome, bedFile):
     print 'Running %s' %bedFile
     samplename = os.path.basename(bedFile).split('.')[0]
     figurename = outputpath + '/' + samplename + '.pdf'
     tablename = figurename.replace('pdf','tsv')
-    regularChromosome = np.arange(1,22)
-    regularChromosome = np.append(regularChromosome,['X','Y'])
     window_size = nucleotides_half_window * 2
     iter_window = np.arange(window_size)
     seq_mat = {end : createCountMat(window_size) for end in ["5'","3'"]}
     seq_count = 0
     for seq in BedTool(bedFile)\
             .filter(lambda x: x.chrom in regularChromosome)\
-            .filter(lambda frag: 150 < int(frag.end) - int(frag.start) < 190)\
+            .filter(lambda frag: 0 < long(frag.end) - long(frag.start) < 500)\
             .each(makeBedLineWindow, nucleotides_half_window) \
             .nucleotide_content(fi=ref_fasta, seq=True, s= True):
         sequence = seq.fields[-1]
@@ -108,12 +118,14 @@ def main():
     figurename = outputprefix + '.pdf'
     bedFiles = glob.glob(bedFilePath + '/*bed')
     nucleotides_half_window = 20
+    regularChromosome = np.arange(1,22)
+    regularChromosome = np.append(regularChromosome,['X','Y'])
     makedir(outputpath)
     set_tempdir(outputpath)
-    func = partial(runFile, nucleotides_half_window, ref_fasta, outputpath)
-    dfs = Pool(24).map(func,bedFiles)
-    df = pd.concat(dfs)
-    df.to_csv(tablename,sep='\t', index=False)
+    func = partial(runFile, nucleotides_half_window, ref_fasta, outputpath, regularChromosome)
+    #dfs = Pool(24).map(func,bedFiles)
+    #df = pd.concat(dfs)
+    #df.to_csv(tablename,sep='\t', index=False)
     df = pd.read_csv(tablename,sep='\t')
     plotNucleotideFreq(df, figurename)
     print 'Saved: %s.' %figurename

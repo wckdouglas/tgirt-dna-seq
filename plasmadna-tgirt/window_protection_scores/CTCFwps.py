@@ -92,12 +92,12 @@ def runBoundaries(samplename, bedFile, bam, windowSize, ctcfBed, boundary):
     wpsWindow = 120 if max(boundary) > 100 else 16
     halfWPSwindow = np.divide(wpsWindow,2)
     print 'Running file: %s with insert size boundary: %s' %(bedFile,str(boundary))
-    
+
     #run wpsTools function and filter signalm funally make data frame
     wps = extractTSSaln(bam, ctcfBed, windowSize, wpsWindow, halfWPSwindow, upperBound, lowerBound)
     wps = wps - medfilt(wps,201)
-    wpsDF = np.array([np.arange(windowSize)-windowSize/2, wps]).transpose()
-    wpsDF = pd.DataFrame(wpsDF,columns=['position','wps'])
+    wpsDF = pd.DataFrame({'position':np.arange(windowSize)-windowSize/2,
+                          'wps':wps})
     wpsDF['samplename'] = samplename
     wpsDF['type'] = typename
     return wpsDF
