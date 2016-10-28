@@ -13,6 +13,7 @@ import pandas as pd
 import sys
 import argparse
 from multiprocessing import Pool
+from collections import defaultdict
 
 complement = string.maketrans('ACTGNactgn','TGACNtgacn')
 
@@ -26,7 +27,7 @@ def reverse_complement(sequence):
     return sequence.translate(complement)[::-1]
 
 
-def extract_interval(ref_fasta, seq_length_dict, insert_dist, base_dist, how_many_bases,
+def extract_interval(ref_fasta, seq_length_dict, insert_dist, base_dist,
                     outputprefix, chrom):
     sys.stderr.write('Simulating from chrom: %s\n' %(chrom))
     fasta = Fasta(ref_fasta)
@@ -38,30 +39,34 @@ def extract_interval(ref_fasta, seq_length_dict, insert_dist, base_dist, how_man
     for s, e in izip(starts, ends):
         sys.stderr.write('Parsing %s: %i-%i\n' %(chrom,s,e))
         sequence = fasta.get_seq(chrom, int(s), int(e))
-        for i in xrange(len(sequence)-how_many_bases + 1):
-            tri_nucleotide = str(sequence[i:i+ how_many_bases])
+        for i in xrange(len(sequence) - 2 + 1):
+            di_nucleotide_5 = str(sequence[i:i+ 2])
             out, out_rev = 0, 0
-            if 'N' not in tri_nucleotide:
+            if 'N' not in di_nucleotide_5:
                 strand_watson = random.binomial(1, p = 0.5)
                 strand_creek = random.binomial(1, p = 0.5)
                 if strand_watson == 0:
-                    out = random.binomial(1, p = base_dist[tri_nucleotide])
-                else strand:
-                    out_rev = random.binomial(1, p = base_dist[reverse_complement(tri_nucleotide)])
+                    out = random.binomial(1, p = base_dist["5'"][di_nucleotide_5])
+                elif strand_creek == 0:
+                    out_rev = random.binomial(1, p = base_dist[reverse_complement(di_nucleotide_5)])
 
                 if out > 0:
                     insert_size = insert_dist.rvs()
-                    start_site = s + i -1
+                    start_site = s + i - 1
                     end_site = start_site + insert_size -1
-                    outfile.write( '%s\t%i\t%i\tSeq_%s_%i\t%i\t+\n' %(chrom, start_site, end_site,
+                    di_nucleotide_3 = fasta.get_seq(chrom, end_site, end_site + 1)
+                    if random.binomial(1, p = base_dist["3'"][di_nucleotide_3]) == 1:
+                        outfile.write( '%s\t%i\t%i\tSeq_%s_%i\t%i\t+\n' %(chrom, start_site, end_site,
                                                         chrom, seq_count, insert_size))
-                    seq_count += 1
+                        seq_count += 1
 
                 if out_rev > 0:
                     insert_size = insert_dist.rvs()
                     end_site = s + i + how_many_bases - 2
                     start_site = end_site - insert_size -1
-                    outfile.write('%s\t%i\t%i\tSeq_%s_%i\t%i\t-\n' %(chrom, start_site, end_site,
+                    di_nucleotide_3 = fasta.get_seq(chrom, start_site, start_site + 1)
+                    if random.binomial(1, p = base_dist["3'"][di_nucleotide_3]) == 1:
+                        outfile.write('%s\t%i\t%i\tSeq_%s_%i\t%i\t-\n' %(chrom, start_site, end_site,
                                                         chrom, seq_count, insert_size))
                     seq_count += 1
     outfile.close()
@@ -75,13 +80,14 @@ def profile_to_distribution(insert_profile_table, base_profile_table):
     insert_dist = rv_discrete(name='custm', values=(insert_df.isize, insert_df.px))
 
     base_df = pd.read_csv(base_profile_table)
-    how_many_bases = len(base_df)
 
-    possible_trinucleotide = product(list('ACTG'),repeat=how_many_bases)
-    base_dist = {''.join(nu_comb): np.prod([base_df[b].values[i] for i, b in enumerate(nu_comb)]) for nu_comb in possible_trinucleotide}
-    #plot_dist(base_dist)
-
-    return insert_dist, base_dist, how_many_bases
+    base_dist = defaultdict(defaultdict)
+    iterable =  izip(base_df.End.values, 
+                    base_df.dinucleotide.values, 
+                    base_df.fraction.values)
+    for end, di, frac in iterable:
+        base_dist[end][di] = frac
+    return insert_dist, base_dist
 
 
 def parse_opt():
@@ -102,7 +108,7 @@ def main():
     base_profile_table = args.base
     ref_fasta = args.refFasta
     fold = args.fold
-    insert_dist, base_dist, how_many_bases = profile_to_distribution(insert_profile_table, base_profile_table)
+    insert_dist, base_dist = profile_to_distribution(insert_profile_table, base_profile_table)
 
     fasta = Fasta(ref_fasta)
     seq_ids = fasta.keys()
@@ -115,7 +121,7 @@ def main():
     seq_count = 0
 
     per_chrom_simulation = partial(extract_interval, ref_fasta, seq_length_dict,
-                                insert_dist, base_dist, how_many_bases, args.outprefix)
+                                insert_dist, base_dist, args.outprefix)
     p = Pool(args.threads)
     p.map(per_chrom_simulation, seq_ids)
     p.close()
