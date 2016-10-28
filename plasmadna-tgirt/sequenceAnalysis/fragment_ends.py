@@ -16,6 +16,15 @@ from functools import partial
 from itertools import izip
 sns.set_style('white')
 
+
+def reverse_end(end, sample):
+    if 'SRR' in sample and end == "5'":
+        return "3'"
+    elif 'SRR' in sample and end == "3'":
+        return "5'"
+    else:
+        return end
+
 def baseCountDict():
     baseDict = {base : 0 for base in ['A','C','T','G','N']}
     return baseDict
@@ -37,7 +46,9 @@ def plotNucleotideFreq(df, figurename):
     df = pd.melt(df, id_vars = ['index','End','sample'],
             value_vars=['A','C','T','G'],
             var_name='Base',
-            value_name = 'fraction')
+            value_name = 'fraction') \
+        .assign(End = lambda d: map(reverse_end, d.End, d['sample']))
+
     plt.figure(figsize=(15, 20))
     with sns.plotting_context('paper', font_scale=1.5):
         p = sns.FacetGrid(data=df, row='End', hue = 'Base', col = 'sample')
@@ -75,7 +86,7 @@ def runFile(nucleotides_half_window, ref_fasta, outputpath, regularChromosome, b
     seq_count = 0
     for seq in BedTool(bedFile)\
             .filter(lambda x: x.chrom in regularChromosome)\
-            .filter(lambda frag: 150 < long(frag.end) - long(frag.start) < 190)\
+            .filter(lambda frag: 0 < long(frag.end) - long(frag.start) < 500)\
             .each(makeBedLineWindow, nucleotides_half_window) \
             .nucleotide_content(fi=ref_fasta, seq=True, s= True):
         sequence = seq.fields[-1]
@@ -105,16 +116,16 @@ def main():
     outputprefix = outputpath + '/endNucleotide'
     tablename = outputprefix + '.tsv'
     figurename = outputprefix + '.pdf'
-    bedFiles = glob.glob(bedFilePath + '/sim*bed')
+    bedFiles = glob.glob(bedFilePath + '/*bed')
     nucleotides_half_window = 20
     regularChromosome = np.arange(1,22)
     regularChromosome = np.append(regularChromosome,['X','Y'])
     makedir(outputpath)
     set_tempdir(outputpath)
     func = partial(runFile, nucleotides_half_window, ref_fasta, outputpath, regularChromosome)
-    dfs = Pool(24).map(func,bedFiles)
-    df = pd.concat(dfs)
-    df.to_csv(tablename,sep='\t', index=False)
+    #dfs = Pool(24).map(func,bedFiles)
+    #df = pd.concat(dfs)
+    #df.to_csv(tablename,sep='\t', index=False)
     df = pd.read_csv(tablename,sep='\t')
     plotNucleotideFreq(df, figurename)
     print 'Saved: %s.' %figurename
