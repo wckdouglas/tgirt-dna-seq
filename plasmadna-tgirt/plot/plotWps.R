@@ -21,13 +21,20 @@ figure_path <- stri_c(project_path,'/figures')
 figurename <- stri_c(figure_path,'/wps_distribution.pdf')
 
 rename <- function(x){
-    y = ifelse(grepl('^P',x),'TGIRT-seq','ssDNA-seq')
+    y = ifelse(grepl('^P|tgirt',x),'TGIRT-seq','ssDNA-seq')
     return(y)
 }
 
 ctcf_df <- wps_data_path %>%
     stri_c('CTCFwps.tsv',sep='/') %>%
-    read_tsv() %>%
+    read_tsv() 
+
+sim_data <- ctcf_df %>%
+    filter(grepl('sim',samplename)) %>%
+    mutate(samplename = rename(samplename)) 
+    rename(sim_wps = wps)
+
+ctcf_df <- ctcf_df %>%
     filter(samplename %in% c('SRR2130051','PD_merged'))  %>%
     group_by(samplename) %>%
     do(data_frame(wps = as.vector(scale(.$wps)),
@@ -38,7 +45,9 @@ ctcf_df <- wps_data_path %>%
     group_by(position, samplename, type) %>%
     summarize(wps = sum(wps)) %>%
     ungroup() %>%
-    tbl_df
+    tbl_df %>%
+    inner_join(sim_data) %>% 
+    mutate(wps = wps - sim_wps)
 
 wpsPlot <- function(sample){
     p <- ctcf_df %>%
