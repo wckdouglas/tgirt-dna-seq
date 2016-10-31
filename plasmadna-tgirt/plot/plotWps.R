@@ -35,43 +35,43 @@ sim_data <- ctcf_df %>%
     filter(grepl('sim',samplename)) %>%
     filter(samplename != 'sim_bed') %>%
     mutate(samplename = label_rename(samplename))%>% 
-    dplyr::rename(sim_wps = wps)
+    dplyr::rename(sim_wps = corrected_wps) %>%
+    select(-wps)
 
 
 ctcf_df <- ctcf_df %>%
     filter(samplename %in% c('SRR2130052','PD_merged'))  %>%
     group_by(samplename) %>%
-    do(data_frame(scaled_wps = as.vector(scale(.$wps)),
-                  wps = .$wps,
+    do(data_frame(wps = .$wps,
+                  corrected_wps = .$corrected_wps,
                   position = .$position,
                   type = .$type)) %>%
     ungroup() %>%
     mutate(samplename = label_rename(samplename)) %>%
-    group_by(position, samplename, type) %>%
-    summarize(wps = sum(wps)) %>%
-    ungroup() %>%
-    tbl_df %>%
     inner_join(sim_data, by=c('samplename','position','type')) %>% 
-    mutate(adjusted_wps = wps - sim_wps) %>%
-    mutate(adjusted_wps = scale(adjusted_wps))
+    mutate(adjusted_wps = corrected_wps - sim_wps)  %>%
+    mutate(scaled_wps = scale(adjusted_wps)) 
 
 wpsPlot <- function(sample){
     p <- ctcf_df %>%
         filter(samplename == sample) %>%
-        ggplot(aes(x=position, y = adjusted_wps)) +
-        geom_line(color='dark blue', size=1.5) +
-        facet_grid(type~., scale='free_y') +
-      #  labs(x= 'Distance to CTCF start site (bp)', y = 'Adjusted WPS') +
-        labs(x= ' ', y =' ')+
-        theme(text = element_text(size=35, face='bold', family = 'Arial'))+
-        scale_x_continuous(breaks=seq(-1000,1000,200)) +
-        theme(axis.text.x = element_text(size=35, angle=50, hjust=1, face='plain',family = 'Arial'))+
-        theme(axis.text.y = element_text(size=35,face='plain',family = 'Arial'))  #+
+        ggplot() +
+            geom_line(aes(x=position, y = adjusted_wps), 
+                    color='dark blue', size=1.5) +
+            geom_line(aes(x = position, y=sim_wps),
+                      alpha=0.5, color = 'grey') +
+            facet_grid(type~., scale='free_y') +
+            labs(x= ' ', y =' ')+
+            theme(text = element_text(size=35, face='bold', family = 'Arial'))+
+            scale_x_continuous(breaks=seq(-1000,1000,200)) +
+            theme(axis.text.x = element_text(size=35, angle=50, hjust=1, face='plain',family = 'Arial'))+
+            theme(axis.text.y = element_text(size=35,face='plain',family = 'Arial'))  
     return (p)
 }
 
 
-wps_ps <- lapply(unique(ctcf_df$samplename),wpsPlot)
+samples = rev(c('TGIRT-seq','ssDNA-seq'))
+wps_ps <- lapply(samples,wpsPlot)
 wps_p <- plot_grid(wps_ps[1][[1]], 
                    wps_ps[2][[1]] + theme(axis.text.y = element_blank())) +
     draw_label( 'Distance to CTCF start site (bp)', x = 0.5, y = 0.05, fontface = 'bold',fontfamily='Arial',size = 35)+

@@ -97,19 +97,19 @@ def runBoundaries(samplename, bedFile, bam, windowSize, ctcfBed, boundary):
     wps = extractTSSaln(bam, ctcfBed, windowSize, wpsWindow, halfWPSwindow, upperBound, lowerBound)
     baseline = np.mean([wps[:500], wps[-500:]])
     wps = wps - baseline
-    if type == 'Long':
+    if 'Long' in typename:
         corrected_wps = wps - pd.Series(wps)\
             .rolling(window=200,center=True)\
             .mean()\
-            .values 
+            .values
     else:
         corrected_wps = wps
 
     wpsDF = pd.DataFrame({'position':np.arange(windowSize)-windowSize/2,
                           'wps':wps,
-                          'corected_wps': corrected_wps}) \
+                          'corrected_wps': corrected_wps}) \
         .assign(samplename = samplename) \
-        .assign(type = typename)  
+        .assign(type = typename)
     return wpsDF
 
 def runFile(ctcfBed, genome, windowSize, bedFile):
@@ -147,7 +147,7 @@ def main():
     genome = referencePath + '/genome_rDNA.fa.fai'
 
     #define input/output files
-    bedFiles = glob.glob(bedPath + '/*bed')
+    bedFiles = glob.glob(bedPath + '/*.bed')
     outputprefix = resultPath + '/CTCFwps'
     figurename = outputprefix + '.pdf'
     tablename = outputprefix + '.tsv'
