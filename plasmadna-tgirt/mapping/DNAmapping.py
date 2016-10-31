@@ -55,7 +55,7 @@ def makeBed(bam_file, samplename, bed_path):
     command = 'bamtools filter -script flag_filter.json -in %s' %(bam_file)+\
 	'| samtools fixmate -r - -' + \
         '| bedtools bamtobed -mate1 -bedpe '+\
-        '| python bedpetobed.py - '+\
+        '| /home1/02727/cdw2854/miniconda2/bin/python bedpetobed.py - '+\
         '> %s' %(bed_file)
     runProcess(command,samplename)
     return bed_file
