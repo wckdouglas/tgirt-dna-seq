@@ -46,8 +46,8 @@ def main():
         elif not args.rmdup:
             command = 'cat %s > %s/%s ' %(joined_files, outpath, group)
         elif args.rmdup and file_type == 'bed':
-            temp_dir = ('%s/%s' %(outpath, group)).replace('.bed')
-            
+            temp_dir = ('%s/%s' %(outpath, group)).replace('.bed','')
+            make_dir(temp_dir)            
             command = 'cat %s ' %(joined_files) + \
                     '| sort -k1,1 -k2,2n -k3,3n -k6,6 '+\
                         '--temporary-directory=%s -u ' %(temp_dir)  +\

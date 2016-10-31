@@ -26,10 +26,8 @@ def trimming(fq1, threads, trim_path, samplename, adaptor):
     sys.stderr.write('Running trim process with %s\n' %samplename)
     #ILLUMINACLIP:<fastaWithAdaptersEtc>:<seed mismatches>:<palindrome clip
     #       threshold>:<simple clip threshold>:<minAdapterLength>:<keepBothReads>
-    options='ILLUMINACLIP:%s:2:10:10:1:true ' %(adaptor)+\
-	    'LEADING:10 TRAILING:10 '  +\
-	    'SLIDINGWINDOW:4:8  MINLEN:15  AVGQUAL:15'
-    command = 'time trimmomatic ' +\
+    options='ILLUMINACLIP:%s:2:10:10:1:true MINLEN:15' %(adaptor)
+    command = 'java -Xmx1G -jar trimmomatic-0.36.jar ' +\
         'PE -threads %i '  %(threads)+\
         '-basein %s ' %(fq1) + \
         '-baseout %s/%s.fq.gz ' %(trim_path, samplename) + \
@@ -43,6 +41,7 @@ def mappingProcess(samplename, trim_path, index, threads, bam_path):
     file1 = trim_path + '/' + samplename + '_1P.fq.gz'
     file2 = file1.replace('1P','2P')
     bam_file = '%s/%s.bam' %(bam_path, samplename)
+    os.system('bwa shm %s' %(index))
     command = 'bwa mem -t %i ' %(threads)+\
 	    '%s %s %s ' %(index, file1, file2 ) +\
             '| samtools view -@ %i -b ' %(threads) +\
@@ -56,21 +55,10 @@ def makeBed(bam_file, samplename, bed_path):
     command = 'bamtools filter -script flag_filter.json -in %s' %(bam_file)+\
 	'| samtools fixmate -r - -' + \
         '| bedtools bamtobed -mate1 -bedpe '+\
-        '| python bedpetobed.py - '+\
+        '| /home1/02727/cdw2854/miniconda2/bin/python bedpetobed.py - '+\
         '> %s' %(bed_file)
     runProcess(command,samplename)
     return bed_file
-
-def makeRmdupBed(bed_file, samplename, rmdup_bed_path):
-    sys.stderr.write('Running post mapping processes with %s\n' %samplename)
-    temp_dir = rmdup_bed_path+ '/' + samplename
-    makedir(temp_dir)
-    command = 'cat %s ' %(bed_file) +\
-        '| sort -k1,1 -k2,2n -k3,3n -k6,6  --temporary-directory=%s -u ' %(temp_dir)+\
-        '> %s/%s.bed' %(rmdup_bed_path, samplename)
-    runProcess(command,samplename)
-    os.rmdir(temp_dir)
-    return 0
 
 def makedir(directory):
     if not os.path.isdir(directory):
@@ -100,7 +88,6 @@ def main(args):
     #map
     bam_file = mappingProcess(samplename, trim_path, index, threads, bam_path)
     bed_file = makeBed(bam_file, samplename, bed_path)
-    makeRmdupBed(bed_file, samplename, rmdup_bed_path)
     sys.stderr.write('Finished mapping %s\n' %samplename)
     return 0
 
