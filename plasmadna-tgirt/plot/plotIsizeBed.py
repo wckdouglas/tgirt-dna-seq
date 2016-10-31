@@ -17,10 +17,10 @@ def getIsize(bed_file, samplename):
     return np.array(isize_array,dtype=np.int32)
 
 def main(bed_file):
-    samplename = os.path.basename(bed_file).split('.')[0].split('_')[0]
+    samplename = os.path.basename(bed_file).split('.')[0]
     print 'Running %s ' %samplename
     isize_array = getIsize(bed_file, samplename)
-    df = pd.DataFrame({'isize':isize_array[isize_array < 600]})\
+    df = pd.DataFrame({'isize':isize_array[isize_array < 500]})\
 	.assign(count = 1) \
 	.groupby(['isize']) \
 	.agg({'count':np.sum})\
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     figurepath = project_path + '/figures'
     figurename = figurepath + '/isizeBedTable.png'
     tablename = datapath + '/isizeBedTable.tsv'
-    bed_files = glob.glob(datapath + '/*bed')
+    bed_files = glob.glob(datapath + '/*.bed')
     p = Pool(24)
     dfs = p.map(main, bed_files)
     p.close()

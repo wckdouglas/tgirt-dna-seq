@@ -7,6 +7,7 @@ library(tidyr)
 library(cowplot)
 library(FBN)
 library(extrafont)
+library(zoo)
 loadfonts()
 
 
@@ -20,39 +21,44 @@ wps_data_path <- stri_c(project_path,'/wpsCTCF')
 figure_path <- stri_c(project_path,'/figures')
 figurename <- stri_c(figure_path,'/wps_distribution.pdf')
 
-rename <- function(x){
-    y = ifelse(grepl('^P|tgirt',x),'TGIRT-seq','ssDNA-seq')
+label_rename <- function(x){
+    y = ifelse(grepl('^P|^TGIRT',x),'TGIRT-seq','ssDNA-seq')
     return(y)
 }
 
 ctcf_df <- wps_data_path %>%
     stri_c('CTCFwps.tsv',sep='/') %>%
-    read_tsv() 
+    read_tsv()  
+
 
 sim_data <- ctcf_df %>%
     filter(grepl('sim',samplename)) %>%
-    mutate(samplename = rename(samplename)) 
-    rename(sim_wps = wps)
+    filter(samplename != 'sim_bed') %>%
+    mutate(samplename = label_rename(samplename))%>% 
+    dplyr::rename(sim_wps = wps)
+
 
 ctcf_df <- ctcf_df %>%
-    filter(samplename %in% c('SRR2130051','PD_merged'))  %>%
+    filter(samplename %in% c('SRR2130052','PD_merged'))  %>%
     group_by(samplename) %>%
-    do(data_frame(wps = as.vector(scale(.$wps)),
+    do(data_frame(scaled_wps = as.vector(scale(.$wps)),
+                  wps = .$wps,
                   position = .$position,
                   type = .$type)) %>%
     ungroup() %>%
-    mutate(samplename = rename(samplename)) %>%
+    mutate(samplename = label_rename(samplename)) %>%
     group_by(position, samplename, type) %>%
     summarize(wps = sum(wps)) %>%
     ungroup() %>%
     tbl_df %>%
-    inner_join(sim_data) %>% 
-    mutate(wps = wps - sim_wps)
+    inner_join(sim_data, by=c('samplename','position','type')) %>% 
+    mutate(adjusted_wps = wps - sim_wps) %>%
+    mutate(adjusted_wps = scale(adjusted_wps))
 
 wpsPlot <- function(sample){
     p <- ctcf_df %>%
         filter(samplename == sample) %>%
-        ggplot(aes(x=position, y = wps)) +
+        ggplot(aes(x=position, y = adjusted_wps)) +
         geom_line(color='dark blue', size=1.5) +
         facet_grid(type~., scale='free_y') +
       #  labs(x= 'Distance to CTCF start site (bp)', y = 'Adjusted WPS') +

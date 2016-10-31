@@ -95,11 +95,21 @@ def runBoundaries(samplename, bedFile, bam, windowSize, ctcfBed, boundary):
 
     #run wpsTools function and filter signalm funally make data frame
     wps = extractTSSaln(bam, ctcfBed, windowSize, wpsWindow, halfWPSwindow, upperBound, lowerBound)
-    wps = wps - medfilt(wps,201)
+    baseline = np.mean([wps[:500], wps[-500:]])
+    wps = wps - baseline
+    if type == 'Long':
+        corrected_wps = wps - pd.Series(wps)\
+            .rolling(window=200,center=True)\
+            .mean()\
+            .values 
+    else:
+        corrected_wps = wps
+
     wpsDF = pd.DataFrame({'position':np.arange(windowSize)-windowSize/2,
-                          'wps':wps})
-    wpsDF['samplename'] = samplename
-    wpsDF['type'] = typename
+                          'wps':wps,
+                          'corected_wps': corrected_wps}) \
+        .assign(samplename = samplename) \
+        .assign(type = typename)  
     return wpsDF
 
 def runFile(ctcfBed, genome, windowSize, bedFile):
