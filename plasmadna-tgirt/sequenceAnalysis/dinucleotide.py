@@ -147,12 +147,11 @@ def main():
     projectpath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     referencepath = '/stor/work/Lambowitz/ref/GRCh38/hg38_rDNA'
     reference = referencepath + '/genome_rDNA.fa'
-    bedFilePath = projectpath + '/rmdup_bed'
+    bedFilePath = projectpath + '/rmdupBedFiles'
     outputpath = projectpath + '/nucleotidesAnaylsis/dinucleotides'
     makedir(outputpath)
     set_tempdir(outputpath)
     bedFiles = glob.glob(bedFilePath + '/*bed')
-    bedFiles = filter(lambda x:re.search('DB|SRR|NT|RNase|PD',x), bedFiles)
     outputprefix = outputpath + '/dinucleotides'
     tablename = outputprefix + '.tsv'
     figurename = outputprefix + '.pdf'

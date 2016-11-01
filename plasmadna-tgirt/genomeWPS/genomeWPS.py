@@ -125,7 +125,7 @@ def extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
         wpsTSS, coverage = calculateWPS(bam, chrom, start, end, 
                     tssWindow, wpsWindow, halfWPSwindow, upperBound, lowerBound)
         chromArray[start:end] += wpsTSS
-    chromArray = chromArray - medfilt(chromArray, 1001)
+    chromArray = chromArray - pd.Series(chromArray).rolling(window = 1000).median()
     chromArray = savgol_filter(chromArray, window_length = 21, polyorder=2)
     printMessage('Finished calculating WPS for chromosome %s' %(chrom), samplename)
     return chromArray

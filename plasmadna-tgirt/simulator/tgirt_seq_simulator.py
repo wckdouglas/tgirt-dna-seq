@@ -66,7 +66,7 @@ def extract_interval(ref_fasta, seq_length_dict, insert_dist, base_dist,
 
                     if out_rev > 0:
                         insert_size = insert_dist.rvs()
-                        end_site = s + i 
+                        end_site = s + i
                         start_site = int(end_site - insert_size -1)
                         di_nucleotide_3 = str(fasta.get_seq(chrom, start_site, start_site + 1))
                         if 'N' not in di_nucleotide_3:
@@ -87,8 +87,8 @@ def profile_to_distribution(insert_profile_table, base_profile_table):
     base_df = pd.read_csv(base_profile_table)
 
     base_dist = defaultdict(dict)
-    iterable =  izip(base_df.End.values, 
-                    base_df.dinucleotide.values, 
+    iterable =  izip(base_df.End.values,
+                    base_df.dinucleotide.values,
                     base_df.fraction.values)
     for end, di, frac in iterable:
         base_dist[end][di] = float(frac)

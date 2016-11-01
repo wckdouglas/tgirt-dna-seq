@@ -111,7 +111,7 @@ def main():
     projectpath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     ref_path = '/stor/work/Lambowitz/ref/GRCh38/hg38_rDNA'
     ref_fasta = ref_path + '/genome_rDNA.fa'
-    bedFilePath = projectpath + '/bedFiles'
+    bedFilePath = projectpath + '/rmdupBedFiles'
     outputpath = projectpath + '/nucleotidesAnaylsis/endsNucleotides'
     outputprefix = outputpath + '/endNucleotide'
     tablename = outputprefix + '.tsv'
@@ -123,9 +123,9 @@ def main():
     makedir(outputpath)
     set_tempdir(outputpath)
     func = partial(runFile, nucleotides_half_window, ref_fasta, outputpath, regularChromosome)
-    #dfs = Pool(24).map(func,bedFiles)
-    #df = pd.concat(dfs)
-    #df.to_csv(tablename,sep='\t', index=False)
+    dfs = Pool(24).map(func,bedFiles)
+    df = pd.concat(dfs)
+    df.to_csv(tablename,sep='\t', index=False)
     df = pd.read_csv(tablename,sep='\t')
     plotNucleotideFreq(df, figurename)
     print 'Saved: %s.' %figurename
