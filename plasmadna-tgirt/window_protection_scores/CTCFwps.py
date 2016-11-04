@@ -20,7 +20,6 @@ import seaborn as sns
 import wpsTools
 from multiprocessing import Pool
 import glob
-from scipy.signal import medfilt
 from functools import partial
 from itertools import product
 sns.set_style('white')
@@ -99,9 +98,9 @@ def runBoundaries(samplename, bedFile, bam, windowSize, ctcfBed, boundary):
     wps = wps - baseline
     if 'Long' in typename:
         corrected_wps = wps - pd.Series(wps)\
-            .rolling(window=200,center=True)\
-            .mean()\
-            .values
+                                .rolling(window=200,center=True)\
+                                .mean()\
+                                .values
     else:
         corrected_wps = wps
 

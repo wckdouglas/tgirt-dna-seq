@@ -44,7 +44,7 @@ def make_comparison_table(table_list, label):
     return df
 
 def main():
-    table_list = [['SRR2130051.tsv', 'PD_merged.tsv'],
+    table_list = [['SRR2130051.tsv', 'P1203_SQ2_S3_clustered.tsv'],
                 ['P1203-SQ1_S2.tsv', 'P1203-SQ2_S3.tsv']]
     labels = ['ssDNA-seq vs TGIRT-seq','TGIRT-seq vs TGIRT-seq'] 
     df = map(make_comparison_table, table_list, labels)

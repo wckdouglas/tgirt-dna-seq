@@ -13,10 +13,10 @@ df <- datapath %>%
     str_c('predictedNucleosomeDistance.tsv',sep='/') %>%
     read_tsv()
 
-
+xlim=300
 nucleo_p <- ggplot(data = df, aes(x = distance, y=..count..)) +
     geom_density(fill='darkblue', color = 'darkblue') +
-    scale_x_continuous(breaks = seq(-500,500,50),limits=c(-500,500)) +
+    scale_x_continuous(breaks = seq(-xlim,xlim,50),limits=c(-xlim,xlim)) +
     theme(text = element_text(size=35, family='Arial', face='bold')) +
     theme(axis.text.x = element_text(size=35,face='plain', family='Arial',angle=50, hjust=0.5, vjust=0.5)) +
     theme(axis.text.y = element_text(size=35,face='plain', family='Arial')) +

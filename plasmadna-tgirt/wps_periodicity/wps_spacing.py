@@ -27,7 +27,7 @@ def highest_periodicity(bw, chromosome, input_arg):
 
     signs = np.sign(wps_array)
     signs[signs==0] = -1
-    peak_count = np.where(np.diff(signs)>0)[0] 
+    peak_count = np.where(np.diff(signs)>0)[0]
     max_periodicity, max_intensity = 0, 0
     if len(peak_count) > 50:
         periodicity, intensity = fft(wps_array)

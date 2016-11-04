@@ -18,7 +18,7 @@ def getOpt():
 # running in shell
 def runProcess(command, samplename):
     sys.stderr.write('[%s] %s\n' %(samplename, command))
-    result = subprocess.call('time ' + command, shell=True)
+#    result = subprocess.call('time ' + command, shell=True)
     return 0
 
 #Trimming
@@ -26,8 +26,8 @@ def trimming(fq1, threads, trim_path, samplename, adaptor):
     sys.stderr.write('Running trim process with %s\n' %samplename)
     ##  ILLUMINACLIP:<fastaWithAdaptersEtc>:<seed mismatches>:<palindrome clip
     ##              threshold>:<simple clip threshold>:<minAdapterLength>:<keepBothReads>
-    #options='ILLUMINACLIP:%s:2:10:10:1:true MINLEN:20' %(adaptor)
-    options='MINLEN:20'
+    options='ILLUMINACLIP:%s:2:10:10:1:true MINLEN:20' %(adaptor)
+    #options='MINLEN:20'
     command = 'time trimmomatic ' +\
         'PE -threads %i '  %(threads)+\
         '-basein %s ' %(fq1) + \
@@ -37,7 +37,7 @@ def trimming(fq1, threads, trim_path, samplename, adaptor):
     return 0
 
 #MAPPING
-def mappingProcess(samplename, trim_path, index, threads, bam_path):
+def mapping(samplename, trim_path, index, threads, bam_path):
     sys.stderr.write('Running mapping with %s\n' %samplename)
     file1 = trim_path + '/' + samplename + '_1P.fq.gz'
     file2 = file1.replace('1P','2P')
@@ -73,7 +73,7 @@ def main(args):
     #trim
     trim = trimming(fq1, threads, trim_path, samplename, adaptor)
     #map
-    bam_file = mappingProcess(samplename, trim_path, index, threads, bam_path)
+    bam_file = mapping(samplename, trim_path, index, threads, bam_path)
     sys.stderr.write('Finished mapping %s\n' %samplename)
     return 0
 

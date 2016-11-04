@@ -34,6 +34,7 @@ def createCountMat(nucleotides_window):
     return countMat
 
 def makeDF(seq_count_matrix, end, nucleotides_half_window):
+    print seq_count_matrix
     df = pd.DataFrame.from_dict(seq_count_matrix, orient='index')
     df['total'] = df.sum(axis=1)
     df['index'] = np.arange(nucleotides_half_window*2) - nucleotides_half_window
@@ -114,6 +115,7 @@ def main():
     bedFilePath = projectpath + '/rmdupBedFiles'
     outputpath = projectpath + '/nucleotidesAnaylsis/endsNucleotides'
     outputprefix = outputpath + '/endNucleotide'
+
     tablename = outputprefix + '.tsv'
     figurename = outputprefix + '.pdf'
     bedFiles = glob.glob(bedFilePath + '/*bed')
@@ -123,7 +125,8 @@ def main():
     makedir(outputpath)
     set_tempdir(outputpath)
     func = partial(runFile, nucleotides_half_window, ref_fasta, outputpath, regularChromosome)
-    dfs = Pool(24).map(func,bedFiles)
+    #dfs = Pool(24).map(func,bedFiles)
+    dfs = map(func,bedFiles)
     df = pd.concat(dfs)
     df.to_csv(tablename,sep='\t', index=False)
     df = pd.read_csv(tablename,sep='\t')

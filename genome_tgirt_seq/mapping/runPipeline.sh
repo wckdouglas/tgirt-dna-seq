@@ -2,15 +2,15 @@
 
 PROJECTPATH=$WORK/cdw2854/ecoli_genome
 #PROJECTPATH=$WORK/cdw2854/genomeDNA
-DATAPATH=$PROJECTPATH/rawData/clipped_id
+DATAPATH=$PROJECTPATH/rawData
 INDEXPATH=$REF/Ecoli
 INDEX=$INDEXPATH/b_strain.fa
-INDEX=$REF//hg19/Sequence/WholeGenomeFasta/genome.fa
+#INDEX=$REF//hg19/Sequence/WholeGenomeFasta/genome.fa
 PYTHON=$(which python)
 ADAPTORS=adaptors.fa
 CORES=12
 
-for FQ in $DATAPATH/*R1_001.fq.gz
+for FQ in $DATAPATH/*R1_001.fastq.gz
 do
 	SAMPLENAME=$(basename $FQ)
 	echo $PYTHON DNAmapping.py --fq1=$FQ  \
