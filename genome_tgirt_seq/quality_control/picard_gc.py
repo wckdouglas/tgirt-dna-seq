@@ -54,28 +54,28 @@ def pipeline(result_path, figures_path, ref, bam_file):
     outNameFunc = partial(outBamName,result_path, samplename)
     filtered_bam = filterBam(bam_file, outNameFunc)
     dedup_bam = MarkDuplicates(filtered_bam, outNameFunc)
-    gcCollect(filtered_bam, figures_path, samplename, result_path, ref)
-    #gcCollect(bam_file, figures_path, samplename, result_path, ref)
+    #gcCollect(filtered_bam, figures_path, samplename, result_path, ref)
+    gcCollect(bam_file, figures_path, samplename, result_path, ref)
     end = time.time()
     time_lapsed = (end - start)/float(60)
     print 'Finished %s in %.3f min' %(samplename, time_lapsed)
     return 0
 
 def main():
-    #project_path = '/stor/work/Lambowitz/cdw2854/ecoli_genome'
-    #bam_path= project_path + '/bamFiles/subsampled_1M'
-    project_path = '/stor/work/Lambowitz/cdw2854/genomeDNA'
-    bam_path = '/stor/work/Lambowitz/cdw2854/genomeDNA/clustered_map'
+    project_path = '/stor/work/Lambowitz/cdw2854/ecoli_genome'
+    bam_path= project_path + '/bamFiles/subsampled_1M'
+    #project_path = '/stor/work/Lambowitz/cdw2854/genomeDNA'
+    #bam_path = '/stor/work/Lambowitz/cdw2854/genomeDNA/clustered_map'
     result_path = project_path + '/picard_results'
     figures_path = project_path + '/figures'
-    #ref_path = '/stor/work/Lambowitz/ref/Ecoli'
-    #ref = ref_path + '/b_strain.fa'
-    ref = '/stor/work/Lambowitz/ref/hg19/Sequence/all_seq/reference.fasta'
+    ref_path = '/stor/work/Lambowitz/ref/Ecoli'
+    ref = ref_path + '/b_strain.fa'
+    #ref = '/stor/work/Lambowitz/ref/hg19/Sequence/all_seq/reference.fasta'
     for path in [result_path, figures_path]:
         if not os.path.isdir(path):
             os.makedirs(path)
 
-    bam_files = glob.glob(bam_path + '/*.bam')
+    bam_files = glob.glob(bam_path + '/*sorted.bam')
     picard_func = partial(pipeline, result_path, figures_path, ref)
     p = Pool(12)
     p.map(picard_func, bam_files)
