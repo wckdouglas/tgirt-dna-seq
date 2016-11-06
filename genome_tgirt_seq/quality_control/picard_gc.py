@@ -75,7 +75,7 @@ def main():
         if not os.path.isdir(path):
             os.makedirs(path)
 
-    bam_files = glob.glob(bam_path + '/*sorted.bam')
+    bam_files = glob.glob(bam_path + '/*sim*.bam')
     picard_func = partial(pipeline, result_path, figures_path, ref)
     p = Pool(12)
     p.map(picard_func, bam_files)
