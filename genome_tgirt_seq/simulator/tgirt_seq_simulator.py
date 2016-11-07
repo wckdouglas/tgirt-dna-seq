@@ -41,13 +41,14 @@ def extract_interval(get_prob, ref_fasta, insert_profile_table, base_profile_tab
     outfile = open(outfile_name, 'w')
     for i in xrange(len(sequence) - 3):
         tri_nucleotide_5 = str(sequence[i:i+ 3])
+        reverse_tri_nucleotide  = reverse_complement(tri_nucleotide_5)
         out, out_rev = 0, 0
         if 'N' not in tri_nucleotide_5:
             for cov in xrange(fold):
                 strand = random.binomial(1, p = 0.5)
                 if strand == 0:
                     out = random.binomial(1, p = base_dist["5'"][tri_nucleotide_5])
-                    if out > 0:
+                    if out == 1:
                         insert_size = insert_dist.rvs()
                         start_site = s + i  - 1  #is for adjusting the 0-base python?
                         end_site = int(start_site + insert_size)
@@ -55,23 +56,24 @@ def extract_interval(get_prob, ref_fasta, insert_profile_table, base_profile_tab
                             tri_nucleotide_3 = str(fasta.get_seq(chrom, end_site - 2, end_site))
                             if 'N' not in tri_nucleotide_3:
                                 if random.binomial(1, p = base_dist["3'"][tri_nucleotide_3]) == 1:
-                                    outfile.write( '%s\t%i\t%i\tSeq_%s_%i\t%i\t+\n' %(chrom, start_site, end_site,
-                                                                chrom, seq_count.value, insert_size))
+                                    line = '%s\t%i\t%i\tSeq_%s_%i\t%i\t+\n' %(chrom, start_site, end_site,
+                                                                chrom, seq_count.value, insert_size)
+                                    outfile.write(line)
                                     seq_count.value += 1
 
                 elif strand == 1:
-                    out = random.binomial(1, p = base_dist["5'"][reverse_complement(tri_nucleotide_5)])
-                    if out > 0:
+                    out = random.binomial(1, p = base_dist["5'"][reverse_tri_nucleotide])
+                    if out == 0:
                         insert_size = insert_dist.rvs()
                         end_site = s + i + 2 #reversed This is the start when the read is reversed
                         start_site = int(end_site - insert_size) #this is the end site
                         if start_site > 0:
                             tri_nucleotide_3 = reverse_complement(str(fasta.get_seq(chrom, start_site, start_site + 2)))
-                            print tri_nucleotide_3
                             if 'N' not in tri_nucleotide_3:
                                 if random.binomial(1, p = base_dist["3'"][tri_nucleotide_3]) == 1:
-                                    outfile.write('%s\t%i\t%i\tSeq_%s_%i\t%i\t-\n' %(chrom, start_site, end_site,
-                                                                chrom, seq_count.value, insert_size))
+                                    line = '%s\t%i\t%i\tSeq_%s_%i\t%i\t-\n' %(chrom, start_site - 1, end_site,
+                                                                chrom, seq_count.value, insert_size)
+                                    outfile.write(line)
                                     seq_count.value += 1
     outfile.close()
     return outfile_name
