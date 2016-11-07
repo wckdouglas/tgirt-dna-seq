@@ -29,10 +29,10 @@ def reverse_complement(sequence):
 
 
 
-def extract_interval(ref_fasta, insert_profile_table, base_profile_table,
+def extract_interval(get_prob, ref_fasta, insert_profile_table, base_profile_table,
                     outprefix, fold, chrom, seq_count, iterable):
     iternum, (s, e) = iterable
-    insert_dist, base_dist = profile_to_distribution(insert_profile_table, base_profile_table)
+    insert_dist, base_dist = profile_to_distribution(insert_profile_table, base_profile_table, get_prob)
     random.seed(iternum)
     fasta = Fasta(ref_fasta)
     sys.stderr.write('Parsing %s: %i-%i\n' %(chrom,s,e))
@@ -52,7 +52,7 @@ def extract_interval(ref_fasta, insert_profile_table, base_profile_table,
                         start_site = s + i  - 1  #is for adjusting the 0-base python?
                         end_site = int(start_site + insert_size)
                         if start_site > 0:
-                            tri_nucleotide_3 = str(fasta.get_seq(chrom, end_site, end_site + 2))
+                            tri_nucleotide_3 = str(fasta.get_seq(chrom, end_site - 2, end_site))
                             if 'N' not in tri_nucleotide_3:
                                 if random.binomial(1, p = base_dist["3'"][tri_nucleotide_3]) == 1:
                                     outfile.write( '%s\t%i\t%i\tSeq_%s_%i\t%i\t+\n' %(chrom, start_site, end_site,
@@ -67,6 +67,7 @@ def extract_interval(ref_fasta, insert_profile_table, base_profile_table,
                         start_site = int(end_site - insert_size) #this is the end site
                         if start_site > 0:
                             tri_nucleotide_3 = reverse_complement(str(fasta.get_seq(chrom, start_site, start_site + 2)))
+                            print tri_nucleotide_3
                             if 'N' not in tri_nucleotide_3:
                                 if random.binomial(1, p = base_dist["3'"][tri_nucleotide_3]) == 1:
                                     outfile.write('%s\t%i\t%i\tSeq_%s_%i\t%i\t-\n' %(chrom, start_site, end_site,
@@ -75,8 +76,33 @@ def extract_interval(ref_fasta, insert_profile_table, base_profile_table,
     outfile.close()
     return outfile_name
 
+def get_prob_5(base_df, pos, nuc, end):
+    end_is_right = (base_df.end == end)
+    pos_is_right = (base_df.pos == pos)
+    nucleotide_is_right = (base_df.base == nuc)
+    d = base_df[end_is_right & nucleotide_is_right & pos_is_right]
+    return float(d.base_fraction)
 
-def get_prob(base_df, pos, nuc, end):
+
+def get_prob_none(base_df, pos, nuc, end):
+    pos = pos if end == "3'" else 20 - pos + 1
+    end_is_right = (base_df.end == end)
+    pos_is_right = (base_df.pos == pos)
+    nucleotide_is_right = (base_df.base == nuc)
+    d = base_df[end_is_right & nucleotide_is_right & pos_is_right]
+    return float(d.base_fraction)
+
+
+def get_prob_3(base_df, pos, nuc, end):
+    pos = 20 - pos + 1
+    end_is_right = (base_df.end == end)
+    pos_is_right = (base_df.pos == pos)
+    nucleotide_is_right = (base_df.base == nuc)
+    d = base_df[end_is_right & nucleotide_is_right & pos_is_right]
+    return float(d.base_fraction)
+
+
+def get_prob_both(base_df, pos, nuc, end):
     pos = pos if end == "5'" else 20 - pos + 1
     end_is_right = (base_df.end == end)
     pos_is_right = (base_df.pos == pos)
@@ -85,7 +111,7 @@ def get_prob(base_df, pos, nuc, end):
     return float(d.base_fraction)
 
 
-def profile_to_distribution(insert_profile_table, base_profile_table):
+def profile_to_distribution(insert_profile_table, base_profile_table, get_prob):
     insert_df = pd.read_csv(insert_profile_table)\
         .assign(px = lambda d: np.true_divide(d['count'].values,d['count'].values.sum()))
     insert_dist = rv_discrete(name='custm', values=(insert_df.isize, insert_df.px))
@@ -111,6 +137,7 @@ def parse_opt():
     parser.add_argument('-f','--fold', type=int, default = 10, help = "how many fold of genome to simulate (default: 10)")
     parser.add_argument('-o','--outbed', required=True, help = "outputprefix")
     parser.add_argument('-t','--threads', type=int, default = 1, help = 'Threads to use')
+    parser.add_argument('-s','--side', choices = ['both','3','5','no'], required = True, help = 'which read to simulate with bias')
     args = parser.parse_args()
     return args
 
@@ -124,6 +151,15 @@ def main():
     threads = args.threads
     outbed = args.outbed
     outprefix = outbed .split('.')[0]
+    side = args.side
+    if side == 'both':
+        get_prob =  get_prob_both
+    elif side == '3':
+        get_prob = get_prob_3
+    elif side == '5':
+        get_prob = get_prob_5
+    elif side == 'no':
+        get_prob = get_prob_none
 
     fasta = Fasta(ref_fasta)
     seq_id = fasta.keys()[0]
@@ -133,10 +169,10 @@ def main():
     ends = starts[1:]
     p = Pool(threads)
     seq_count = Manager().Value('i',0)
-    per_site_simulation = partial(extract_interval, ref_fasta, insert_profile_table,
+    per_site_simulation = partial(extract_interval, get_prob, ref_fasta, insert_profile_table,
                                   base_profile_table, outprefix, fold, str(seq_id), seq_count)
     iterable = enumerate(zip(starts,ends))
-    outfiles = p.map(per_site_simulation, iterable)
+    outfiles = map(per_site_simulation, iterable)
     p.close()
     p.join()
     all_files = ' '.join(outfiles)

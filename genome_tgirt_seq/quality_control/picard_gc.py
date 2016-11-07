@@ -20,8 +20,8 @@ def filterBam(in_bam, outNameFunc):
             '| samtools sort -O bam -T %s ' %out_bam.replace('.bam','')+\
             '> %s' %(out_bam)
     command2 = 'samtools index %s' %(out_bam)
-    #runProcess(command)
-    #runProcess(command2)
+    runProcess(command)
+    runProcess(command2)
     return out_bam
 
 def MarkDuplicates(in_bam, outNameFunc):
@@ -32,7 +32,7 @@ def MarkDuplicates(in_bam, outNameFunc):
         'ASSUME_SORT_ORDER=coordinate ' +\
         'CREATE_INDEX=true '+\
 	'METRICS_FILE=%s ' %(out_bam.replace('bam','duplicate.metric'))
-    #runProcess(command)
+    runProcess(command)
     return out_bam
 
 def gcCollect(in_bam, figures_path, samplename, result_path, ref):
@@ -54,8 +54,8 @@ def pipeline(result_path, figures_path, ref, bam_file):
     outNameFunc = partial(outBamName,result_path, samplename)
     filtered_bam = filterBam(bam_file, outNameFunc)
     dedup_bam = MarkDuplicates(filtered_bam, outNameFunc)
-    #gcCollect(filtered_bam, figures_path, samplename, result_path, ref)
-    gcCollect(bam_file, figures_path, samplename, result_path, ref)
+    gcCollect(dedup_bam, figures_path, samplename, result_path, ref)
+    #gcCollect(bam_file, figures_path, samplename, result_path, ref)
     end = time.time()
     time_lapsed = (end - start)/float(60)
     print 'Finished %s in %.3f min' %(samplename, time_lapsed)
