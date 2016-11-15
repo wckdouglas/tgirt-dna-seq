@@ -18,7 +18,7 @@ def getOpt():
 # running in shell
 def runProcess(command, samplename):
     sys.stderr.write('[%s] %s\n' %(samplename, command))
-#    result = subprocess.call('time ' + command, shell=True)
+    result = subprocess.call('time ' + command, shell=True)
     return 0
 
 #Trimming
@@ -27,7 +27,6 @@ def trimming(fq1, threads, trim_path, samplename, adaptor):
     ##  ILLUMINACLIP:<fastaWithAdaptersEtc>:<seed mismatches>:<palindrome clip
     ##              threshold>:<simple clip threshold>:<minAdapterLength>:<keepBothReads>
     options='ILLUMINACLIP:%s:2:10:10:1:true MINLEN:20' %(adaptor)
-    #options='MINLEN:20'
     command = 'time trimmomatic ' +\
         'PE -threads %i '  %(threads)+\
         '-basein %s ' %(fq1) + \

@@ -27,7 +27,7 @@ for line in sys.stdin:
     else:
         read1 = sequence
         read2 = reverse_complement(sequence)
-        qual = 'I' * (length + 1)
+        qual = ''.join(['I' for i in sequence])
     line1 = '@%s/1\n%s\n+\n%s\n' %(name, read1, qual)  
     line2 = '@%s/2\n%s\n+\n%s' %(name, read2, qual)
     line = line1 + line2

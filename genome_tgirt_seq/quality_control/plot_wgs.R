@@ -13,10 +13,11 @@ read_wgs_table <- function(filename, datapath){
 		str_c(filename, sep='/') %>%
 		read_tsv(skip = 10) %>%
 		filter(!is.na(coverage)) %>%
-		mutate(rol_count = rollmean(count, 10, fill=0, align='center')) %>%
-		mutate(rol_count = rol_count/ sum(rol_count) * 100) %>%
-        mutate(samplename = sapply(samplename, function(x) str_split(x,'_')[[1]][1])) %>%
-        mutate(subsampled = ifelse(grepl('subsample',filename),'Yes','No'))
+        mutate(rol_count = count/sum(count) * 100) %>%
+#		mutate(rol_count = rollmean(count, 10, fill=0, align='center')) %>%
+#		mutate(rol_count = rol_count/ sum(rol_count) * 100) %>%
+        mutate(samplename = samplename) %>%
+        mutate(subsampled = ifelse(grepl('1M',filename),'Yes','No'))
 	message('Read ', filename)
 	return(df)
 }
@@ -31,7 +32,10 @@ df <- table_names %>%
 	map(read_wgs_table, picard_path) %>%
 	reduce(rbind)  %>%
     mutate(line_type = 'WGS') %>%
-    select(-subsampled)
+    select(-subsampled) %>%
+    filter(!grepl('sim',samplename)) %>%
+    filter(!grepl('clustered',samplename)) %>%
+    filter(samplename != 'SRR733099')
 
 
 base_df <- df %>%
@@ -47,13 +51,15 @@ base_df <- df %>%
     ungroup() %>%
     mutate(line_type = 'Theoretical (Poisson)') 
     
-df <- rbind(base_df, df %>%select(-baseq_count, -count)) %>%
+plot_df <- rbind(base_df, df %>%select(-baseq_count, -count)) %>%
     mutate(line_type = factor(line_type, levels = c('WGS','Theoretical (Poisson)')))
     
 wgs_p <- ggplot() +
-	geom_line(data = df, aes(x = coverage, y = rol_count, color = samplename, linetype = line_type), size = 1.3) + 
-	xlim(0,200) +
-	theme(legend.position = c(0.8, 0.9)) +
+	geom_line(data = plot_df, aes(x = coverage, y = rol_count, 
+	                              color = samplename, linetype = line_type), 
+	          size = 1.3) + 
+	xlim(1,200) +
+	theme(legend.position = c(0.6, 0.9)) +
     scale_color_discrete(guide = F)+
     scale_linetype_discrete(guide = guide_legend(ncol = 1))+
 	theme(text = element_text(size = 20)) +

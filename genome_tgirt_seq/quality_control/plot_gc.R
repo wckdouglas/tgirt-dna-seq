@@ -27,7 +27,9 @@ figurename <- str_c(figure_path, '/gc_plot.pdf')
 table_names <- list.files(path = picard_path, pattern = '.txt')
 df <- table_names %>%
 	map(read_gc_table, picard_path) %>%
-	reduce(rbind)
+	reduce(rbind) %>%
+    filter(samplename != 'SRR733099') %>%
+    filter(!grepl('clustered|sim',samplename))
 
 windows_df <- df %>% 
 	filter(samplename == unique(.$samplename)[1]) %>%

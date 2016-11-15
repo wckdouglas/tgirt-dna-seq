@@ -46,7 +46,7 @@ def normCount(d):
     return d
 
 def main(bamFile):
-    samplename = os.path.basename(bamFile).split('.')[0].split('_')[0]
+    samplename = os.path.basename(bamFile).replace('.bam','')
     print 'Running %s ' %samplename
     isize_array = getIsize(bamFile, samplename)
     df = pd.DataFrame({'isize':isize_array})\
