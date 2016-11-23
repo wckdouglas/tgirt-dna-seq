@@ -29,7 +29,10 @@ df <- table_names %>%
 	map(read_gc_table, picard_path) %>%
 	reduce(rbind) %>%
     filter(samplename != 'SRR733099') %>%
-    filter(!grepl('clustered|sim',samplename))
+#    filter(!grepl('clustered|sim',samplename)) %>%
+#    filter(grepl('kq|q5',samplename)) %>%
+    filter(!grepl('X',samplename) ) %>%
+    tbl_df
 
 windows_df <- df %>% 
 	filter(samplename == unique(.$samplename)[1]) %>%
@@ -39,11 +42,12 @@ windows_df <- df %>%
 gc_p <- ggplot(data = df, aes(x = GC, y = NORMALIZED_COVERAGE)) +
 	geom_line(size = 1.3, aes(color = samplename)) +
 	geom_hline(yintercept = 1, linetype = 2, alpha = 0.9) +
-	geom_bar(data = windows_df, aes(x = GC, y = roll_mean_window), 
+	geom_bar(data = windows_df, aes(x = GC, y = rol_window), 
 			 stat='identity', fill='salmon', alpha = 1)  +
 	theme(text = element_text(size = 20)) +
 	theme(axis.text = element_text(size = 18)) +
-    theme(legend.position =  'None') +
-	labs(x = 'GC %', y = 'Normalized Coverage', color = ' ') 
+#    theme(legend.position =  'None') +
+	labs(x = 'GC %', y = 'Normalized Coverage', color = ' ')+
+    ylim(0,4)
 #ggsave(gc_p, file= figurename)
 #message( 'Saved: ' ,figurename)

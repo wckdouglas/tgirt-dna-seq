@@ -1,10 +1,10 @@
 #!/usr/bin/bash
 
 PROJECT_PATH=${WORK}/cdw2854/ecoli_genome
-BAM_PATH=$PROJECT_PATH/bamFiles/subsampled_1M
+BAM_PATH=$PROJECT_PATH/bamFiles/subsampled_bam
 PICARD_PATH=$PROJECT_PATH/picard_results
 REF_PATH=$REF/Ecoli
-GENOME=$REF_PATH/b_strain.fa
+GENOME=$REF_PATH/k12_mg1655.fa
 
 for BAM in $BAM_PATH/*.MarkDuplicate*.bam
 do

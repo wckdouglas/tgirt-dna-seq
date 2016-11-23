@@ -13,6 +13,12 @@ CORES=12
 for FQ in $DATAPATH/*R1_001.fastq.gz
 do
 	SAMPLENAME=$(basename $FQ)
+	if [[ $SAMPLENAME == K12* ]]
+	then
+		ADAPTORS=adaptors.fa
+	else
+		ADAPTORS=TruSeq2-PE.fa
+	fi
 	echo $PYTHON DNAmapping.py --fq1=$FQ  \
 		--outdir=$PROJECTPATH --index=$INDEX \
 		--threads=$CORES --adaptor=$ADAPTORS 

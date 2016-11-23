@@ -20,7 +20,7 @@ do
 		${OUT_BAM} \
 	\| pileup_to_bed.py \
 		--input=- \
-		--qual=33 \
+		--qual=40 \
 		--threads 4 \
 	\> $BASE_PATH/${SAMPLENAME}.tsv
 done > command.sh

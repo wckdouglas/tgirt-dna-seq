@@ -18,9 +18,8 @@ read_file <- function(tablename){
         filter(start > 174) %>%
         filter(start < 370) %>%
         filter(chrom == 'ENST00000621411')  %>%
-#        filter(chrom %in% c("ENST00000613854","ENST00000612966","ENST00000621411",
-#                            "ENST00000616365","ENST00000359303","ENST00000356476",
-#                            "ENST00000614911","ENST00000618052")) %>%
+     #   filter(chrom %in% c("ENST00000621411",
+     #                       "ENST00000616365","ENST00000356476")) %>%
         tbl_df
     return (df)
 }
@@ -28,46 +27,34 @@ read_file <- function(tablename){
 transition <- c('A -> G','G -> A','C -> T','T -> C')
 
 assignTemplate <- function(x){
-    ifelse(grepl('^H',x),'RNA','DNA')
+    ifelse(grepl('^H|^200R|^WR',x),'RNA','DNA')
 }
 
-assignMethod <- function(x){
-    ifelse(grepl('bayesian',x),'New clustering','Traditional clustering')
-}
-
-assignFilter <- function(x){
-    ifelse(grepl('.3',x),'> 3 member','> 4 member')
-}
-
-plot_mismatch <- function(clean_mismatch_df){
+plot_mismatch <- function(clean_mismatch_df, base_count){
     mismatch_df <- clean_mismatch_df %>%
-        group_by(samplename, base, ref_base) %>%
+        dplyr::rename(ref = ref_base) %>%
+        dplyr::rename(read = base) %>%
+        group_by(samplename, read, ref) %>%
         summarize(count = sum(count)) %>%
         ungroup() %>% 
-        mutate(mutation = str_c(ref_base, ' -> ', base)) %>%
-        group_by(samplename) %>%
+        mutate(mutations = str_c(ref, ' -> ', read)) %>%
+        inner_join(base_count) %>%
+        mutate(base_fraction = count / base_total) %>%
+        filter(ref!=read) %>%
+        mutate(template = assignTemplate(samplename) ) %>%
+        group_by(template, mutations,ref,read) %>%
         do(data_frame(
-            count = .$count/sum(.$count),
-            mutations = .$mutation,
-            ref = .$ref_base,
-            read = .$base
+            average_mut = mean(.$base_fraction),
+            minimum_mut = min(.$base_fraction),
+            maximum_mut = max(.$base_fraction)
         )) %>%
         ungroup() %>%
-        filter(ref!=read) %>%
-        mutate(filter_data = assignFilter(samplename)) %>%
-        mutate(template = assignTemplate(samplename) ) %>%
-    #    mutate(samplename = str_c(template, ' (',filter_data, ')')) %>%
         mutate(label_mutation = ifelse(mutations %in% transition, 'Transition','Transversion')) %>%
         tbl_df
 
-#    mismatch_df <- mismatch_df %>% 
-#        inner_join(error_DF %>% select(-count)) %>%
-#	     mutate(template = str_c(template, '\n(','Error rate = ',signif(error_rate,3),')')) %>%
-#        tbl_df
-        
-    
-mismatch_p <- ggplot(data = mismatch_df, aes(x = mutations, y = count, fill = label_mutation)) +
-        geom_bar(stat='identity') + 
+    mismatch_p <- ggplot(data = mismatch_df, aes(x = mutations, y = average_mut, fill = label_mutation)) +
+        geom_bar(stat='identity') +
+        geom_errorbar(aes(ymin = minimum_mut, ymax = maximum_mut), width=0.25) +
         facet_grid(template~ref, scale='free') +
         labs(x = ' ', y = 'Fractions', fill = ' ') +
         theme(axis.text.x = element_text(size = 20, angle = 90, hjust = 1, vjust =0.5)) +
@@ -78,24 +65,6 @@ mismatch_p <- ggplot(data = mismatch_df, aes(x = mutations, y = count, fill = la
 	return (mismatch_p)
 }
 
-plot_cov <- function(merge_df){
-    ### coverage
-    cov_table <-  merge_df %>% 
-        select(samplename, coverage,start)  %>%
-        mutate(filter_data = assignFilter(samplename)) %>%
-        mutate(template = assignTemplate(samplename) ) %>%
-        mutate(samplename = str_c(template, ' (',filter_data, ')')) %>%
-        mutate(gene_name = 'HIST1H3B') %>%
-        tbl_df
-        
-    cov_p <- ggplot(data = cov_table, aes(x=start, y = coverage)) +
-        geom_bar(stat='identity',fill='grey') +
-        facet_grid(template~gene_name, scale = 'free_y') +
-        theme(text = element_text(size = 20, face='bold')) +
-        theme(axis.text = element_text(size = 18, face='bold')) +
-        labs(x = ' ', y = 'High Quality Base Coverage')
-	return(cov_p)
-}
 
 plot_pos_mismatch <- function(clean_mismatch_df){
     pos_mismatch <- clean_mismatch_df %>%
@@ -104,77 +73,69 @@ plot_pos_mismatch <- function(clean_mismatch_df){
 					  percentage = .$count/sum(.$count))) %>%
 		ungroup() %>%
         filter(ref_base != base) %>%
-        group_by(samplename, start, ref_base) %>%
+        group_by(samplename, start, ref_base, base) %>%
         summarize(percentage = sum(percentage) * 100 )   %>%
         ungroup() %>%
-        mutate(gene_name = 'HIST1H3B') %>%
-        mutate(filter_data = assignFilter(samplename)) %>%
         mutate(template = assignTemplate(samplename) ) %>%
-        mutate(samplename = str_c(template, ' (',filter_data, ')')) %>%
+        group_by(template, start, ref_base, base) %>%
+        do(data_frame(
+            average_mut = mean(.$percentage),
+            minimum_mut = min(.$percentage),
+            maximum_mut = max(.$percentage)
+        )) %>%
+        ungroup() %>%
+        mutate(mutations = str_c(ref_base, base, sep='->')) %>%
+        mutate(gene_name = 'HIST1H3B') %>%
         tbl_df
     
-    pos_p <- ggplot(data = pos_mismatch, aes(x = start, y = percentage, fill=ref_base)) +
+    library(RColorBrewer)
+    n <- 60
+    qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
+    col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+    pos_p <- ggplot(data = pos_mismatch, aes(x = start, y = average_mut, fill=mutations)) +
         geom_bar(stat='identity') +
         facet_grid(template~., scale = 'free_y') +
         theme(text = element_text(size = 20, face='bold')) +
         theme(axis.text = element_text(size = 18, face='bold')) +
         labs(x = 'Position on GOI', y = '% of Mismatch', fill= ' ') +
-        theme(legend.position ='top')
+        theme(legend.position = 'top') + 
+        guides(fill=guide_legend(nrow=2,byrow=TRUE)) +
+        scale_fill_manual(values = col_vector) +
+        panel_border()
 	return(pos_p)
-}
-
-make_diff_fig <- function(correct_method, filter_member, merge_df){
-	member <- ifelse(filter_member == 4, '> 3 member','> 4 member')
-
-	merge_df <-	merge_df %>% 
-		mutate(filter_data = assignFilter(samplename)) %>%
-		filter(filter_data == member) %>%
-		select(-filter_data)
-
-	figurename <- str_c(table_dir, '/mismatch_',filter_member,'_and_up_',correct_method,'.pdf')
-	
-	if(correct_method == 'bayesian'){
-		merge_df <- filter(merge_df, grepl('bayesian',samplename))
-	}else{
-		merge_df <- filter(merge_df, !grepl('bayesian',samplename))
-	}
-
-
-	clean_mismatch_df <- merge_df %>%
-		select(ref_base, A,C,T,G, samplename, start) %>%
-		gather(base, count, -samplename, -ref_base, -start)  %>%
-		tbl_df
-
-	mismatch_p <- plot_mismatch(clean_mismatch_df)
-	cov_p <- plot_cov(merge_df)
-	pos_p <- plot_pos_mismatch(clean_mismatch_df)
-    
-    #p <- ggdraw() +
-    #    draw_plot(cov_p, 0, 0.666, 1, 0.333) +
-    #    draw_plot(pos_p, 0.02, 0.333, 0.98, 0.333) +
-    #    draw_plot(mismatch_p, 0, 0, 1, 0.333) 
-    #    draw_plot_label(label = c('(B)','(C)','(D)'), 
-    #                    x = c(0,0,0),
-    #                    y = c(1,0.666,0.333), 
-    #                    size = 20)
-	p <- plot_grid(pos_p, mismatch_p, ncol=1)
-    ggsave(p , file = figurename, width = 10, height = 15)
-    message('Plotted: ',figurename)
-}
-
-
-iter_method <- function(filter_member, merge_df){
-	method <- c('bayesian','traditional')
-	lapply(method, make_diff_fig, filter_member, merge_df)
 }
 
 table_dir <- '/stor/work/Lambowitz/cdw2854/target-seq/base_tables'
 tables <- list.files(path = table_dir, pattern = '.tsv')
+figurename <- str_c(table_dir, '/mismatch_target.pdf')
+
 merge_df <- tables %>%
 	map(read_file) %>%
-	reduce(rbind)  %>%
+	reduce(rbind)   
+
+base_count <-  merge_df %>% 
+    group_by(samplename, ref_base) %>% 
+    summarize(base_total = sum(coverage))
+	
+cleaned_mismatch_df <- merge_df %>%
+    select(ref_base, A,C,T,G, samplename, start) %>%
+	gather(base, count, -samplename, -ref_base, -start)  %>%
+    filter(!grepl('200[RD]|W[RD]',samplename)) %>%
 	tbl_df
 
-plots <- lapply(c(3,4),iter_method, merge_df)
+mismatch_p <- plot_mismatch(clean_mismatch_df , base_count)
+pos_p <- plot_pos_mismatch(clean_mismatch_df)
+    
+#p <- ggdraw() +
+#    draw_plot(cov_p, 0, 0.666, 1, 0.333) +
+#    draw_plot(pos_p, 0.02, 0.333, 0.98, 0.333) +
+#    draw_plot(mismatch_p, 0, 0, 1, 0.333) 
+#    draw_plot_label(label = c('(B)','(C)','(D)'), 
+#                    x = c(0,0,0),
+#                    y = c(1,0.666,0.333), 
+#                    size = 20)
+p <- plot_grid(pos_p, mismatch_p, ncol=1)
+ggsave(p , file = figurename, width = 10, height = 15)
+message('Plotted: ',figurename)
 
 

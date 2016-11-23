@@ -1,7 +1,7 @@
 #!/bin/bash
 
 TARGET_DIR=/stor/work/Lambowitz/cdw2854/ecoli_genome/rawData/k12
-FROM="$DATA/JA16703"
+FROM="$DATA/JA16703 $DATA/JA16720" 
 for DIR in $FROM
 do
 	for FQ in $DIR/K12*fastq.gz

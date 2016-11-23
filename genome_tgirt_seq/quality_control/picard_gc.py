@@ -62,16 +62,16 @@ def pipeline(result_path, figures_path, ref, bam_file):
     return 0
 
 def main():
-    #project_path = '/stor/work/Lambowitz/cdw2854/ecoli_genome'
-    #bam_path= project_path + '/bamFiles/subsampled_1M'
-    project_path = '/stor/work/Lambowitz/cdw2854/genomeDNA'
-    bam_path = '/stor/work/Lambowitz/cdw2854/genomeDNA/bamFiles'
+    project_path = '/stor/work/Lambowitz/cdw2854/ecoli_genome'
+    bam_path= project_path + '/bamFiles'
+    #project_path = '/stor/work/Lambowitz/cdw2854/genomeDNA'
+    #bam_path = '/stor/work/Lambowitz/cdw2854/genomeDNA/bamFiles'
     result_path = project_path + '/picard_results'
     figures_path = project_path + '/figures'
     ref_path = '/stor/work/Lambowitz/ref/Ecoli'
-    ref = ref_path + '/b_strain.fa'
+    ref = ref_path + '/k12_mg1655.fa'
     #ref = '/stor/work/Lambowitz/ref/hg19/Sequence/all_seq/reference.fasta'
-    ref = '/stor/work/Lambowitz/ref/hg19/Sequence/WholeGenomeFasta/genome.fa'
+    #ref = '/stor/work/Lambowitz/ref/hg19/Sequence/WholeGenomeFasta/genome.fa'
     for path in [result_path, figures_path]:
         if not os.path.isdir(path):
             os.makedirs(path)

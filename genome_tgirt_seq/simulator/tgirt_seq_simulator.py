@@ -46,7 +46,7 @@ def reverse_complement(sequence):
 def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
                     outprefix, fold, chrom, seq_count, iterable):
     iternum, (s, e) = iterable
-    insert_dist, base_dist = profile_to_distribution_bayes(insert_profile_table, base_profile_table, side)
+    insert_dist, base_dist = profile_to_distribution(insert_profile_table, base_profile_table, side)
     #plot_dist(base_dist, outprefix)
     random.seed(iternum)
     fasta = Fasta(ref_fasta)
@@ -113,7 +113,6 @@ def get_prob(base_df, side, pos, nuc, end):
     return float(d.base_fraction)
 
 
-
 def conditional_probit(d):
     d['probit'] = d.trinucleotide_count/ d.trinucleotide_count.sum()
     return d
@@ -134,19 +133,12 @@ def profile_to_distribution_bayes(insert_profile_table, base_profile_table, side
 
     base_df = pd.read_csv(base_profile_table) \
         .pipe(lambda d: d[~d.trinucleotides.str.contains('N')]) \
-        .groupby('read_end')\
-        .apply(conditional_probit) \
-        .assign(nucleotides = lambda d: map(make_nucleotides, d.read_end, d.trinucleotides)) \
-        .groupby(['read_end','nucleotides'])\
-        .agg({'probit':np.sum})\
-        .reset_index()
 
     base_dist = defaultdict(lambda: defaultdict(float))
     for t,p,r in izip(base_df.nucleotides, base_df.probit, base_df.read_end):
         base_dist[r][t] = p
 
     return insert_dist, base_dist
-
 
 
 def profile_to_distribution(insert_profile_table, base_profile_table, side):

@@ -24,6 +24,7 @@ do
 		--threads $THREADS \
 		--mismatch 3 \
 		--read read2 \
+		--fraction 0.66 \
 		\&\> ${RESULT_PATH}/${SAMPLE_NAME}.log
 done
 

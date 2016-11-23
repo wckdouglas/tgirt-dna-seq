@@ -10,7 +10,7 @@ cpdef bool validateAlignment(AlignedSegment aln):
     softclipped = 'S' in aln.cigarstring
     mismatch_looks_good = aln.get_tag('NM') < 4
     on_hist1h3b = aln.reference_name == 'ENST00000621411'
-    return  not softclipped and mismatch_looks_good and on_hist1h3b
+    return  not softclipped and mismatch_looks_good
 
 
 cpdef int filterBAM(infile, outfile):
