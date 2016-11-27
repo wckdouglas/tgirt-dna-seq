@@ -8,7 +8,7 @@ from multiprocessing import Pool
 
 def runProcess(command):
     print command
-    os.system(command)
+    #os.system(command)
 
 def outBamName(result_path, samplename, analysis_type):
     return result_path + '/' + samplename + '.' + analysis_type + '.bam'
@@ -35,18 +35,44 @@ def MarkDuplicates(in_bam, outNameFunc):
     runProcess(command)
     return out_bam
 
-def gcCollect(in_bam, figures_path, samplename, result_path, ref):
+def collect_gc(in_bam, figures_path, samplename, result_path, ref):
     command = 'picard CollectGcBiasMetrics '+\
 	'SCAN_WINDOW_SIZE=100 ' + \
 	'INPUT=%s ' %(in_bam) +\
         'CHART_OUTPUT=%s/%s.pdf '  %(figures_path, samplename) + \
-        'OUTPUT=%s/%s.txt ' %(result_path, samplename) +\
+        'OUTPUT=%s/%s.gc_metrics ' %(result_path, samplename) +\
 	'SUMMARY_OUTPUT=%s/%s.summary ' %(result_path, samplename) +\
 	'REFERENCE_SEQUENCE=%s ' %ref +\
 	'ASSUME_SORTED=true ' +\
         'VALIDATION_STRINGENCY=SILENT'
     runProcess(command)
 
+def subsampling(bam_file):
+    fold = 500000
+    subsampled_bam = bam_file.replace('.bam','.subsampled.bam')
+    command = 'samtools view -bF 256 -F 4 -F 1024 -F 2048 %s ' %(bam_file) +\
+            '| bedtools sample -i - -n %i ' %(fold) +\
+            '> %s ' %(subsampled_bam)
+    runProcess(command)
+    return subsampled_bam
+
+def collect_wgs(bam_file, ref):
+    out_metric = bam_file.replace('.bam','.wgs_metrics')
+    command = 'picard CollectRawWgsMetrics '+\
+            'INPUT=%s ' %bam_file +\
+            'REFERECE_SEQUENCE=%s ' %(ref)+\
+            'OUTPUT=%s ' %(out_metric) +\
+            'INCLUDE_BQ_HISTOGRAM=true'
+    runProcess(command)
+
+def collect_alignment(bam_file, ref):
+    out_metric = bam_file.replace('.bam','.alignment_metrics')
+    command = 'picard CollectAlignmentSummaryMetrics ' +\
+            'REFERENCE_SEQUENCE=%s ' %ref +\
+            'INPUT=%s ' %bam_file +\
+            'OUTPUT=%s ' %out_metric +\
+            'ASSUME_SORTED=true ' 
+    runProcess(command)
 
 def pipeline(result_path, figures_path, ref, bam_file):
     start = time.time()
@@ -54,8 +80,12 @@ def pipeline(result_path, figures_path, ref, bam_file):
     outNameFunc = partial(outBamName,result_path, samplename)
     filtered_bam = filterBam(bam_file, outNameFunc)
     dedup_bam = MarkDuplicates(filtered_bam, outNameFunc)
-    gcCollect(dedup_bam, figures_path, samplename, result_path, ref)
-    #gcCollect(bam_file, figures_path, samplename, result_path, ref)
+    subsampled_bam = subsampling(dedup_bam)
+    collect_gc(dedup_bam, figures_path, samplename, result_path, ref)
+    collect_wgs(subsampled_bam, ref)
+    collect_alignment(subsampled_bam, ref)
+    
+
     end = time.time()
     time_lapsed = (end - start)/float(60)
     print 'Finished %s in %.3f min' %(samplename, time_lapsed)

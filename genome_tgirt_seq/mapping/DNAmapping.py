@@ -30,6 +30,7 @@ def trimming(fq1, threads, trim_path, samplename, adaptor):
         'LEADING:15 TRAILING:15 SLIDINGWINDOW:4:15 MINLEN:25'
     command = 'time trimmomatic ' +\
         'PE -threads %i '  %(threads)+\
+        '-phred33 '+\
         '-basein %s ' %(fq1) + \
         '-baseout %s/%s.fq.gz ' %(trim_path, samplename) + \
         options
@@ -44,7 +45,7 @@ def mapping(samplename, trim_path, index, threads, bam_path):
     bam_file = '%s/%s.bam' %(bam_path, samplename)
     command = 'bwa mem -t%i  ' %(threads)+\
 	    '%s %s %s ' %(index, file1, file2 ) +\
-            '| samtools sort -@ %i -O BAM -T %s ' %(threads, bam_file.replace('.bam','')) +\
+            '| samtools sort -@ %i -O bam -T %s ' %(threads, bam_file.replace('.bam','')) +\
             '> %s' %bam_file
     runProcess(command, samplename)
     return bam_file
