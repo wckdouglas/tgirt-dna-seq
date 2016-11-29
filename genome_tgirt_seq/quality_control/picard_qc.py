@@ -8,7 +8,7 @@ from multiprocessing import Pool
 
 def runProcess(command):
     print command
-    #os.system(command)
+    os.system(command)
 
 def outBamName(result_path, samplename, analysis_type):
     return result_path + '/' + samplename + '.' + analysis_type + '.bam'
@@ -60,7 +60,7 @@ def collect_wgs(bam_file, ref):
     out_metric = bam_file.replace('.bam','.wgs_metrics')
     command = 'picard CollectRawWgsMetrics '+\
             'INPUT=%s ' %bam_file +\
-            'REFERECE_SEQUENCE=%s ' %(ref)+\
+            'REFERENCE_SEQUENCE=%s ' %(ref)+\
             'OUTPUT=%s ' %(out_metric) +\
             'INCLUDE_BQ_HISTOGRAM=true'
     runProcess(command)

@@ -68,8 +68,7 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
                         start_site = s + i  - 1  #is for adjusting the 0-base python?
                         end_site = int(start_site + insert_size)
                         if end_site < chrom_len:
-                            #tri_nucleotide_3 = str(fasta.get_seq(chrom, end_site - 2, end_site))
-                            tri_nucleotide_3 = str(fasta.get_seq(chrom, end_site - 2, end_site-2))
+                            tri_nucleotide_3 = str(fasta.get_seq(chrom, end_site - 2, end_site))
                             if 'N' not in tri_nucleotide_3:
                                 if random.binomial(1, p = base_dist["3'"][tri_nucleotide_3]) == 1:
                                     line = '%s\t%i\t%i\tSeq_%s_%i\t%i\t+\n' %(chrom, start_site, end_site,
@@ -84,8 +83,7 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
                         end_site = s + i + 2 #reversed This is the start when the read is reversed
                         start_site = int(end_site - insert_size) #this is the end site
                         if start_site > 0:
-                            #reverse_tri_nucleotide_3 = reverse_complement(str(fasta.get_seq(chrom, start_site, start_site + 2)))
-                            reverse_tri_nucleotide_3 = reverse_complement(str(fasta.get_seq(chrom, start_site, start_site )))
+                            reverse_tri_nucleotide_3 = reverse_complement(str(fasta.get_seq(chrom, start_site, start_site + 2)))
                             if 'N' not in reverse_tri_nucleotide_3:
                                 if random.binomial(1, p = base_dist["3'"][reverse_tri_nucleotide_3]) == 1:
                                     line = '%s\t%i\t%i\tSeq_%s_%i\t%i\t-\n' %(chrom, start_site - 1, end_site,
@@ -94,7 +92,6 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
                                     seq_count.value += 1
     outfile.close()
     return outfile_name
-
 
 def get_prob(base_df, side, pos, nuc, end):
     if side == '3':
@@ -111,35 +108,6 @@ def get_prob(base_df, side, pos, nuc, end):
     nucleotide_is_right = (base_df.base == nuc)
     d = base_df[end_is_right & nucleotide_is_right & pos_is_right]
     return float(d.base_fraction)
-
-
-def conditional_probit(d):
-    d['probit'] = d.trinucleotide_count/ d.trinucleotide_count.sum()
-    return d
-
-def merge_probit(df1, df2):
-    return pd.merge(df1, df2, how ='inner')
-
-def make_nucleotides(x,y):
-    if x == "3'":
-        return y[0]
-    if x == "5'":
-        return y
-
-def profile_to_distribution_bayes(insert_profile_table, base_profile_table, side):
-    insert_df = pd.read_csv(insert_profile_table)\
-        .assign(px = lambda d: np.true_divide(d['count'].values,d['count'].values.sum()))
-    insert_dist = rv_discrete(name='custm', values=(insert_df.isize, insert_df.px))
-
-    base_df = pd.read_csv(base_profile_table) \
-        .pipe(lambda d: d[~d.trinucleotides.str.contains('N')]) \
-
-    base_dist = defaultdict(lambda: defaultdict(float))
-    for t,p,r in izip(base_df.nucleotides, base_df.probit, base_df.read_end):
-        base_dist[r][t] = p
-
-    return insert_dist, base_dist
-
 
 def profile_to_distribution(insert_profile_table, base_profile_table, side):
     insert_df = pd.read_csv(insert_profile_table)\

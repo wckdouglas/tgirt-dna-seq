@@ -24,7 +24,7 @@ project_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/'
 picard_path <- str_c( project_path, '/picard_results')
 figure_path  <- str_c(project_path, '/figures')
 figurename <- str_c(figure_path, '/gc_plot.pdf')
-table_names <- list.files(path = picard_path, pattern = '.txt')
+table_names <- list.files(path = picard_path, pattern = 'gc_metrics')
 df <- table_names %>%
 	map(read_gc_table, picard_path) %>%
 	reduce(rbind) %>%

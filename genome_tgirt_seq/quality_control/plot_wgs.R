@@ -33,7 +33,6 @@ read_wgs_table <- function(filename, datapath){
 		filter(!is.na(coverage)) %>%
         mutate(density = count/sum(count)) %>%
         mutate(samplename = samplename) %>%
-        mutate(subsampled = ifelse(grepl('1M',filename),'Yes','No'))  %>%
         tbl_df
 	message('Read ', filename)
 	return(df)
@@ -44,14 +43,11 @@ picard_path <- str_c( project_path, '/picard_results')
 figure_path <- str_c( project_path, '/figures')
 figurename <- str_c( figure_path, '/wgs_plot.pdf')
 table_names <- list.files(path = picard_path , pattern = '.wgs.metrics')
-table_names <- table_names[grepl('1M',table_names)]
 df <- table_names %>%
-	map_df(read_wgs_table, picard_path) %>%
+	map(read_wgs_table, picard_path) %>%
+    reduce(rbind) %>%
     mutate(line_type = 'WGS') %>%
-    select(-subsampled) %>%
-    filter(!grepl('sim',samplename)) %>%
-    filter(!grepl('clustered',samplename)) %>%
-    filter(samplename != 'SRR733099') %>%
+#    select(-subsampled) %>%
     tbl_df
 
 base_df <- df %>%
@@ -92,34 +88,34 @@ wgs_p <- ggplot() +
 
 
 
-model_df <- base_df %>% 
-    select(coverage, density,samplename) %>%
-    dplyr::rename(poisson=density) %>%
-    inner_join(df %>% select(density, coverage, samplename)) %>%
-    filter(!grepl('[86]X',samplename)) %>%
-    filter(grepl('^K12',samplename)) %>%
-    group_by(samplename) %>%
-    summarize(sum_res = sum((density - poisson)^2),
-              sum_var = sum((density - mean(density))^2),
-              rmsd = sqrt(sum((density-poisson)^2)/length(density))
-              ) %>%
-    ungroup() %>%
-    mutate(rsqrd = 1 - sum_res/ sum_var) %>%
-    mutate(enzyme = str_sub(samplename,5,6)) %>%
-    mutate(enzyme = sapply(enzyme, rename_enzyme))  %>%
-    group_by(enzyme) %>%
-    summarize(mean_rsqrd = mean(rsqrd),
-              min_rsqrd = min(rsqrd),
-              max_rsqrd = max(rsqrd)) %>%
-    ungroup()
-
-library(scales)
-p <- ggplot(data = model_df, aes(x = enzyme, y = mean_rsqrd, fill = enzyme)) +
-    geom_bar(stat='identity') +
-    geom_errorbar(aes(ymin = min_rsqrd, ymax = max_rsqrd), width = 0.4) +
-    theme(legend.position = 'none') +
-    labs(x = ' ', y = 'R-sqaured', title='Model fitting to Possion') +
-    scale_y_continuous(limits=c(0.8,1),oob = rescale_none)
-figurename <- str_c(figure_path, '/enzyme_rsqrd_plot.pdf')
-ggsave(p , file = figurename)
-    
+#model_df <- base_df %>% 
+#    select(coverage, density,samplename) %>%
+#    dplyr::rename(poisson=density) %>%
+#    inner_join(df %>% select(density, coverage, samplename)) %>%
+#    filter(!grepl('[86]X',samplename)) %>%
+#    filter(grepl('^K12',samplename)) %>%
+#    group_by(samplename) %>%
+#    summarize(sum_res = sum((density - poisson)^2),
+#              sum_var = sum((density - mean(density))^2),
+#              rmsd = sqrt(sum((density-poisson)^2)/length(density))
+#              ) %>%
+#    ungroup() %>%
+#    mutate(rsqrd = 1 - sum_res/ sum_var) %>%
+#     mutate(enzyme = str_sub(samplename,5,6)) %>%
+#     mutate(enzyme = sapply(enzyme, rename_enzyme))  %>%
+#     group_by(enzyme) %>%
+#     summarize(mean_rsqrd = mean(rsqrd),
+#               min_rsqrd = min(rsqrd),
+#               max_rsqrd = max(rsqrd)) %>%
+#     ungroup()
+# 
+# library(scales)
+# p <- ggplot(data = model_df, aes(x = enzyme, y = mean_rsqrd, fill = enzyme)) +
+#     geom_bar(stat='identity') +
+#     geom_errorbar(aes(ymin = min_rsqrd, ymax = max_rsqrd), width = 0.4) +
+#     theme(legend.position = 'none') +
+#     labs(x = ' ', y = 'R-sqaured', title='Model fitting to Possion') +
+#     scale_y_continuous(limits=c(0.8,1),oob = rescale_none)
+# figurename <- str_c(figure_path, '/enzyme_rsqrd_plot.pdf')
+# ggsave(p , file = figurename)
+#     

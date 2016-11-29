@@ -134,8 +134,8 @@ def main():
     threads = 20
     projectPath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     referencePath = '/stor/work/Lambowitz/ref/GRCh38/hg38_rDNA'
-    bedPath = projectPath + '/rmdupBedFiles'
-    #bedPath = projectPath + '/bedFiles'
+    #bedPath = projectPath + '/rmdupBedFiles'
+    bedPath = projectPath + '/bedFiles'
     resultPath = projectPath + '/wpsCTCF'
     makedir(resultPath)
     makedir(bedPath + '/bamFiles')
