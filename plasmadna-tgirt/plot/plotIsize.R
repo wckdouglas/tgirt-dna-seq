@@ -46,3 +46,16 @@ insert_p <- ggplot(data = insert_df, aes(x=isize, y=count*100)) +
     geom_vline(data = peaks_df, aes(xintercept = peak, color = colors), linetype= 2, size=1) +
     theme(legend.position='none') +
     scale_color_manual(values = c('green','grey'))
+
+insert_p_merge <- ggplot(data = insert_df, aes(x=isize, y=count*100, color = samplename)) + 
+    geom_line(size = 1.5, alpha=0.8) +
+    theme(axis.text.y = element_text(size=35,face='plain',family = 'Arial')) +
+    theme(axis.text.x = element_text(angle=50,hjust=1,size=30, face='plain',family = 'Arial')) +
+    theme(text = element_text(size=35, face='bold',family = 'Arial'))+
+    labs(x='Insert Size (bp)',y='Percent reads', color = ' ')+
+    theme(legend.key.size = unit(11,'mm')) +
+    scale_x_continuous(breaks=seq(0,401,50), limits=c(0,400)) +
+    geom_vline(data = peaks_df, aes(xintercept = peak), 
+               linetype= 2, size=1, color = 'gray1', alpha = 0.5) +
+    theme(legend.position = c(0.8,0.5)) +
+    scale_color_manual(values = c('black','salmon'))

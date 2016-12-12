@@ -30,6 +30,7 @@ def MarkDuplicates(in_bam, outNameFunc):
         'INPUT=%s ' %(in_bam) +\
         'OUTPUT=%s '%(out_bam) +\
         'ASSUME_SORT_ORDER=coordinate ' +\
+        'REMOVE_SEQUENCING_DUPLICATES=false ' +\
         'CREATE_INDEX=true '+\
 	'METRICS_FILE=%s ' %(out_bam.replace('bam','duplicate.metric'))
     runProcess(command)
@@ -58,8 +59,12 @@ def subsampling(bam_file):
 
 def collect_wgs(bam_file, ref):
     out_metric = bam_file.replace('.bam','.wgs_metrics')
-    command = 'picard CollectRawWgsMetrics '+\
+    command = 'picard CollectWgsMetrics '+\
             'INPUT=%s ' %bam_file +\
+            'COVERAGE_CAP=300 ' +\
+            'COUNT_UNPAIRED=true ' +\
+            'MINIMUM_BASE_QUALITY=0 '+\
+            'MINIMUM_MAPPING_QUALITY=0 '+\
             'REFERENCE_SEQUENCE=%s ' %(ref)+\
             'OUTPUT=%s ' %(out_metric) +\
             'INCLUDE_BQ_HISTOGRAM=true'

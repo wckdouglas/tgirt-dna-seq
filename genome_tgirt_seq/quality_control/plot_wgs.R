@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-library(zoo)
 library(stringr)
 library(readr)
 library(cowplot)
@@ -24,6 +23,10 @@ rename_enzyme <- function(x){
     }
 }
 
+make_prep <- function(x){
+    ifelse(grepl('nextera',x),'Nextera XT','TGIRT-seq')
+}
+
 read_wgs_table <- function(filename, datapath){
     samplename <- str_split(filename,'\\.')[[1]][1]
     df <- datapath %>%
@@ -43,21 +46,24 @@ picard_path <- str_c( project_path, '/picard_results')
 figure_path <- str_c( project_path, '/figures')
 figurename <- str_c( figure_path, '/wgs_plot.pdf')
 table_names <- list.files(path = picard_path , pattern = '.wgs.metrics')
+    
 df <- table_names %>%
 	map(read_wgs_table, picard_path) %>%
     reduce(rbind) %>%
     mutate(line_type = 'WGS') %>%
 #    select(-subsampled) %>%
+    dplyr::filter(grepl('nextera|^K12_kh|^K12_kq', samplename)) %>%
+    mutate(prep = make_prep(samplename))%>%
     tbl_df
 
 base_df <- df %>%
     mutate(bases = count * coverage) %>%
-    group_by(samplename) %>%
+    group_by(samplename,prep) %>%
     summarize(bases = sum(bases),
               count = sum(count)) %>%
     ungroup() %>%
     mutate(theoretical = bases/count)  %>%
-    group_by(samplename) %>% 
+    group_by(samplename, prep) %>% 
     do(data_frame(coverage = seq(max(df$coverage)),
                 density = dpois(seq(max(df$coverage)), .$theoretical) ))%>%
     ungroup() %>%
@@ -67,55 +73,78 @@ base_df <- df %>%
 plot_df <- rbind(base_df, df %>%select(-baseq_count, -count)) %>%
     mutate(line_type = factor(line_type, levels = c('WGS','Theoretical (Poisson)'))) %>%
 #    filter(grepl('^K12',samplename)) %>%
-    filter(!grepl('X',samplename)) %>%
     tbl_df
 
+rsqrd_df <- plot_df %>% 
+    spread(line_type, density) %>% 
+    set_names(c('samplename','prep','coverage','wgs','model')) %>% 
+    filter(!is.na(model))  %>%
+    group_by(samplename, prep) %>%
+    summarize(sum_res = sum((wgs- model)^2),
+              sum_var = sum((wgs - mean(wgs))^2),
+              rmsd = sqrt(sum((wgs-model)^2)/length(wgs))
+    ) %>%
+    ungroup() %>%
+    mutate(rsqrd = 1 - sum_res/ sum_var) %>%
+    filter(grepl('nextera|clustered',samplename)) 
+
+rsqrd <- rsqrd_df %>%
+    group_by(prep) %>%
+    summarize(mean_rsqd = signif(mean(rsqrd),3),
+              sd_rsqd = signif(sd(rsqrd),3)) %>%
+    tbl_df
+
+plot_df <- inner_join(plot_df, rsqrd) %>%
+    mutate(prep = str_c(prep, ' (R-sqrd: ',mean_rsqd,'±',sd_rsqd,')'))
     
 wgs_p <- ggplot() +
-	geom_line(data = plot_df, aes(x = coverage, y = density, 
-	                              color = samplename, linetype = line_type), 
-	          size = 1.3) + 
+	geom_line(data = plot_df, aes(x = coverage, y = density * 100, 
+	                   color = prep, size = samplename, linetype=line_type)) + 
 	xlim(1,50) +
-	theme(legend.position = c(0.6, 0.9)) +
-#    scale_color_discrete(guide = F)+
+    scale_color_manual(values = c('light sky blue','salmon'))+
+    scale_size_manual(guide = 'none', values = rep(1.2, length(unique(plot_df$samplename))))+
     scale_linetype_discrete(guide = guide_legend(ncol = 1))+
 	theme(text = element_text(size = 20)) +
 	theme(axis.text = element_text(size = 18)) +
-	labs(x ='Depth of coverage', y = '% of Genome', 
-	     color =' ', linetype = ' ') 
-#ggsave(wgs_p, file = figurename)
-#message('Saved: ', figurename)
+	labs(x ='Level of Coverage', y = '% of Genome', 
+	     color =' ', linetype = ' ') +
+    theme(legend.position = c(0.8,0.5))
 
 
-
-#model_df <- base_df %>% 
-#    select(coverage, density,samplename) %>%
-#    dplyr::rename(poisson=density) %>%
-#    inner_join(df %>% select(density, coverage, samplename)) %>%
-#    filter(!grepl('[86]X',samplename)) %>%
-#    filter(grepl('^K12',samplename)) %>%
-#    group_by(samplename) %>%
-#    summarize(sum_res = sum((density - poisson)^2),
-#              sum_var = sum((density - mean(density))^2),
-#              rmsd = sqrt(sum((density-poisson)^2)/length(density))
-#              ) %>%
-#    ungroup() %>%
-#    mutate(rsqrd = 1 - sum_res/ sum_var) %>%
-#     mutate(enzyme = str_sub(samplename,5,6)) %>%
-#     mutate(enzyme = sapply(enzyme, rename_enzyme))  %>%
-#     group_by(enzyme) %>%
-#     summarize(mean_rsqrd = mean(rsqrd),
-#               min_rsqrd = min(rsqrd),
-#               max_rsqrd = max(rsqrd)) %>%
-#     ungroup()
-# 
-# library(scales)
-# p <- ggplot(data = model_df, aes(x = enzyme, y = mean_rsqrd, fill = enzyme)) +
-#     geom_bar(stat='identity') +
-#     geom_errorbar(aes(ymin = min_rsqrd, ymax = max_rsqrd), width = 0.4) +
+# rsqrd_p <- ggplot(data = rsqrd_df, aes(x = prep, y = rsqrd, 
+#                                        color = prep)) +
+#     geom_boxplot(size=2) +
+#     labs(x = ' ', y=expression(R^{2}),parse=T) +
 #     theme(legend.position = 'none') +
-#     labs(x = ' ', y = 'R-sqaured', title='Model fitting to Possion') +
-#     scale_y_continuous(limits=c(0.8,1),oob = rescale_none)
-# figurename <- str_c(figure_path, '/enzyme_rsqrd_plot.pdf')
-# ggsave(p , file = figurename)
-#     
+#     theme(axis.text.y = element_text(face='bold',size = 20))+
+#     theme(text = element_text(size = 18)) +
+#     theme(axis.text = element_text(size = 18)) +
+#     theme(axis.ticks.y = element_blank()) +
+#     theme(axis.text.x = element_text(size = 18, angle = 60, hjust = 1, vjust =1)) +
+#     coord_flip()
+# 
+# model_df <- plot_df %>% 
+#     spread(line_type, density) %>% 
+#     set_names(c('samplename','prep','coverage','wgs','model')) %>% 
+#     filter(!is.na(model))  %>%
+#     group_by(samplename, prep) %>%
+#     nest() %>%
+#     mutate(lm_model = map(data, ~lm(wgs~model, data = .))) %>%
+#     mutate(anova_test = map(lm_model, anova)) %>%
+#     mutate(summary_stat = map(anova_test, tidy))  %>%
+#     unnest(summary_stat)  %>%
+#     filter(term == 'Residuals') 
+# 
+# residual_p <- ggplot(data = model_df, aes(x = prep, y = sumsq, 
+#                                        color = prep)) +
+#     geom_boxplot(size=2) +
+#     labs(x = ' ', y='Residual Sum of Squares') +
+#     theme(legend.position = 'none') +
+#     theme(axis.text.y = element_text(face='bold',size = 20))+
+#     theme(text = element_text(size = 18)) +
+#     theme(axis.text = element_text(size = 18)) +
+#     theme(axis.ticks.y = element_blank()) +
+#     theme(axis.text.x = element_text(size = 18, angle = 60, hjust = 1, vjust =1)) +
+#     coord_flip()
+
+   

@@ -59,6 +59,7 @@ def main():
         ylim=(low_periodicity, high_periodicity))
     p.set_axis_labels('Periodicity','Periodicity')
     p.set_titles('{col_name}')
+    p.add_legend() 
     p.fig.suptitle('Nucleosome Spacing\n(10kb windows)',
         fontsize=14, fontweight='bold')
     p.fig.subplots_adjust(top=0.75)

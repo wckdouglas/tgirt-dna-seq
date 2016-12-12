@@ -22,8 +22,6 @@ do
 	| bwa mem -t ${CORES} ${HUMAN_INDEX_PATH}/genome.fa - \
 	| samtools view -@ ${CORES} -b \
 	| bedtools intersect -abam - -b ${TARGET_INDEX_PATH}/hist1h3b.bed \
-	| bamToFastq -i - -fq /dev/stdout \
-	| bwa mem -t ${CORES}  ${TARGET_INDEX_PATH}/histone_protein.fa - \
 	| samtools sort -@ ${CORES} -O bam \
 		-T ${NAME_SORT_BAM_PATH}/${SAMPLE_NAME} \
 	> ${BAM_PATH}/${SAMPLE_NAME}.bam 
@@ -33,6 +31,4 @@ do
 done
 
 python filtering.py  4
-##		${INDEX_PATH}/hist1h3b.fa \
-##		${INDEX_PATH}/hist1h3.fa \
-bash ../mismatch/extract_base.sh
+#bash ../mismatch/extract_base.sh

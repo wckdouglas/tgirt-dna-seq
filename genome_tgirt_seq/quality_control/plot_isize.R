@@ -5,6 +5,10 @@ library(dplyr)
 library(stringr)
 library(cowplot)
 
+make_prep <- function(x){
+    ifelse(grepl('nextera',x),'Nextera XT','TGIRT-seq')
+}
+
 bampath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/bamFiles/figures'
 isize_table <- bampath %>%
 	str_c('/insertSize.tsv') %>%
@@ -16,12 +20,17 @@ isize_table <- bampath %>%
 	)) %>%
     ungroup() %>%
     dplyr::filter(!grepl('clustered|sim',samplename)) %>%
-	tbl_df 
+    dplyr::filter(grepl('nextera|^K12_kh|^K12_kq', samplename)) %>%
+    mutate(prep = make_prep(samplename)) %>%
+ 	tbl_df 
 
 
 isize_p <- ggplot(data = isize_table, aes(x = isize, y = counts)) +
-	geom_line(aes(color = samplename), size=1.3) +
+	geom_line(aes(color = prep, group = samplename), size=1.3) +
 	theme(text = element_text(size = 20)) +
 	theme(axis.text = element_text(size = 18)) +
-	labs(x = 'Insert Size', y = 'Percentage of fragments', color = ' ')
+	labs(x = 'Insert Size', y = '% of fragments', color = ' ') +
+    theme(legend.position = 'none') +
+    xlim(0,600)
+    
     

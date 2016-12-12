@@ -7,6 +7,7 @@ BASE_PATH=$PROJECT_PATH/base_tables
 SCRIPT_PATH=${HOME}/tgirt-dna-seq/target-seq/mismatch
 INDEX=$REF/targeted_gene/hist1h3b.fa
 INDEX=$REF/targeted_gene/histone_protein.fa
+INDEX=$REF/GRCh38/genome.fa
 mkdir -p $BASE_PATH
 
 for BAM in $FILTERED_BAM_PATH/*bam
