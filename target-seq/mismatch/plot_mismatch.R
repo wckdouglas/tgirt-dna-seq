@@ -111,7 +111,9 @@ figurename <- str_c(table_dir, '/mismatch_target.pdf')
 
 merge_df <- tables %>%
 	map(read_file) %>%
-	reduce(rbind)   
+	reduce(rbind)   %>%
+    filter(grepl('S[78]', samplename)) %>%
+    tbl_df
 
 base_count <-  merge_df %>% 
     group_by(samplename, ref_base) %>% 
@@ -123,8 +125,8 @@ cleaned_mismatch_df <- merge_df %>%
     filter(!grepl('200[RD]|W[RD]',samplename)) %>%
 	tbl_df
 
-mismatch_p <- plot_mismatch(clean_mismatch_df , base_count)
-pos_p <- plot_pos_mismatch(clean_mismatch_df)
+mismatch_p <- plot_mismatch(cleaned_mismatch_df , base_count)
+pos_p <- plot_pos_mismatch(cleaned_mismatch_df)
     
 #p <- ggdraw() +
 #    draw_plot(cov_p, 0, 0.666, 1, 0.333) +

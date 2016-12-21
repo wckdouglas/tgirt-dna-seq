@@ -61,7 +61,7 @@ p <- ggdraw() +
     draw_plot(nucleo_p + 
                 theme(strip.background = element_blank()) + 
                 theme(strip.text.x = element_blank()), x= 0.02,y=0.0, width = 0.98, height=0.21)  +
-        draw_plot_label(c('(a)','(b)','(c)'),x = c(0,0,0), y =c(1,0.77,0.30), size=35,family = 'Arial')
+        draw_plot_label(c('(a)','(b)','(c)'),x = c(0,0,0), y =c(1,0.77,0.24), size=35,family = 'Arial')
 
 ggsave(p, filename = figurename,height = 24,width=14)
 message('Plotted:', figurename)

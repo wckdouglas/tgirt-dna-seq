@@ -6,6 +6,7 @@ BAM_PATH=${PROJECT_PATH}/bamFiles
 MERGE_PATH=${PROJECT_PATH}/merged_fastq
 TARGET_INDEX_PATH=${REF}/targeted_gene
 HUMAN_INDEX_PATH=${REF}/GRCh38
+TRANSCRIPTOME_INDEX_PATH=${REF}/human_transcriptome
 ADAPTOR=adaptors.fa
 SUFFIX=_R1_001.fastq.gz
 CORES=12
@@ -19,9 +20,11 @@ do
 
 	flash --to-stdout ${READ1} ${READ2} --threads ${CORES} \
 	| tee ${MERGE_PATH}/${SAMPLE_NAME}.fq \
-	| bwa mem -t ${CORES} ${HUMAN_INDEX_PATH}/genome.fa - \
+	| bwa mem -t ${CORES} ${TRANSCRIPTOME_INDEX_PATH}/transcriptome.fa - \
 	| samtools view -@ ${CORES} -b \
-	| bedtools intersect -abam - -b ${TARGET_INDEX_PATH}/hist1h3b.bed \
+	| bedtools intersect -abam - -b ${TARGET_INDEX_PATH}/hist1h3.bed  \
+	| bamToFastq -i /dev/stdin -fq /dev/stdout \
+	| bwa mem -t ${CORES} ${TARGET_INDEX_PATH}/hist1h3.fa - \
 	| samtools sort -@ ${CORES} -O bam \
 		-T ${NAME_SORT_BAM_PATH}/${SAMPLE_NAME} \
 	> ${BAM_PATH}/${SAMPLE_NAME}.bam 
@@ -31,4 +34,4 @@ do
 done
 
 python filtering.py  4
-#bash ../mismatch/extract_base.sh
+bash ../mismatch/extract_base.sh

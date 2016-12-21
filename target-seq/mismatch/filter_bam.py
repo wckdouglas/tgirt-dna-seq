@@ -7,15 +7,16 @@ import sys
 
 def validate_alignment(aln):
     softclipped = 'S' in aln.cigarstring
-    mismatch_looks_good = aln.get_tag('NM') < 4
+    indel = 'I' in aln.cigarstring or 'D' in aln.cigarstring
+    mismatch_looks_good = aln.get_tag('NM') < 3
     on_hist1h3b = aln.reference_name == 'ENST00000621411'
-    return  not softclipped and mismatch_looks_good
+    return  not softclipped and mismatch_looks_good #and not indel
 
 
 
 def filter_bam(infile, outfile):
     in_bam = pysam.Samfile(infile,'rb')
-    out_bam = pysam.Samfile(outfile,'w', template = in_bam)
+    out_bam = pysam.Samfile(outfile,'wb', template = in_bam)
 
     count = 0
     for aln in in_bam:

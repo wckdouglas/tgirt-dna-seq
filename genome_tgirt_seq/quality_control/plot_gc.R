@@ -20,7 +20,8 @@ read_gc_table <- function(filename, datapath){
 
 make_prep <- function(x){
     ifelse(grepl('nextera',x),'Nextera XT',
-           ifelse(grepl('pb',x),'Pacbio','TGIRT-seq'))
+           ifelse(grepl('pb',x),'Pacbio',
+                  ifelse(grepl('NEB',x),'TGIRT-seq Fragmentase','TGIRT-seq Covaris')))
 }
 
 
@@ -29,6 +30,7 @@ picard_path <- str_c( project_path, '/picard_results')
 figure_path  <- str_c(project_path, '/figures')
 figurename <- str_c(figure_path, '/gc_plot.pdf')
 table_names <- list.files(path = picard_path, pattern = 'gc_metrics')
+table_names<-table_names[!grepl('pb',table_names)]
 df <- table_names %>%
 	map(read_gc_table, picard_path) %>%
 	reduce(rbind) %>%
@@ -47,7 +49,7 @@ windows_df <- df %>%
 
 plot_gc <-function(df){
     p <- ggplot(data = df, aes(x = GC, y = NORMALIZED_COVERAGE)) +
-        geom_line(size = 1.3, aes(color = prep, group = samplename)) +
+        geom_line(size = 1.3, aes(color = prep, group = samplename), alpha=0.7) +
         geom_hline(yintercept = 1, linetype = 2, alpha = 0.9) +
         geom_bar(data = windows_df, aes(x = GC, y = rol_window), 
              stat='identity', fill='springgreen1', alpha = 1)  +
@@ -60,10 +62,11 @@ plot_gc <-function(df){
 }
 
 gc_p <- df %>% 
-    filter(grepl('nextera|^K12_kh|^K12_kq', samplename)) %>%
-    filter(grepl('nextera|clustered',samplename)) %>%
-    plot_gc() +
-        theme(legend.position =  'None') 
+#    filter(grepl('nextera|^K12_kh|^K12_kq', samplename)) %>%
+#    filter(grepl('nextera|clustered',samplename)) %>%
+    filter(grepl('nextera|_[EF]_|K12_kh',samplename)) %>%
+    plot_gc()# +
+#        theme(legend.position =  'None') 
 
 rename_sim <- function(x){
     ifelse(grepl('no_bias',x), 'Simulation: no bias',

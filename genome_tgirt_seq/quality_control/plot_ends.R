@@ -30,12 +30,12 @@ df <- files %>%
     mutate(prep = make_prep(filename)) %>% 
     mutate(read_end = ifelse(read_end == "5'", 'Read 1', 'Read 2')) %>%
     mutate(read_end = factor(read_end, levels=c("Read 1","Read 2"))) %>%
-    mutate(actual_positions = ifelse(read_end == "Read 2", positions-20, positions))
+    mutate(actual_positions = ifelse(read_end == "Read 2", positions-20, positions)) %>%
+    mutate(bit = -log2(base_fraction))
 
-p <- ggplot(data = df, aes(x = actual_positions, color = prep, linetype=filename, 
+p <- ggplot(data = df, aes(x = actual_positions, color = prep, group=filename, 
                            y = base_fraction)) +
     geom_line(size = 1.3, alpha=0.6) +
-    scale_linetype_manual(guide=F,values=rep(1,length(unique(df$filename))))+
     facet_grid(base~read_end, scale ='free_x') +
     labs(x = 'Relative position to fragment ends',y='Fraction of base',color=' ') +
     panel_border() +
@@ -50,3 +50,25 @@ p <- ggplot(data = df, aes(x = actual_positions, color = prep, linetype=filename
 figurename <- str_c(datapath , '/end_bias_plot.pdf')
 ggsave(p , file = figurename, height = 8, width = 8)
 message('Plotted: ', figurename)
+
+df <- df %>%
+    group_by(actual_positions, read_end, filename, prep) %>%
+    summarize(entropy = sum(base_fraction * bit)) %>%
+    ungroup()
+
+en_p <- ggplot(data = df, aes(x = actual_positions, y = entropy, 
+                      group = filename, color = prep)) + 
+    geom_line() +
+    facet_grid(.~read_end, scale= 'free_x') +
+    geom_line(size = 1, alpha=0.6) +
+    labs(x = 'Relative position to fragment ends',y='Entropy (Information)',color=' ') +
+    panel_border() +
+    scale_color_manual(values = c('light sky blue','salmon'))+
+    theme(strip.text.x = element_text(size = 20, face='bold')) +
+    theme(strip.text.y = element_text(size = 20, face='bold', angle = 0)) +
+    theme(axis.title = element_text(size = 20, face='bold')) +
+    theme(axis.text = element_text(size = 18, face='bold'))  +
+    theme(legend.position = c(0.65,0.45))+
+    theme(legend.text = element_text(size = 18, face='bold'))+
+    theme(legend.key.size=unit(8,'mm'))+
+    ylim(0,2)
