@@ -12,6 +12,11 @@ import os
 
 
 def fft(array):
+    '''
+    Feed in a WPS array and return:
+        1. range of periodicity
+        2. intensity
+    '''
     sample_size = len(array)
     half_size = sample_size/2
     intensity = fftpack.fft(array)
@@ -22,6 +27,11 @@ def fft(array):
 
 
 def highest_periodicity(bw, chromosome, input_arg):
+    '''
+    From a bigWig value array
+    using start and end to extract desired region,
+    run FFT to get frequency domain and corersponding intensity
+    '''
     bin_count, (start, end) = input_arg
     wps_array = bw.values(chromosome, start, end)
 
@@ -83,10 +93,13 @@ def analyze_sample(bw_path, periodicity_path, samplename):
     return 0
 
 def main():
+    '''
+    This program used chromosome splitted bigWig files to calculate nucleosome spacing.
+    *** Long fragments WPS
+    '''
     project_path =  '/stor/work/Lambowitz/cdw2854/plasmaDNA/genomeWPS'
-    bw_path = project_path + '/bigwig_files'
+    bw_path = project_path  + '/bigWig_files'
     periodicity_path = project_path + '/periodicity_tables'
-    print periodicity_path
     if not os.path.isdir(periodicity_path):
         os.mkdir(periodicity_path)
     bw_files = glob.glob(bw_path + '/*.Long.bigWig')

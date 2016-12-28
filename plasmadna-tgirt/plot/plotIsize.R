@@ -10,7 +10,7 @@ library(extrafont)
 loadfonts()
 
 project_path <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/'
-insert_data_path <- stri_c(project_path,'/bamFiles')
+insert_data_path <- stri_c(project_path,'/insertSize')
 
 rename <- function(x){
     y = ifelse(grepl('^P',x),'TGIRT-seq','ssDNA-seq')
@@ -20,8 +20,8 @@ rename <- function(x){
 insert_df <- insert_data_path %>%
     stri_c('isizeTable.tsv',sep='/') %>%
     read_tsv()%>%
-    filter(grepl('SRR2130052|P1203-SQ',samplename))  %>%
-#    filter(chrom == 'Autosomal and Sex Chromosome') %>%
+    filter(grepl('SRR2130052|P1',samplename))  %>%
+    filter(!grepl('cluster',samplename))  %>%
     mutate(samplename = rename(samplename))  %>%
     group_by(isize,samplename) %>%
     summarize(count = sum(count)) %>%

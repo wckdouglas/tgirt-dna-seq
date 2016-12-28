@@ -33,5 +33,5 @@ do
 	samtools index ${BAM_PATH}/${SAMPLE_NAME}.bam
 done
 
-python filtering.py  4
+python filtering.py  3
 bash ../mismatch/extract_base.sh
