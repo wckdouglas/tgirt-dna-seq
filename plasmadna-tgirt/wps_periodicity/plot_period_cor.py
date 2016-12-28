@@ -9,9 +9,9 @@ datapath = '/stor/work/Lambowitz/cdw2854/plasmaDNA/genomeWPS/periodicity_tables'
 def rename_sample(name):
     if 'SRR' in name:
         return 'ssDNA-seq'
-    elif 'SQ1' in name:
+    elif 'P1022' in name:
         return 'TGIRT-seq 1'
-    elif 'SQ2' in name:
+    elif 'P1203' in name:
         return 'TGIRT-seq 2'
     else:
         return 'TGIRT-seq merge'
