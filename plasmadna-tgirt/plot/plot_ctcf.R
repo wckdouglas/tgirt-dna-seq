@@ -21,26 +21,25 @@ wps_data_path <- stri_c(project_path,'/wpsCTCF')
 figure_path <- stri_c(project_path,'/figures')
 figurename <- stri_c(figure_path,'/wps_distribution_merged.pdf')
 
-label_rename <- function(x){
-    y = ifelse(grepl('^P|^TGIRT',x),'TGIRT-seq','ssDNA-seq')
-    return(y)
-}
 
 ctcf_df <- wps_data_path %>%
     stri_c('CTCFwps.tsv',sep='/') %>%
     read_tsv()   %>%
-    filter(samplename %in% c('SRR2130052','PD_merged'))  %>%
+    filter(samplename %in% c('SRR2130052','P1022_merge'))  %>%
     group_by(samplename, type) %>%
     do(data_frame(
         scale_wps = c(scale(.$wps)),
-        position = .$position
+        position = .$position,
+        wps = .$wps
     )) %>%
     ungroup() %>%
-    mutate(samplename = label_rename(samplename))  %>%
+    mutate(prep = case_when(grepl('^P|^TGIRT',.$samplename) ~ 'TGIRT-seq',
+                                grepl('SRR',.$samplename) ~ 'ssDNA-seq'))  %>%
     tbl_df
 
 wps_p <- ggplot(ctcf_df) +
-    geom_line(aes(x=position, y = scale_wps, color=samplename), size=1.5) +
+    geom_line(aes(x=position, y = scale_wps, color=prep), 
+              size=1.5, alpha = 0.6) +
     facet_grid(type~., scale='free_y') +
     labs(y= ' ', x ='Position relative to CTCF binding sites', color = ' ')+
     theme(text = element_text(size=35, face='bold', family = 'Arial'))+

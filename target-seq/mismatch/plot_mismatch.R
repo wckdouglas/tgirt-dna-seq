@@ -27,11 +27,11 @@ read_file <- function(tablename){
 transition <- c('A -> G','G -> A','C -> T','T -> C')
 
 assignTemplate <- function(x){
-    ifelse(grepl('^H|^200R|^WR',x),'RNA','DNA')
+    ifelse(grepl('R_|_R_',x),'RNA','DNA')
 }
 
-plot_mismatch <- function(clean_mismatch_df, base_count){
-    mismatch_df <- clean_mismatch_df %>%
+plot_mismatch <- function(cleaned_mismatch_df, base_count){
+    mismatch_df <- cleaned_mismatch_df %>%
         dplyr::rename(ref = ref_base) %>%
         dplyr::rename(read = base) %>%
         group_by(samplename, read, ref) %>%
@@ -41,21 +41,28 @@ plot_mismatch <- function(clean_mismatch_df, base_count){
         inner_join(base_count) %>%
         mutate(base_fraction = count / base_total) %>%
         filter(ref!=read) %>%
-        mutate(template = assignTemplate(samplename) ) %>%
-        group_by(template, mutations,ref,read) %>%
-        do(data_frame(
-            average_mut = mean(.$base_fraction),
-            minimum_mut = min(.$base_fraction),
-            maximum_mut = max(.$base_fraction)
-        )) %>%
+        group_by(samplename, mutations,ref,read) %>%
+        summarize(base_fraction = mean(base_fraction)) %>%
+#        do(data_frame(
+#            average_mut = mean(.$base_fraction),
+#            minimum_mut = min(.$base_fraction),
+#            maximum_mut = max(.$base_fraction)
+#        )) %>%
         ungroup() %>%
+        mutate(template = assignTemplate(samplename)) %>%
         mutate(label_mutation = ifelse(mutations %in% transition, 'Transition','Transversion')) %>%
+        mutate(condition = case_when(grepl('^SS',.$samplename) ~ 'SuperScript II',
+                                     grepl('^Pl|^HR|^420',.$samplename) ~ '420mM',
+                                     grepl('^200',.$samplename) ~ '200mM',
+                                     grepl('^W[DR]',.$samplename) ~ '75mM KCl')) %>%
         tbl_df
 
-    mismatch_p <- ggplot(data = mismatch_df, aes(x = mutations, y = average_mut, fill = label_mutation)) +
+#    mismatch_p <- ggplot(data = mismatch_df, aes(x = mutations, y = average_mut, fill = label_mutation)) +
+    mismatch_p <- ggplot(data = mismatch_df, aes(x = mutations, y = base_fraction, fill = label_mutation)) +
         geom_bar(stat='identity') +
-        geom_errorbar(aes(ymin = minimum_mut, ymax = maximum_mut), width=0.25) +
-        facet_grid(template~ref, scale='free') +
+#        geom_errorbar(aes(ymin = minimum_mut, ymax = maximum_mut), width=0.25) +
+#        facet_grid(template~ref, scale='free') +
+        facet_grid(template~condition, scale='free') +
         labs(x = ' ', y = 'Fractions', fill = ' ') +
         theme(axis.text.x = element_text(size = 20, angle = 90, hjust = 1, vjust =0.5)) +
         theme(text = element_text(size = 20, face='bold')) +
@@ -112,7 +119,7 @@ figurename <- str_c(table_dir, '/mismatch_target.pdf')
 merge_df <- tables %>%
 	map(read_file) %>%
 	reduce(rbind)   %>%
-    filter(grepl('S[78]', samplename)) %>%
+#    filter(grepl('_u_',samplename)) %>%
     tbl_df
 
 base_count <-  merge_df %>% 
@@ -122,7 +129,6 @@ base_count <-  merge_df %>%
 cleaned_mismatch_df <- merge_df %>%
     select(ref_base, A,C,T,G, samplename, start) %>%
 	gather(base, count, -samplename, -ref_base, -start)  %>%
-    filter(!grepl('200[RD]|W[RD]',samplename)) %>%
 	tbl_df
 
 mismatch_p <- plot_mismatch(cleaned_mismatch_df , base_count)
