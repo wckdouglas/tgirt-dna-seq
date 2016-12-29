@@ -17,6 +17,7 @@ import pyBigWig as pbw
 from sys import stderr, argv
 from multiprocessing import Pool
 from scipy.signal import savgol_filter, medfilt
+import pandas as pd
 
 def printMessage(message, sample):
     programname = os.path.basename(argv[0]).split('.')[0]
@@ -25,11 +26,14 @@ def printMessage(message, sample):
 
 def getOpt():
     parser = argparse.ArgumentParser(description='Extract coverage of TSS')
-    parser.add_argument('-i','--inFile',help='input bed file (merged paired-end fragments to single fragment bed file)',required=True)
+    parser.add_argument('-i','--inFile',
+            help='input bed file (merged paired-end fragments to single fragment bed file)',
+            required=True)
     parser.add_argument('-o','--outprefix',help='output prefix', default='out')
     parser.add_argument('-g','--genome',help='genome file (.fa.fai)',required=True)
     parser.add_argument('-c','--chromosome',help='chromosome name',required=True)
-    parser.add_argument('-t','--TSSwindow', help='Window size for calculating WPS (default: 2000)', default = 2000, type=int)
+    parser.add_argument('-t','--TSSwindow', help='Window size for calculating WPS (default: 2000)', 
+            default = 2000, type=int)
     args = parser.parse_args()
     inFile = args.inFile
     outprefix = args.outprefix
@@ -126,7 +130,7 @@ def extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
                     tssWindow, wpsWindow, halfWPSwindow, upperBound, lowerBound)
         chromArray[start:end] += wpsTSS
     chromArray = chromArray - pd.Series(chromArray).rolling(window = 1000).median()
-    chromArray = savgol_filter(chromArray, window_length = 21, polyorder=2)
+    chromArray = savgol_filter(np.nan_to_num(chromArray), window_length = 21, polyorder=2)
     printMessage('Finished calculating WPS for chromosome %s' %(chrom), samplename)
     return chromArray
 
@@ -192,7 +196,8 @@ def main(inFile, outprefix, genome, tssWindow, chromosome):
     tempBam = makeBam(inFile, outprefix, genome, samplename)
     args = [(tempBam, outprefix, genome, wpsWindow, tssWindow, upperBound, lowerBound, lenType, samplename, chromosome) \
             for upperBound, lowerBound, lenType, wpsWindow in zip([80, 180],[35, 120],['Short (35-80bp)','Long (120-180bp)'],[16,120])]
-    Pool(2).map(runFile, args)
+    #Pool(2).map(runFile, args)
+    map(runFile, args)
     return 0
 
 if __name__ == '__main__':
