@@ -3,7 +3,7 @@
 PROJECTPATH=/scratch/02727/cdw2854/plasmaDNA
 BED_PATH=$PROJECTPATH/bedFiles/merged/splittedBed
 RESULT_PATH=$PROJECTPATH/genomeWPS
-REF_PATH=$REF/GRCh38/hg38_rDNA
+REF_PATH=$SCRATCH/GRCh38/hg38_rDNA
 GENOME=$REF_PATH/genome_rDNA.fa.fai
 PROGRAM=genomeWPS.py
 #PROGRAM=strandedGenomeWPS.py

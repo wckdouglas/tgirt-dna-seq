@@ -18,7 +18,7 @@ def getOpt():
 # running in shell
 def runProcess(command, samplename):
     sys.stderr.write('[%s] %s\n' %(samplename, command))
-    result = subprocess.call('time ' + command, shell=True)
+    #result = subprocess.call('time ' + command, shell=True)
     return 0
 
 #Trimming
@@ -41,7 +41,7 @@ def mappingProcess(samplename, trim_path, index, threads, bam_path):
     file1 = trim_path + '/' + samplename + '_1P.fq.gz'
     file2 = file1.replace('1P','2P')
     bam_file = '%s/%s.bam' %(bam_path, samplename)
-    os.system('bwa shm %s' %(index))
+    runProcess('bwa shm %s' %(index), samplename)
     command = 'bwa mem -t %i ' %(threads)+\
 	    '%s %s %s ' %(index, file1, file2 ) +\
             '| samtools view -@ %i -b ' %(threads) +\
@@ -55,7 +55,9 @@ def makeBed(bam_file, samplename, bed_path):
     command = 'bamtools filter -script flag_filter.json -in %s' %(bam_file)+\
 	'| samtools fixmate -r - -' + \
         '| bedtools bamtobed -mate1 -bedpe '+\
-        '| /home1/02727/cdw2854/miniconda2/bin/python bedpetobed.py - '+\
+        "| awk '$1!=\".\" && $NF!=$(NF-1) && $1==$4' "+\
+        "| awk '{start=$2;end=$3} {if($5<start) start=$5} {if($6>end) end=$6} "+\
+                "{print $1,start,end,$7,end-start,$9}' OFS='\\t'"+\
         '> %s' %(bed_file)
     runProcess(command,samplename)
     return bed_file
