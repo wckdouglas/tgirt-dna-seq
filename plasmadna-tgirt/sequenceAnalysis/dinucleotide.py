@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import matplotlib
-matplotlib.use('Agg')
+from matplotlib import use as mpl_use
+mpl_use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
@@ -15,6 +15,8 @@ import seaborn as sns
 from multiprocessing import Pool
 from scipy.signal import medfilt
 from itertools import product
+from functools import partial
+import math
 sns.set_style('white')
 
 def allDinucleotides():
@@ -24,42 +26,40 @@ def allDinucleotides():
 
 def makeDinucleotideMatrix(dinucleotides, window):
     length = window * 2
-    dinucleotide_dict = {di : {i: 0 for i in range(length)} for di in dinucleotides} 
+    dinucleotide_dict = {di : {i: 0 for i in range(length)} for di in dinucleotides}
     return dinucleotide_dict
 
 def extractDinucleotide(dinucleotide_count_dict, sequence):
-    first_nucleotide = sequence[:-1] 
-    second_nucleotide = sequence[1:] 
+    first_nucleotide = sequence[:-1]
+    second_nucleotide = sequence[1:]
     dinucleotides = map(lambda x,y: x+y, first_nucleotide, second_nucleotide)
     for i,di in enumerate(dinucleotides):
         dinucleotide_count_dict[di][i] += 1
     return dinucleotide_count_dict
 
 def makeDF(nucleotideDict, lenType, window):
-    df = pd.DataFrame.from_dict(nucleotideDict) \
+    return pd.DataFrame.from_dict(nucleotideDict) \
         .assign(rowsum = lambda d: d.sum(axis=1))\
         .assign(position = lambda d: d.index - window) \
         .pipe(pd.melt, id_vars=['position','rowsum'], var_name='dinucleotide', value_name = 'count')\
         .assign(fraction = lambda d: np.true_divide(d['count'],d['rowsum'])) \
         .assign(lenType = lenType)
-    return df
 
 def fragmentCenter(fragment,window):
     center = (long(fragment.end) + long(fragment.start)) / 2
     center_start = center - window
     center_end = center + window
-    insert_size = fragment.score
     return Interval(chrom = fragment.chrom,
-            start = center_start, 
+            start = center_start,
             end = center_end,
-            score = insert_size,
+            score = fragment.score,
             strand = fragment.strand)
 
 def parseBed(bed_file, ref_fasta, window, regular_chrom):
     dinucleotides_header = allDinucleotides()
     short_dinucleotides_count = makeDinucleotideMatrix(dinucleotides_header, window)
     long_dinucleotides_count = makeDinucleotideMatrix(dinucleotides_header, window)
-    large_fragments = [165,170]
+    large_fragments = [167, 167]
     small_fragments = [35,80]
     long_count, short_count = 0, 0
     for fragment in BedTool(bed_file)\
@@ -82,25 +82,32 @@ def parseBed(bed_file, ref_fasta, window, regular_chrom):
     df = pd.concat(dfs)
     return df
 
+AT = list(map(lambda x: ''.join(x), product(['A','T'],repeat=2)))
+CG = list(map(lambda x: ''.join(x), product(['G','C'],repeat=2)))
+AT_label = '|'.join(AT)
+CG_label = '|'.join(CG)
 def renameDinucleotide(di):
     ''' A function to rename dinucleotides '''
-    AT = list(map(lambda x: ''.join(x), product(['A','T'],repeat=2)))
-    CG = list(map(lambda x: ''.join(x), product(['G','C'],repeat=2)))
     if di in AT:
-        new = 'AT|TA|TT|AA'
+        label = AT_label
     elif di in CG:
-        new = 'CG|GC|CC|GG'
+        label = CG_label
     else:
         new = 'Nope'
-    return new
+    return label
 
 def plotting(df, figurename):
     #start plotting
     df = df[df['lenType'].str.contains('long')]
+    number_of_wrap = len(set(df['samplename']))
     with sns.plotting_context('paper', font_scale=2.5, rc={"lines.linewidth":2}):
-        p = sns.FacetGrid(data = df, hue = 'dinucleotide_type',
-                col = 'samplename', size = 4, aspect = 1.6, col_wrap=3) 
-        p.map(plt.plot, 'position', 'deviation')
+        p = sns.FacetGrid(data = df,
+                hue = 'dinucleotide_type',
+                col = 'samplename',
+                size = 4,
+                aspect = 1.6,
+                col_wrap = int(math.sqrt(number_of_wrap)))
+        p.map(plt.plot, 'position', 'smoothed_signal')
         p.set_titles('{col_name}', fontweight='bold')
         p.set_ylabels('log2(Observer/Expected)')
         p.set_xlabels('Postion relative to middle of transcripts')
@@ -110,11 +117,10 @@ def plotting(df, figurename):
     return 0
 
 def medianFilter(dt):
-    dt['deviation'] = dt['fraction'] / medfilt(dt['fraction'],201)
+    dt['smoothed_signal'] = medfilt(dt['fraction'],201)
     return dt
 
-def runFile(args):
-    bed_file, ref_fasta, window, outputpath = args
+def analyze_bam(ref_fasta, window_size, outputpath, bed_file):
     samplename = os.path.basename(bed_file).split('.')[0]
     outputPrefix = outputpath + '/' + samplename
     figurename = outputPrefix + '.pdf'
@@ -122,7 +128,7 @@ def runFile(args):
     regular_chrom = map(str, np.arange(1,23))
     regular_chrom.extend(['X','Y'])
     print 'Start analyzing %s ' %samplename
-    df = parseBed(bed_file, ref_fasta, window, regular_chrom)\
+    df = parseBed(bed_file, ref_fasta, window_size, regular_chrom)\
         .assign(dinucleotide_type = lambda d: map(renameDinucleotide, d['dinucleotide'])) \
         .pipe(lambda d: d[d['dinucleotide_type'] != 'Nope'])\
         .groupby(['dinucleotide_type','position','lenType'])\
@@ -147,18 +153,19 @@ def main():
     projectpath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     referencepath = '/stor/work/Lambowitz/ref/GRCh38/hg38_rDNA'
     reference = referencepath + '/genome_rDNA.fa'
-    bedFilePath = projectpath + '/rmdupBedFiles'
+    bedFilePath = projectpath + '/bedFiles'
     outputpath = projectpath + '/nucleotidesAnaylsis/dinucleotides'
     makedir(outputpath)
     set_tempdir(outputpath)
-    bedFiles = glob.glob(bedFilePath + '/*bed')
+    bedFiles = glob.glob(bedFilePath + '/*.bed')
     outputprefix = outputpath + '/dinucleotides'
     tablename = outputprefix + '.tsv'
     figurename = outputprefix + '.pdf'
-    window = 400
+    window_size = 400
+    analyze_bam_func = partial(analyze_bam, reference, window_size, outputpath)
     if not os.path.isfile(tablename):
         pool = Pool(24)
-        dfs = pool.map(runFile,[(bed_file, reference, window, outputpath) for bed_file in bedFiles])
+        dfs = pool.map(analyze_bam_func, bedFiles)
         pool.close()
         pool.join()
         df = pd.concat(dfs)

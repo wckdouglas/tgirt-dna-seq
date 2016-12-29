@@ -10,8 +10,8 @@ datapath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/figures'
 df <- datapath %>%
     str_c('peakDistance.tsv',sep='/') %>%
     read_tsv()  %>%
-    filter(grepl('PD-m|52|NT|RNase',samplename)) %>%
-    mutate(prep = ifelse(grepl('SRR',samplename),'ssDNA-seq (ref 1)','TGIRT-seq')) %>%
+    filter(grepl('^P1|^SRR',samplename)) %>%
+    mutate(prep = ifelse(grepl('SRR',samplename),'ssDNA-seq','TGIRT-seq')) %>%
     filter(distance < 500) %>%
     group_by(prep,distance) %>% 
     summarize(count = n()) %>% 

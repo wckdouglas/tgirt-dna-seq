@@ -27,34 +27,33 @@ read_file <- function(tablename){
 transition <- c('A -> G','G -> A','C -> T','T -> C')
 
 assignTemplate <- function(x){
-    ifelse(grepl('R_|_R_',x),'RNA','DNA')
+    ifelse(grepl('[0-9]+R|[WH]R_|_R_',x),'RNA','DNA')
 }
 
 plot_mismatch <- function(cleaned_mismatch_df, base_count){
     mismatch_df <- cleaned_mismatch_df %>%
-        dplyr::rename(ref = ref_base) %>%
         dplyr::rename(read = base) %>%
-        group_by(samplename, read, ref) %>%
+        group_by(samplename, read, ref_base) %>%
         summarize(count = sum(count)) %>%
         ungroup() %>% 
-        mutate(mutations = str_c(ref, ' -> ', read)) %>%
-        inner_join(base_count) %>%
+        mutate(mutations = str_c(ref_base, ' -> ', read)) %>%
+        inner_join(base_count, by = c('ref_base', 'samplename')) %>%
         mutate(base_fraction = count / base_total) %>%
-        filter(ref!=read) %>%
-        group_by(samplename, mutations,ref,read) %>%
-        summarize(base_fraction = mean(base_fraction)) %>%
+        filter(ref_base!=read) %>%
 #        do(data_frame(
 #            average_mut = mean(.$base_fraction),
 #            minimum_mut = min(.$base_fraction),
 #            maximum_mut = max(.$base_fraction)
 #        )) %>%
-        ungroup() %>%
         mutate(template = assignTemplate(samplename)) %>%
         mutate(label_mutation = ifelse(mutations %in% transition, 'Transition','Transversion')) %>%
         mutate(condition = case_when(grepl('^SS',.$samplename) ~ 'SuperScript II',
                                      grepl('^Pl|^HR|^420',.$samplename) ~ '420mM',
                                      grepl('^200',.$samplename) ~ '200mM',
                                      grepl('^W[DR]',.$samplename) ~ '75mM KCl')) %>%
+        group_by(template, condition, label_mutation, mutations,ref_base,read) %>%
+        summarize(base_fraction = mean(base_fraction)) %>%
+        ungroup() %>%
         tbl_df
 
 #    mismatch_p <- ggplot(data = mismatch_df, aes(x = mutations, y = average_mut, fill = label_mutation)) +
@@ -113,13 +112,14 @@ plot_pos_mismatch <- function(clean_mismatch_df){
 }
 
 table_dir <- '/stor/work/Lambowitz/cdw2854/target-seq/base_tables'
-tables <- list.files(path = table_dir, pattern = '.tsv')
+tables <- list.files(path = table_dir, pattern = '.4.tsv')
 figurename <- str_c(table_dir, '/mismatch_target.pdf')
 
 merge_df <- tables %>%
 	map(read_file) %>%
 	reduce(rbind)   %>%
-#    filter(grepl('_u_',samplename)) %>%
+    filter(grepl('_u_',samplename)) %>%
+    filter(!grepl('200',samplename)) %>%
     tbl_df
 
 base_count <-  merge_df %>% 

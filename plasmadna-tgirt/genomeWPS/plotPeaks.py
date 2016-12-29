@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import matplotlib
-matplotlib.use('Agg')
+from matplotlib import use as mpl_use
+mpl_use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -49,7 +49,7 @@ def plotDistance(df, figurename):
 
 def main():
     projectPath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
-    datapath = projectPath + '/genomeWPS'
+    datapath = projectPath + '/genomeWPS/bed_files'
     resultpath = projectPath + '/figures'
     figurename = resultpath + '/peakDistance.pdf'
     tablename = resultpath + '/peakDistance.tsv'
@@ -57,8 +57,7 @@ def main():
         os.mkdir(resultpath)
     bedFiles = np.array(glob.glob(datapath + '/*.Long.bed'),dtype='string')
     chromosomes = np.array(map(lambda x: x.split('.')[-3], bedFiles),dtype='string')
-    bedFiles = bedFiles[(np.in1d(chromosomes,np.arange(23)))]
-    bedFiles = filter(lambda x: re.search('SRR|NT|PD|RNa',x), bedFiles )
+    bedFiles = bedFiles[(np.in1d(chromosomes,np.array(np.arange(23),dtype='string')))]
     p = Pool(12)
     dfs = map(readFile, bedFiles)
     p.close()
