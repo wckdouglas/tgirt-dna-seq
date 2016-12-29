@@ -1,1 +1,0 @@
-/home1/02727/cdw2854/miniconda2/bin/python DNAmapping.py --fq1=/scratch/02727/cdw2854/plasmaDNA/splittedFastq/01-P1022_1_S3_clustered_R1_001.fastq.gz --outdir=/scratch/02727/cdw2854/plasmaDNA --index=/scratch/02727/cdw2854/GRCh38/hg38_rDNA/genome_rDNA --threads=3 --adaptor=adaptors.fa

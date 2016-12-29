@@ -2,7 +2,6 @@
 
 from glob import glob 
 import re
-import pandas as pd
 import numpy as np
 import os
 import argparse
@@ -27,19 +26,18 @@ def make_dir(directory):
 def main():
     args = getopt()
     path = args.path
-    outpath = path + '/merged'
+    outpath = path + '/merged' if not args.rmdup else path + '/merged_rmdup'
     file_type = args.suffix
     make_dir(outpath)
 
 
     map_files = glob(path + '/*' + file_type)
-    df = pd.DataFrame({'filename': map_files}) \
-        .assign(group_name = lambda d: get_group(d['filename'])) 
+    group_name = get_group(map_files)
 
-    group_file = np.unique(df['group_name'])
+    group_file = np.unique(group_name)
 
     for group in group_file:
-        files = df[df['group_name'] == group]['filename'].values
+        files = map_files[group_name==group]
         joined_files = ' '.join(files)
         if file_type == 'bam':
             command = 'samtools cat %s > %s/%s ' %(joined_files, outpath, group)
