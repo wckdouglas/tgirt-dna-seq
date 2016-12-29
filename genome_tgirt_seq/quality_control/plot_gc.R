@@ -18,11 +18,6 @@ read_gc_table <- function(filename, datapath){
     return(df)
 }
 
-make_prep <- function(x){
-    ifelse(grepl('nextera',x),'Nextera XT',
-           ifelse(grepl('pb',x),'Pacbio',
-                  ifelse(grepl('NEB',x),'TGIRT-seq Fragmentase','TGIRT-seq Covaris')))
-}
 
 
 project_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/'
@@ -30,15 +25,15 @@ picard_path <- str_c( project_path, '/picard_results')
 figure_path  <- str_c(project_path, '/figures')
 figurename <- str_c(figure_path, '/gc_plot.pdf')
 table_names <- list.files(path = picard_path, pattern = 'gc_metrics')
-table_names<-table_names[!grepl('pb',table_names)]
 df <- table_names %>%
 	map(read_gc_table, picard_path) %>%
 	reduce(rbind) %>%
-#    dplyr::filter(grepl('nextera|^K12_kh|^K12_kq', samplename)) %>%
-    mutate(prep = make_prep(samplename)) %>%
-#    filter(!grepl('clustered|sim',samplename)) %>%
-#    filter(grepl('kq|q5',samplename)) %>%
-#    filter(!grepl('X',samplename) ) %>%
+    filter(!grepl('Ecoli',samplename)) %>%
+    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera XT',
+                            grepl('pb',.$samplename) ~ 'Pacbio',
+                            grepl('sim',.$samplename) ~ 'Covaris Sim',
+                            grepl('NEB',.$samplename) ~ 'TGIRT-seq Fragmentase')) %>%
+    mutate(prep = ifelse(is.na(prep),'TGIRT-seq Covaris',prep)) %>%
     tbl_df
 
 windows_df <- df %>% 
@@ -64,20 +59,21 @@ plot_gc <-function(df){
 gc_p <- df %>% 
 #    filter(grepl('nextera|^K12_kh|^K12_kq', samplename)) %>%
 #    filter(grepl('nextera|clustered',samplename)) %>%
-    filter(grepl('nextera|_[EF]_|K12_kh',samplename)) %>%
+    filter(grepl('nextera|_[EF]_|K12_kh|pb',samplename)) %>%
+    filter(!grepl('SRR',samplename)) %>%
     plot_gc()# +
 #        theme(legend.position =  'None') 
 
 rename_sim <- function(x){
-    ifelse(grepl('no_bias',x), 'Simulation: no bias',
-           ifelse(grepl('sim$',x),'Simulation: Reads 1 and 2 bias',
-                ifelse(grepl('sim_template_switch',x),'Simulation: Read 1 bias only',
-                        ifelse(grepl('ligation',x),'Simluation: Read 2 bias only','Experimental'))))
 }
 
 supplemental_p <- df %>%
     filter(grepl('K12_kh|sim',samplename)) %>%
-    mutate(prep = rename_sim(samplename)) %>%
+    mutate(prep = case_when(grepl('no_bias',.$samplename) ~ 'Simulation: no bias',
+                            grepl('sim$',.$samplename) ~'Simulation: Reads 1 and 2 bias',
+                            grepl('sim_template_switch',.$samplename) ~ 'Simulation: Read 1 bias only',
+                            grepl('ligation',.$samplename) ~ 'Simluation: Read 2 bias only')) %>%
+    mutate(prep = ifelse(is.na(prep),'Experimental',prep)) %>%
     mutate(prep = factor(prep, levels = c('Experimental',
                                            'Simulation: no bias',
                                            'Simulation: Read 1 bias only',

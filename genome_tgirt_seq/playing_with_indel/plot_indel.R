@@ -30,9 +30,12 @@ df <- list.files(path = indel_table_path, pattern = '.tsv', full.names = T) %>%
     map_df(read_indel_table) %>%
     inner_join(indel_index_df)%>% 
     select(grep('samplename|num_D|num_I|index',names(.))) %>%
-    filter(!grepl('MiSeq|Ecoli',samplename)) %>%
-    mutate(prep = ifelse(grepl('nextera',samplename),'Nextera XT',
-                         ifelse(grepl('clustered',samplename),'Clustered TGIRT-seq','TGIRT-seq'))) %>%
+    filter(!grepl('MiSeq|Ecoli|phus|q5|NEB',samplename)) %>%
+    mutate(prep = case_when(grepl('nextera', .$samplename)~'Nextera XT',
+                            grepl('clustered', .$samplename)~'Clustered TGIRT-seq',
+                            grepl('NEB', .$samplename)~'NEB TGIRT-seq',
+                            grepl('K12', .$samplename)~'TGIRT-seq')) %>%
+    filter(!grepl('clustered',samplename)) %>%
     mutate(indel_index = negative_index + positive_index ) %>%
     mutate(number_of_indel = num_D + num_I) %>%
     group_by(prep, samplename, indel_index) %>%
@@ -45,16 +48,17 @@ form <- y ~ poly(x,1, raw=T)
 p<-ggplot(data = df, aes(x = indel_index, y = normalized_indel, color = prep))+
     geom_smooth(method='lm', formula =form, se = F) +
     geom_point() +
-    ggpmisc::stat_poly_eq(aes(label = ..eq.label..), 
-                 formula = form, 
-                 label.x.npc = "center",
-                 label.y.npc = 'top',
-                 parse = TRUE) +
-    ggpmisc::stat_poly_eq(aes(label = ..rr.label..),
-                 formula = form, 
-                 label.y.npc = "center",
-                 label.x.npc = 'center',
-                 parse = TRUE)+
+#    ggpmisc::stat_poly_eq(aes(label = ..eq.label..), 
+#                 formula = form, 
+#                 label.x.npc = "center",
+#                 label.y.npc = 'top',
+#                 parse = TRUE) +
+#    ggpmisc::stat_poly_eq(aes(label = ..rr.label..),
+#                 formula = form, 
+#                 label.y.npc = "center",
+#                 label.x.npc = 'center',
+#                 parse = TRUE)+
+#    scale_color_manual(values = c('lightskyblue','salmon'))+
     labs(x = 'Repeat Index on Genome', y = 'Average Indel per Read', color = ' ')+
     scale_x_continuous(breaks = seq(0,10),name='Repeat units') +
     theme(legend.position = c(0.2,0.8))

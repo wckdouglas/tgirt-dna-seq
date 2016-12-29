@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import matplotlib
-matplotlib.use('Agg')
+from matplotlib import use as mpl_use
+mpl_use('Agg')
 import numpy as np
 import seaborn as sns
 import fileinput
@@ -18,7 +18,7 @@ def plottingFigure(figurename, df):
     df.columns = ['distance','Chromosomes'] 
     with sns.plotting_context('paper',font_scale=1.6):
         p = sns.FacetGrid(data = df, hue = 'Chromosomes', aspect = 2, size = 7, legend_out=True)
-        p.map(sns.distplot, 'distance', hist=False)
+        p.map(sns.distplot, 'distance', kde=False, norm_hist=False, bins=100)
         p.set(xlim=(-1000,1000),
                 xlabel = 'Distance from NT to closest SRR2130051 nucleosom calls',
                 ylabel ='Fraction of nucleosomes',
@@ -57,7 +57,7 @@ def makeDir(directory):
 def main():
     start = time.time()
     projectpath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
-    bedpath = projectpath + '/genomeWPS'
+    bedpath = projectpath + '/genomeWPS/bed_files'
     figurepath = projectpath + '/figures'
     figurename = figurepath + '/predictedNucleosomeDistance.pdf'
     tablename = figurename.replace('pdf','tsv')
@@ -67,11 +67,12 @@ def main():
     chromosomes = map(str,np.arange(1,23))
     chromosomes = np.concatenate([chromosomes,['X','Y']])
     closestPeakFunc = partial(closestPeak, bedpath, file1, file2)
-    p = Pool(24)
-    dfs = p.map(closestPeakFunc, chromosomes)
-    dfs = [df for df in dfs if df is not None]
-    df = pd.concat(dfs)
-    df.to_csv(tablename, index=False, sep = '\t')
+    #p = Pool(24)
+    #dfs = p.map(closestPeakFunc, chromosomes)
+    #dfs = [df for df in dfs if df is not None]
+    #df = pd.concat(dfs)
+    #df.to_csv(tablename, index=False, sep = '\t')
+    df = pd.read_table(tablename)
     plottingFigure(figurename, df)
     print 'Writtten %s in %.3f min' %(tablename, np.true_divide(time.time() - start,60))
     return 0
