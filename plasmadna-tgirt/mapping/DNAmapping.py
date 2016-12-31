@@ -55,8 +55,8 @@ def makeBed(bam_file, samplename, bed_path):
     command = 'bamtools filter -script flag_filter.json -in %s' %(bam_file)+\
 	'| samtools fixmate -r - -' + \
         '| bedtools bamtobed -mate1 -bedpe '+\
-        "| awk '$1!=\".\" && $NF!=$(NF-1) && $1==$4' "+\
-        "| awk '{start=$2;end=$3} {if($5<start) start=$5} {if($6>end) end=$6} "+\
+        "| awk '$1!=\".\" && $NF!=$(NF-1) && $1==$4 "+\
+                "{start=$2;end=$3} {if($5<start) start=$5} {if($6>end) end=$6} "+\
                 "{print $1,start,end,$7,end-start,$9}' OFS='\\t'"+\
         '> %s' %(bed_file)
     runProcess(command,samplename)

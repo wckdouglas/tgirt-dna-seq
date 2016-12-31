@@ -1,9 +1,9 @@
 #!/bin/env python
 
 # This is the program for converting bed file to
-# bam file and calculate window prediction scores from the selected window size 
+# bam file and calculate window prediction scores from the selected window size
 # input: bed file for alignment, each record is a fragment
-#        gtf file 
+#        gtf file
 #        fai file
 
 from pybedtools import BedTool
@@ -18,6 +18,14 @@ from sys import stderr, argv
 from multiprocessing import Pool
 from scipy.signal import savgol_filter, medfilt
 import pandas as pd
+from functools import partial
+from itertools import izip
+
+def make_folder(folder):
+    if not os.path.isdir(folder):
+        os.mkdir(folder)
+    return 0
+
 
 def printMessage(message, sample):
     programname = os.path.basename(argv[0]).split('.')[0]
@@ -32,7 +40,7 @@ def getOpt():
     parser.add_argument('-o','--outprefix',help='output prefix', default='out')
     parser.add_argument('-g','--genome',help='genome file (.fa.fai)',required=True)
     parser.add_argument('-c','--chromosome',help='chromosome name',required=True)
-    parser.add_argument('-t','--TSSwindow', help='Window size for calculating WPS (default: 2000)', 
+    parser.add_argument('-t','--TSSwindow', help='Window size for calculating WPS (default: 2000)',
             default = 2000, type=int)
     args = parser.parse_args()
     inFile = args.inFile
@@ -77,16 +85,16 @@ def pushWPStoArray(aln, halfWPSwindow, start, end, tssWindow, isize, wpsWindow):
     """
     for a given alignment, compute the regions that can be fully aligned and not
     e.g. [-1, -1 , -1, 1 , 1, 1, 1, 1, 1, -1, -1, -1] for a wps window -f 6 (halfwindow 3 )
-    this will be added to the defined transcription start site wps score array after 
+    this will be added to the defined transcription start site wps score array after
     adjusting fot the position
     """
     tssWindow = end - start
     transcriptAlnWPS = np.zeros(tssWindow) # setting the tss window as zeros wps array
     alnWPS = np.zeros(isize + wpsWindow) #adding halfwindow to both side of the alignment
-    alnWPS[wpsWindow:-wpsWindow] = 1 # only half window after aln start, the alignment is fully covering the wps window 
+    alnWPS[wpsWindow:-wpsWindow] = 1 # only half window after aln start, the alignment is fully covering the wps window
                                      # and we added half window on the previous line
     alnWPS[alnWPS != 1 ] = -1 #making the alignment wps with ends containing windows
-    alnShift = start - (aln.pos - halfWPSwindow) # the distance between alignment start and right side of the wps window: 
+    alnShift = start - (aln.pos - halfWPSwindow) # the distance between alignment start and right side of the wps window:
                                   #  + is left side of the window start, - is to the right
     if alnShift >= 0:
         wps = alnWPS[alnShift:]
@@ -110,56 +118,127 @@ def calculateWPS(bam, chrom, start, end, tssWindow, wpsWindow, halfWPSwindow, up
     '''
     transcriptWps = np.zeros(end - start)
     coverage = 0
-    for aln in bam.fetch(reference = chrom, start = start - halfWPSwindow, end = end+halfWPSwindow):
+    for aln in bam.fetch(reference = chrom,
+                         start = start - halfWPSwindow,
+                         end = end+halfWPSwindow):
         isize = abs(aln.qlen)
         if upperBound > isize > lowerBound:
-            transcriptWps += pushWPStoArray(aln, halfWPSwindow, start, 
+            transcriptWps += pushWPStoArray(aln, halfWPSwindow, start,
                     end, tssWindow, isize, wpsWindow)
             coverage += 1
     return transcriptWps, coverage
 
-def extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound, 
+
+def adjust_median(wps_array):
+    rolling_median = pd.Series(wps_array)\
+            .rolling(window = 1000)\
+            .median()
+    adjusted_wps = np.nan_to_num(wps_array - rolling_median)
+    return adjusted_wps
+
+
+def extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
         lowerBound, chrom, chromSize, samplename):
     '''
-    adding up wps track for all genes 
+    adding up wps track for all genes
     '''
     chromArray = np.zeros(chromSize)
     for start in np.arange(halfWPSwindow, chromSize - halfWPSwindow, tssWindow):
         end = start + tssWindow if (start + tssWindow + halfWPSwindow) < chromSize else chromSize - halfWPSwindow
-        wpsTSS, coverage = calculateWPS(bam, chrom, start, end, 
+        wpsTSS, coverage = calculateWPS(bam, chrom, start, end,
                     tssWindow, wpsWindow, halfWPSwindow, upperBound, lowerBound)
         chromArray[start:end] += wpsTSS
-    chromArray = chromArray - pd.Series(chromArray).rolling(window = 1000).median()
-    chromArray = savgol_filter(np.nan_to_num(chromArray), window_length = 21, polyorder=2)
+    chromArray = savgol_filter(adjust_median(chromArray), window_length = 21, polyorder=2)
     printMessage('Finished calculating WPS for chromosome %s' %(chrom), samplename)
     return chromArray
+
+
+def find_peak_region(wpsArray):
+    wpsArray = np.asarray(wpsArray)
+    signs = np.sign(wpsArray)
+    signs[signs==0] = -1
+    start = np.where(np.diff(signs)>0)[0]
+    end = np.where(np.diff(signs)<0)[0]
+    return start, end
+
+
+def merge_peaks(peak_start, peak_end):
+    new_start = []
+    new_end = []
+    tolerance_unprotected = 5
+    i = 0
+    while i < len(peak_start)-1:
+        new_start.append(start[i])
+        j = i
+        while peak_start[j+1] - peak_end[j] <= tolerance_unprotected:
+            j += 1
+        new_end.append(end[j-1])
+        j += 1
+        i = j
+    new_start.append(start[i])
+    new_end.append(end[i])
+    return np.array(new_start), np.array(new_end)
+
+def maxSubArray(ls):
+#https://gist.github.com/alabid/3734606
+    if len(ls) == 0:
+       raise Exception("Array empty") # should be non-empty
+
+    runSum = maxSum = ls[0]
+    i = 0
+    start = finish = 0
+
+    for j in range(1, len(ls)):
+    	if ls[j] > (runSum + ls[j]):
+            runSum = ls[j]
+            i = j
+        else:
+            runSum += ls[j]
+
+        if runSum > maxSum:
+            maxSum = runSum
+            start = i
+            finish = j
+
+    print start, finish
+
+
+def calling_peaks(wpsArray, peak_start, peak_end, peak_count):
+    sub_wps = wpsArray[peak_start:peak_end]
+    median_sub_wps = sub_wps.median()
+    adjusted_sub_wps = sub_wps - median_sub_wps
+    above_median_starts, above_median_ends = find_peak_region(adjusted_sub_wps)
+    for ams, ame in zip(peak_start + above_median_starts, peak_start + above_median_ends):
+        sub_wps = wpsArray[ams:ame]
+        nucleosome_start , nucleosome_end = maxSubArray(adjusted_sub_wps)
+        nucleosome_center = int((nucleosome_start + nucleosome_end) /2)
+        peak_score = sub_wps.max()
+        peak_count += 1
+        peakname = '%s_peak_%i' %(chromosome, peak_count)
+        peakPos = (i + j)/2
+        line = '\t'.join(map(str,[chromosome, i, j, peakname, peakPos ,'+', coverageScore]))
+        outFile.write(line+'\n')
+
 
 def findIntercepts(wpsArray, outFile, chromosome,samplename, lenType):
     '''
     looking for the positions that across 0 in the de-noised signal
     '''
-    wpsArray = np.asarray(wpsArray)
+    start, end = find_peak_region(wpsArray)
+    start, end = merge_peaks(start, end)
+    peak_count = 0
+    #lowPeakBound, upperPeakBound = (15, 120) if 'Long' in lenType else (50,150)
+    for peak_start, peak_end  in izip(start, end):
+        peak_size = np.abs(peak_end - peak_start)
+        if 50 <= peak_size <= 150:
+            calling_peaks(wpsArray, peak_start, peak_end, peak_count)
+        elif 150 < peak_size <= 450:
 
-    signs = np.sign(wpsArray)
-    signs[signs==0] = -1
-    start = np.where(np.diff(signs)>0)[0]  
-    end = np.where(np.diff(signs)<0)[0]  
-    numberOfPeak = 0
-    lowPeakBound, upperPeakBound = (15, 120) if 'Long' in lenType else (50,150)
-    for i, j  in zip(start, end):
-        nucleosomeSize = np.abs(j - i)
-        coverageScore = np.max(wpsArray[i:j])
-        if nucleosomeSize > lowPeakBound and nucleosomeSize < upperPeakBound:
-            numberOfPeak += 1
-            peakname = '%s_peak_%i' %(chromosome,numberOfPeak)
-            peakPos = (i + j)/2
-            line = '\t'.join(map(str,[chromosome, i, j, peakname, peakPos ,'+', coverageScore]))
-            outFile.write(line+'\n')
     printMessage('Written %i peaks to %s' %(numberOfPeak, outFile.name), samplename)
     return 0
 
 def writeWig(chromArray, outputWig, chromosome, samplename):
-    outWig =  pbw.open(outputWig,'w') 
+    outWig =  pbw.open(outputWig,'w')
     chrom_length = len(chromArray)
     outWig.addHeader([(chromosome,chrom_length)])
     outWig.addEntries(chromosome, range(chrom_length), values=map(np.float64,chromArray), span=1)
@@ -167,20 +246,23 @@ def writeWig(chromArray, outputWig, chromosome, samplename):
     printMessage('Witten %s' %outputWig, samplename)
     return 0
 
-def runFile(arg):
-    tempBam, outprefix, genome, wpsWindow, tssWindow, upperBound, lowerBound, lenType, samplename, chromosome = arg
+def runFile(tempBam, outprefix, genome, tssWindow, samplename, chromosome, upperBound, lowerBound, lenType, wpsWindow):
     wpsWindow = wpsWindow + 1
     halfWPSwindow = np.divide(wpsWindow,2)
     halfTSSwindow = (tssWindow-1)/2
-    outputBed = outprefix + '.'+lenType.split(' ')[0] +'.bed'
-    outputWig = outputBed.replace('.bed','.bigWig')
+    output_folder = os.path.dirname(outprefix)
+    bed_folder = output_folder + '/bed_files'
+    bigwig_folder = output_folder + '/bigWig_files'
+    outputBed = bed_folder + '/'  + samplename + '.'+lenType.split(' ')[0] +'.bed'
+    outputWig = bigwig_folder + '/' + samplename+ '.'+lenType.split(' ')[0] +'.biwWig'
+    map(make_folder, [bigwig_folder, bed_folder])
     with pysam.Samfile(tempBam,'rb') as bam:
         chroms = np.array(bam.references)
         if chromosome not in chroms:
             sys.exit('Wrong chromosome name: %s!' %chromosome)
         chromLength = np.array(bam.lengths)
         chromSize = int(chromLength[chroms==chromosome][0])
-        chromArray = extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound, 
+        chromArray = extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
                 lowerBound, chromosome, chromSize, samplename)
     writeWig(chromArray, outputWig, chromosome, samplename)
     with open(outputBed,'w') as outBed:
@@ -194,10 +276,10 @@ def main(inFile, outprefix, genome, tssWindow, chromosome):
     samplename = os.path.basename(inFile).split('.')[0]
     printMessage( 'Saving all result to: %s' %outprefix, samplename)
     tempBam = makeBam(inFile, outprefix, genome, samplename)
-    args = [(tempBam, outprefix, genome, wpsWindow, tssWindow, upperBound, lowerBound, lenType, samplename, chromosome) \
-            for upperBound, lowerBound, lenType, wpsWindow in zip([80, 180],[35, 120],['Short (35-80bp)','Long (120-180bp)'],[16,120])]
-    #Pool(2).map(runFile, args)
-    map(runFile, args)
+    run_file = partial(runFile, tempBam, outprefix, genome, tssWindow, samplename, chromosome)
+    upperBound, lowerBound = [80, 180], [35, 120]
+    lenType, wpsWindow = ['Short (35-80bp)','Long (120-180bp)'],[16,120]
+    map(run_file, upperBound, lowerBound, lenType, wpsWindow)
     return 0
 
 if __name__ == '__main__':
