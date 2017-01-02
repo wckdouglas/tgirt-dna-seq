@@ -18,7 +18,7 @@ do
 	    --fastq1 ${FQ1} \
 		--fastq2 ${FQ2} \
 		--idxBase 15 \
-		--barcodeCutOff 20 \
+		--barcodeCutOff 25 \
 	    --cutoff 0 \
 		--constant_region TACGCTCTTTCTCCGCGAATGCGGCGAGCGAGCTGGATGTC \
 		--threads $THREADS \
