@@ -18,7 +18,7 @@ def readFile(bedFile):
     samplename = basename.split('.')[0]
     chromosome = basename.split('.')[-3]
     print 'Reading %s for chr: %s ' %(samplename, chromosome)
-    column_names = ['chrom','start','end','name','center','strand','intensity']
+    column_names = ['chrom','start','end','name','intensity','strand','center']
     df = pd.read_table(bedFile, names=column_names,) \
         .assign(peak_width = lambda d: np.abs(d['end'] - d['start']))\
         .pipe(lambda d: d[(d['peak_width'] >= 50) & (d['peak_width'] <= 500)])\
@@ -34,26 +34,28 @@ def readFile(bedFile):
     return df
 
 
-def normalize_count(d):
-    d['normalized_count'] = d.nucleosome_count / d.nucleosome_count.sum()
+def normalize_count_func(d):
+    d['normalized_count'] = np.true_divide(d.nucleosome_count, d.nucleosome_count.sum())
     return d
 
+def weighted_hist(x, weights, **kwargs):
+    plt.hist(x, weights=weights, **kwargs)   
+                    
 
 def plotDistance(df, figurename):
     upper_bound = 450
     df = df[(df['distance'] <  upper_bound)]  \
-        .groupby(['distance','samplename']) \
-        .apply(normalized_count)
+        .groupby(['samplename']) \
+        .apply(normalize_count_func) \
+        .sort_values('distance')
     with sns.plotting_context('paper',font_scale=1.3):
         p = sns.FacetGrid(data = df, hue='samplename',aspect = 1.6)
-        p.map(plt.plot,'distance', 'normalized_count')
-        p.set(xlim=(50,500),
-             xticks=np.arange(50,500,50))
-        p.set_xticklabels(rotation=45)
-        p.set_xlabels('Distance to the nearest nucleosome call')
-        p.set_ylabels('Fraction of nucleosomes')
-        p.add_legend()
-        p.savefig(figurename)
+    p.map(weighted_hist,'distance',  'normalized_count',alpha=0.5,bins=np.arange(0,500,5))
+    p.set_xticklabels(rotation=45)
+    p.set_xlabels('Distance to the nearest nucleosome call')
+    p.set_ylabels('Fraction of nucleosomes')
+    p.add_legend()
+    p.savefig(figurename)
     print 'Saved %s' %figurename
 
 def main():
@@ -72,8 +74,12 @@ def main():
     dfs = map(readFile, bedFiles)
     p.close()
     p.join()
-    df = pd.concat(dfs)
+    df = pd.concat(dfs) \
+        .groupby(['samplename','distance'])\
+        .agg({'nucleosome_count':np.sum})\
+        .reset_index()
     df.to_csv(tablename,sep='\t',index=False)
+    print 'Saved %s' %tablename
     df = pd.read_csv(tablename,sep='\t')
     plotDistance(df, figurename)
 

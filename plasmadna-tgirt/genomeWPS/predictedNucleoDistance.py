@@ -31,8 +31,8 @@ def plottingFigure(figurename, df):
 
 def parseClosetLine(closestLine):
     fields = closestLine.fields
-    center1 = int(fields[4])
-    center2 = int(fields[11])
+    center1 = int(fields[6])
+    center2 = int(fields[13])
     distance = center2 - center1
     return distance
 
@@ -67,11 +67,11 @@ def main():
     chromosomes = map(str,np.arange(1,23))
     chromosomes = np.concatenate([chromosomes,['X','Y']])
     closestPeakFunc = partial(closestPeak, bedpath, file1, file2)
-    #p = Pool(24)
-    #dfs = p.map(closestPeakFunc, chromosomes)
-    #dfs = [df for df in dfs if df is not None]
-    #df = pd.concat(dfs)
-    #df.to_csv(tablename, index=False, sep = '\t')
+    p = Pool(24)
+    dfs = p.map(closestPeakFunc, chromosomes)
+    dfs = [df for df in dfs if df is not None]
+    df = pd.concat(dfs)
+    df.to_csv(tablename, index=False, sep = '\t')
     df = pd.read_table(tablename)
     plottingFigure(figurename, df)
     print 'Writtten %s in %.3f min' %(tablename, np.true_divide(time.time() - start,60))
