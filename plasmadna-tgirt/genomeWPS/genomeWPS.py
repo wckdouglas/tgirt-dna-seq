@@ -149,7 +149,6 @@ def extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
                     tssWindow, wpsWindow, halfWPSwindow, upperBound, lowerBound)
         chromArray[start:end] += wpsTSS
     chromArray = savgol_filter(adjust_median(chromArray), window_length = 21, polyorder=2)
-    printMessage('Finished calculating WPS for chromosome %s' %(chrom), samplename)
     return chromArray
 
 
@@ -168,15 +167,15 @@ def merge_peaks(peak_start, peak_end):
     tolerance_unprotected = 5
     i = 0
     while i < len(peak_start)-1:
-        new_start.append(start[i])
+        new_start.append(peak_start[i])
         j = i
         while peak_start[j+1] - peak_end[j] <= tolerance_unprotected:
             j += 1
-        new_end.append(end[j-1])
+        new_end.append(peak_end[j])
         j += 1
         i = j
-    new_start.append(start[i])
-    new_end.append(end[i])
+    new_start.append(peak_start[i])
+    new_end.append(peak_end[i])
     return np.array(new_start), np.array(new_end)
 
 def maxSubArray(ls):
@@ -200,30 +199,58 @@ def maxSubArray(ls):
             start = i
             finish = j
 
-    print start, finish
+    return start, finish
 
 
-def calling_peaks(wpsArray, peak_start, peak_end, peak_count):
+def pick_peak(above_median_starts, above_median_ends, sub_wps):
+    sub_wps = np.asarray(sub_wps)
+    above_median_ends = np.asarray(above_median_ends)
+    above_median_starts = np.asarray(above_median_starts)
+    max_wps_array = np.array([sub_wps[s:e].max() for s, e in izip(above_median_starts, above_median_ends)])
+    maximum_wps = np.where(max_wps_array == max_wps_array.max())[0]
+    return above_median_starts[maximum_wps], above_median_ends[maximum_wps]
+
+
+def calling_peaks(chromosome, wpsArray, peak_start, peak_end, peak_count, outFile, peak_size_filter):
     sub_wps = wpsArray[peak_start:peak_end]
-    median_sub_wps = sub_wps.median()
+    median_sub_wps = np.median(sub_wps)
     adjusted_sub_wps = sub_wps - median_sub_wps
     above_median_starts, above_median_ends = find_peak_region(adjusted_sub_wps)
-    for ams, ame in zip(peak_start + above_median_starts, peak_start + above_median_ends):
-        sub_wps = wpsArray[ams:ame]
-        nucleosome_start , nucleosome_end = maxSubArray(adjusted_sub_wps)
+
+    if len(above_median_starts)>len(above_median_ends):
+        above_median_ends = np.append(above_median_ends,len(adjusted_sub_wps)) 
+    if not peak_size_filter:
+        above_median_starts, above_median_ends =  pick_peak(above_median_starts, above_median_ends, sub_wps) 
+
+    for above_median_start, above_median_end in izip(above_median_starts, above_median_ends):
+        try:
+            sub_peak_wps = sub_wps[above_median_start:above_median_end]
+        except TypeError:
+            print above_median_start, above_median_end
+            print above_median_starts, above_median_ends
+            sys.exit()
+        nucleosome_start , nucleosome_end = maxSubArray(sub_peak_wps)
+
+
+        #adjust coordinate
+        nucleosome_start, nucleosome_end = peak_start + above_median_start + np.array([nucleosome_start, nucleosome_end])
         nucleosome_center = int((nucleosome_start + nucleosome_end) /2)
-        peak_score = sub_wps.max()
-        peak_count += 1
-        peakname = '%s_peak_%i' %(chromosome, peak_count)
-        peakPos = (i + j)/2
-        line = '\t'.join(map(str,[chromosome, i, j, peakname, peakPos ,'+', coverageScore]))
-        outFile.write(line+'\n')
+        peak_center = (nucleosome_start + nucleosome_end)/2
+        nucleosome_size = abs(nucleosome_end - nucleosome_start)
+        if (peak_size_filter and 50 < nucleosome_size  < 150 ) or (not peak_size_filter and nucleosome_size > 5):
+            peak_score = wpsArray[nucleosome_start:nucleosome_end].max()
+            peak_count += 1
+            peak_name = '%s_peak%i' %(chromosome, peak_count)
+            line = '\t'.join(map(str,[chromosome, nucleosome_start, nucleosome_end, peak_name, peak_score, '+', peak_center]))
+            outFile.write(line+'\n')
+    return peak_count
 
 
 def findIntercepts(wpsArray, outFile, chromosome,samplename, lenType):
     '''
     looking for the positions that across 0 in the de-noised signal
     '''
+    wpsArray = np.asarray(wpsArray)
     start, end = find_peak_region(wpsArray)
     start, end = merge_peaks(start, end)
     peak_count = 0
@@ -231,11 +258,23 @@ def findIntercepts(wpsArray, outFile, chromosome,samplename, lenType):
     for peak_start, peak_end  in izip(start, end):
         peak_size = np.abs(peak_end - peak_start)
         if 50 <= peak_size <= 150:
-            calling_peaks(wpsArray, peak_start, peak_end, peak_count)
+            peak_count = calling_peaks(chromosome, wpsArray, peak_start, peak_end, peak_count, outFile, False)
         elif 150 < peak_size <= 450:
+            peak_count = calling_peaks(chromosome, wpsArray, peak_start, peak_end, peak_count, outFile, True)
 
-    printMessage('Written %i peaks to %s' %(numberOfPeak, outFile.name), samplename)
+    printMessage('Written %i peaks to %s' %(peak_count, outFile.name), samplename)
     return 0
+
+
+def write_peaks(outputWig, outputBed, samplename, lenType):
+    bw = pbw.open(outputWig)
+    chrom, length = bw.chroms().items()[0]
+    chromArray = np.array(bw.values(chrom,0,length))
+
+    with open(outputBed,'w') as outBed:
+        findIntercepts(chromArray, outBed, chrom, samplename, lenType)
+    return 0
+
 
 def writeWig(chromArray, outputWig, chromosome, samplename):
     outWig =  pbw.open(outputWig,'w')
@@ -243,19 +282,13 @@ def writeWig(chromArray, outputWig, chromosome, samplename):
     outWig.addHeader([(chromosome,chrom_length)])
     outWig.addEntries(chromosome, range(chrom_length), values=map(np.float64,chromArray), span=1)
     outWig.close()
-    printMessage('Witten %s' %outputWig, samplename)
     return 0
 
-def runFile(tempBam, outprefix, genome, tssWindow, samplename, chromosome, upperBound, lowerBound, lenType, wpsWindow):
+def make_wps_array(tempBam, chromosome, tssWindow, wpsWindow, 
+                upperBound, lowerBound, lenType, samplename):
     wpsWindow = wpsWindow + 1
     halfWPSwindow = np.divide(wpsWindow,2)
     halfTSSwindow = (tssWindow-1)/2
-    output_folder = os.path.dirname(outprefix)
-    bed_folder = output_folder + '/bed_files'
-    bigwig_folder = output_folder + '/bigWig_files'
-    outputBed = bed_folder + '/'  + samplename + '.'+lenType.split(' ')[0] +'.bed'
-    outputWig = bigwig_folder + '/' + samplename+ '.'+lenType.split(' ')[0] +'.biwWig'
-    map(make_folder, [bigwig_folder, bed_folder])
     with pysam.Samfile(tempBam,'rb') as bam:
         chroms = np.array(bam.references)
         if chromosome not in chroms:
@@ -264,19 +297,32 @@ def runFile(tempBam, outprefix, genome, tssWindow, samplename, chromosome, upper
         chromSize = int(chromLength[chroms==chromosome][0])
         chromArray = extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
                 lowerBound, chromosome, chromSize, samplename)
+    return chromArray
+
+def runFile(tempBam, outprefix, genome, tssWindow, samplename, chromosome, upperBound, lowerBound, lenType, wpsWindow):
+    output_folder = os.path.dirname(outprefix)
+    bed_folder = output_folder + '/bed_files'
+    bigwig_folder = output_folder + '/bigWig_files'
+    outputBed = bed_folder + '/'  + samplename + '.'+lenType.split(' ')[0] +'.bed'
+    outputWig = bigwig_folder + '/' + samplename +  '.' +lenType.split(' ')[0] +'.bigWig'
+    map(make_folder, [bigwig_folder, bed_folder])
+    chromArray = make_wps_array(tempBam, chromosome, tssWindow, wpsWindow, 
+                                upperBound, lowerBound, lenType, samplename)
+    printMessage('Finished calculating WPS for chromosome %s' %(chromosome), samplename)
     writeWig(chromArray, outputWig, chromosome, samplename)
-    with open(outputBed,'w') as outBed:
-        findIntercepts(chromArray, outBed, chromosome, samplename, lenType)
+    printMessage('Witten %s' %outputWig, samplename)
+    write_peaks(outputWig, outputBed, samplename, lenType)
+    printMessage('Witten %s' %outputBed, samplename)
     return 0
 
 def main(inFile, outprefix, genome, tssWindow, chromosome):
     '''
     main function for controling the work flow
     '''
-    samplename = os.path.basename(inFile).split('.')[0]
+    samplename = os.path.basename(inFile).replace('.bed','')
     printMessage( 'Saving all result to: %s' %outprefix, samplename)
     tempBam = makeBam(inFile, outprefix, genome, samplename)
-    run_file = partial(runFile, tempBam, outprefix, genome, tssWindow, samplename, chromosome)
+    run_file = partial(runFile, tempBam, outprefix, genome, tssWindow, samplename  , chromosome)
     upperBound, lowerBound = [80, 180], [35, 120]
     lenType, wpsWindow = ['Short (35-80bp)','Long (120-180bp)'],[16,120]
     map(run_file, upperBound, lowerBound, lenType, wpsWindow)
