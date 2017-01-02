@@ -93,7 +93,7 @@ def renameDinucleotide(di):
     elif di in CG:
         label = CG_label
     else:
-        new = 'Nope'
+        label = 'Nope'
     return label
 
 def plotting(df, figurename):
@@ -107,7 +107,7 @@ def plotting(df, figurename):
                 size = 4,
                 aspect = 1.6,
                 col_wrap = int(math.sqrt(number_of_wrap)))
-        p.map(plt.plot, 'position', 'smoothed_signal')
+        p.map(plt.plot, 'position', 'adjusted_signal')
         p.set_titles('{col_name}', fontweight='bold')
         p.set_ylabels('log2(Observer/Expected)')
         p.set_xlabels('Postion relative to middle of transcripts')
@@ -117,7 +117,7 @@ def plotting(df, figurename):
     return 0
 
 def medianFilter(dt):
-    dt['smoothed_signal'] = medfilt(dt['fraction'],201)
+    dt['adjusted_signal'] = dt['fraction'] - medfilt(dt['fraction'],101)
     return dt
 
 def analyze_bam(ref_fasta, window_size, outputpath, bed_file):

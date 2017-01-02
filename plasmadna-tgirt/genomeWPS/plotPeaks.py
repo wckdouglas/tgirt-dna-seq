@@ -26,18 +26,27 @@ def readFile(bedFile):
         .assign(peak_previous = lambda d: np.abs(shift(d['center'],1) - d['center']))\
         .assign(distance = lambda d: d[['peak_next','peak_previous']].min(axis=1))\
         .assign(samplename = samplename) \
-        .pipe(lambda d: d[['distance','samplename']])
+        .pipe(lambda d: d[['distance','samplename']]) \
+        .assign(nucleosome_count = 1)\
+        .groupby(['distance','samplename']) \
+        .agg({'nucleosome_count':np.sum})\
+        .reset_index() 
     return df
 
+
+def normalize_count(d):
+    d['normalized_count'] = d.nucleosome_count / d.nucleosome_count.sum()
+    return d
+
+
 def plotDistance(df, figurename):
-    lowerBound = 450
-    df['distance'] = np.asarray(df['distance'], dtype=int)
-    df = df[(df['distance'] <  lowerBound)] 
-    df.columns = ['distance','Sample']
-    df['plotTitle'] = 'Nearest nucleosome call'
+    upper_bound = 450
+    df = df[(df['distance'] <  upper_bound)]  \
+        .groupby(['distance','samplename']) \
+        .apply(normalized_count)
     with sns.plotting_context('paper',font_scale=1.3):
-        p = sns.FacetGrid(data = df, hue='Sample',aspect = 1.6, legend_out=False)
-        p.map(sns.distplot,'distance',hist=False,bins=1)
+        p = sns.FacetGrid(data = df, hue='samplename',aspect = 1.6)
+        p.map(plt.plot,'distance', 'normalized_count')
         p.set(xlim=(50,500),
              xticks=np.arange(50,500,50))
         p.set_xticklabels(rotation=45)
@@ -57,7 +66,8 @@ def main():
         os.mkdir(resultpath)
     bedFiles = np.array(glob.glob(datapath + '/*.Long.bed'),dtype='string')
     chromosomes = np.array(map(lambda x: x.split('.')[-3], bedFiles),dtype='string')
-    bedFiles = bedFiles[(np.in1d(chromosomes,np.array(np.arange(23),dtype='string')))]
+    usable_chromosomes = np.append(['X','Y'],np.array(np.arange(23),dtype='string'))
+    bedFiles = bedFiles[(np.in1d(chromosomes,usable_chromosomes))]
     p = Pool(12)
     dfs = map(readFile, bedFiles)
     p.close()

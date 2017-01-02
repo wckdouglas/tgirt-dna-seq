@@ -2,24 +2,26 @@
 
 library(readr)
 library(dplyr)
-library(stringi)
+library(purrr)
+library(stringr)
 library(cowplot)
 library(tidyr)
 
-datapath <- '/Users/wckdouglas/plasmaDNA/results/plasmaResults/nucleotidesAnalysis'
-figurepath <- '/Users/wckdouglas/plasmaDNA/figures'
+project_path <- '/stor/work/Lambowitz/cdw2854/plasmaDNA'
+datapath <- str_c(project_path,'/nucleotidesAnaylsis/endsNucleotides')
+figurepath <- str_c(project_path,'/figures')
 
 files <- list.files(path = datapath, pattern = '.tsv')
 readFile <- function(filename, datapath){
 	df <- datapath %>%
-		stri_c(filename, sep='/') %>%
+		str_c(filename, sep='/') %>%
 		read_tsv() %>%
 		mutate(filename = filename) %>%
-		separate(filename, 'name', '_', remove=T) %>%
+		mutate(name = sapply(filename, function(x) str_split_fixed(x,'_',1))) %>%
 		return
 }
-df <- lapply(files, readFile, datapath) %>%
-	do.call(rbind,.) %>%
+df <- (files) %>%
+    map_df(readFile, datapath) %>%
 	select(-total) %>%
 	gather(nucleotide, fraction, -index:-name) %>%
 	filter(nucleotide!='N') %>%
@@ -28,6 +30,6 @@ df <- lapply(files, readFile, datapath) %>%
 p <- ggplot(data = df, aes(x = index, y = fraction, color= nucleotide)) +
 	geom_line() +
 	facet_grid(End~name)
-figurename <- stri_c(figurepath, '/nucleotideEnd.pdf')
+figurename <- str_c(figurepath, '/nucleotideEnd.pdf')
 ggsave(p, file= figurename, width = 15, height = 10)
 message('Plotted ', figurename)

@@ -39,7 +39,7 @@ def highest_periodicity(bw, chromosome, input_arg):
     signs[signs==0] = -1
     peak_count = np.where(np.diff(signs)>0)[0]
     max_periodicity, max_intensity = 0, 0
-    if len(peak_count) > 50:
+    if len(peak_count) > 20:
         periodicity, intensity = fft(wps_array)
         usable_indices = periodicity<500
         periodicity = periodicity[usable_indices]
@@ -49,8 +49,8 @@ def highest_periodicity(bw, chromosome, input_arg):
         max_periodicity = periodicity[argmax]
         max_intensity = intensity[argmax]
 
-    if bin_count == 1000:
-        print 'Analyzing %i bin' %bin_count
+    if bin_count % 10000 == 0:
+        print 'Analyzed %i bin' %bin_count
     bin_name = '%s_%i' %(chromosome, bin_count)
     return (chromosome, start, end, bin_name , max_periodicity, max_intensity)
 
@@ -60,7 +60,7 @@ def analyze_file(samplename, bw_name):
     chromosome = bw_name.split('.')[1]
     print 'Reading %s from %s' %(chromosome, samplename)
     chromosome_info = bw.chroms()
-    window_size = 10000
+    window_size = 5000
     chrom_length = chromosome_info[chromosome]
     no_of_bins = chrom_length / window_size
     start_positions = np.linspace(0, chrom_length, no_of_bins)
