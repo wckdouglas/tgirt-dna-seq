@@ -9,6 +9,7 @@ import pandas as pd
 from multiprocessing import Pool
 import glob
 import os
+import sys
 
 
 def fft(array):
@@ -22,6 +23,9 @@ def fft(array):
     intensity = fftpack.fft(array)
     intensity = abs(intensity)**2
     freq = fftpack.fftfreq(sample_size)
+    usable_indice = freq != 0
+    intensity = intensity[usable_indice]
+    freq = freq[usable_indice]
     periodicity = 1/(freq)
     return periodicity[:half_size], intensity[:half_size]
 
@@ -56,9 +60,9 @@ def highest_periodicity(bw, chromosome, input_arg):
 
 def analyze_file(samplename, bw_name):
     samplename = os.path.basename(bw_name).split('.')[0]
-    bw = pbw.open(bw_name,'r')
     chromosome = bw_name.split('.')[1]
-    print 'Reading %s from %s' %(chromosome, samplename)
+    print 'Reading chromosome: %s from %s' %(chromosome, samplename)
+    bw = pbw.open(bw_name,'r')
     chromosome_info = bw.chroms()
     window_size = 5000
     chrom_length = chromosome_info[chromosome]
