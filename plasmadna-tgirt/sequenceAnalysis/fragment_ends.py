@@ -1,8 +1,7 @@
-
 #!/usr/bin/env python
 
-import matplotlib
-matplotlib.use('Agg')
+from matplotlib import use as mpl_use
+mpl_use('Agg')
 import seaborn as sns
 import numpy as np
 import pandas as pd
@@ -34,7 +33,6 @@ def createCountMat(nucleotides_window):
     return countMat
 
 def makeDF(seq_count_matrix, end, nucleotides_half_window):
-    print seq_count_matrix
     df = pd.DataFrame.from_dict(seq_count_matrix, orient='index')
     df['total'] = df.sum(axis=1)
     df['index'] = np.arange(nucleotides_half_window*2) - nucleotides_half_window
@@ -112,21 +110,23 @@ def main():
     projectpath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     ref_path = '/stor/work/Lambowitz/ref/GRCh38/hg38_rDNA'
     ref_fasta = ref_path + '/genome_rDNA.fa'
-    bedFilePath = projectpath + '/rmdupBedFiles'
+    bedFilePath = projectpath + '/bedFiles'
     outputpath = projectpath + '/nucleotidesAnaylsis/endsNucleotides'
     outputprefix = outputpath + '/endNucleotide'
 
     tablename = outputprefix + '.tsv'
     figurename = outputprefix + '.pdf'
-    bedFiles = glob.glob(bedFilePath + '/*bed')
+    bedFiles = glob.glob(bedFilePath + '/*.bed')
     nucleotides_half_window = 20
     regularChromosome = np.arange(1,22)
     regularChromosome = np.append(regularChromosome,['X','Y'])
     makedir(outputpath)
     set_tempdir(outputpath)
     func = partial(runFile, nucleotides_half_window, ref_fasta, outputpath, regularChromosome)
-    #dfs = Pool(24).map(func,bedFiles)
-    dfs = map(func,bedFiles)
+    p = Pool(24)
+    dfs = p.map(func,bedFiles)
+    p.close()
+    p.join()
     df = pd.concat(dfs)
     df.to_csv(tablename,sep='\t', index=False)
     df = pd.read_csv(tablename,sep='\t')

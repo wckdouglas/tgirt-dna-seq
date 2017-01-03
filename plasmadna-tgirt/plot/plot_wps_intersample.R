@@ -16,9 +16,9 @@ df <- datapath %>%
     summarize(count = n()) %>%
     ungroup()
 
-xlim=400
+xlim=480
 nucleo_p <- ggplot(data = df, aes(x = distance, weights=count)) +
-    geom_histogram(fill='salmon', color = 'salmon',binwidth = 3) +
+    geom_histogram(fill='salmon', color = 'salmon',binwidth = 6) +
     scale_x_continuous(breaks = seq(-xlim,xlim,80),limits=c(-xlim,xlim)) +
     theme(text = element_text(size=35, family='Arial', face='bold')) +
     theme(axis.text.x = element_text(size=35,face='plain', family='Arial',angle=50, hjust=0.5, vjust=0.5)) +
