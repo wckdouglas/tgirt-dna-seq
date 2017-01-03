@@ -166,7 +166,7 @@ def merge_peaks(peak_start, peak_end):
     new_end = []
     tolerance_unprotected = 5
     i = 0
-    while i < len(peak_start)-1:
+    while i < len(peak_start)-2:
         new_start.append(peak_start[i])
         j = i
         while peak_start[j+1] - peak_end[j] <= tolerance_unprotected:
