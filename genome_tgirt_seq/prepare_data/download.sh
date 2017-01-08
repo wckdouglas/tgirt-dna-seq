@@ -15,3 +15,9 @@ for SR in $SRR
 do
 	echo fastq-dump --split-3 --gzip -O $TARGET_DIR $SR
 done
+
+for SRR in $(cat files.txt)
+do
+	echo fastq-dump --split-3 --gzip -O $TARGET_DIR $SRR
+done
+
