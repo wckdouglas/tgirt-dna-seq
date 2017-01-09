@@ -38,6 +38,7 @@ def run_file(protein_bed, out_path, bw_path, bw_prefix):
     chroms.extend(['X','Y'])
     chroms = map(str, chroms)
     preiodicity_func = partial(find_tss_periodicity, bw_prefix)
+    fail = 0
     with open(out_file,'w') as out, open(protein_bed, 'r') as genes:
         out.write('chrom\tstart\tend\tname\tscore\tstrand\ttype\tid\tperiodicity\tintensity\n')
         for gene_count, bed_record in enumerate(genes):
@@ -47,15 +48,16 @@ def run_file(protein_bed, out_path, bw_path, bw_prefix):
                 start = long(fields[1])
                 end = long(fields[2])
                 strand = fields[5]
-
+                
                 try:
                     max_periodicity, max_intensity = preiodicity_func(chrom, start, end)
+                    out.write('%s\t%s\t%s\n' %(bed_record.rstrip(), str(max_periodicity),str(max_intensity)))
                 except:
-                    sys.exit('%s:%i-%i' %(chrom, start, end))
-                out.write('%s\t%s\t%s\n' %(bed_record.rstrip(), str(max_periodicity),str(max_intensity)))
+                    fail += 1
+                    pass
                 if gene_count % 1000 == 0 and gene_count != 0:
                     print 'Analyzed %i genes' %gene_count
-    print 'written: %s' %out_file
+    print 'written: %s, failed %i' %(out_file,fail)
     return 0
 
 def main():
@@ -68,8 +70,7 @@ def main():
         os.mkdir(out_path)
     bw_prefix = ['PD_merged', 'SRR2130052']
     run_file_func = partial(run_file, protein_bed, out_path, bw_path)
-#    Pool(2).map(run_file_func, bw_prefix)
-    map(run_file_func, bw_prefix)
+    Pool(2).map(run_file_func, bw_prefix)
 
 
 if __name__ == '__main__':

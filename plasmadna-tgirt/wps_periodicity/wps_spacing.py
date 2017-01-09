@@ -11,15 +11,19 @@ import os
 import sys
 from spectrum import pdaniell
 from statsmodels.tsa.filters.filtertools import recursive_filter
+from scipy.signal import periodogram
 
 
 filter_freq = 1/np.arange(5,100,4)
+def ts_filter(signal):
+    return recursive_filter(signal,
+                    ar_coeff=filter_freq,
+                    init = signal[:24])
+
 def daniell_spectrum(signal):
     arr = np.asarray(signal)
     # recursive_filter
-    filtered_signal = recursive_filter(signal,
-                                       ar_coeff=filter_freq,
-                                       init = signal[:24])
+    filtered_signal = ts_filter(arr)
     # demean
     filtered_signal = filtered_signal - filtered_signal.mean()
     # detrending and smoothing before spectrogram
@@ -36,9 +40,11 @@ def daniell_smoother(weight_array):
     return smooth
 
 
-def daniell_spectrum(arr):
+filter_freq = 1/np.arange(5,100,4)
+def daniell_spectrum_customize(arr):
+    arr = np.asarray(arr)
     arr = arr - arr.mean()
-    arr = re_filt(arr)
+    arr = ts_filter(arr)
     arr = pd.Series(arr)\
         .rolling(window=3)\
         .apply(daniell_smoother([1,1,0.5]))\
