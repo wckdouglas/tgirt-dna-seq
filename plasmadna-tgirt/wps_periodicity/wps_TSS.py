@@ -9,16 +9,7 @@ import pandas as pd
 from multiprocessing import Pool
 import glob
 import os
-
-
-def fft(array):
-    sample_size = len(array)
-    half_size = sample_size/2
-    intensity = fftpack.fft(array)
-    intensity = abs(intensity)**2
-    freq = fftpack.fftfreq(sample_size)
-    periodicity = 1/(freq)
-    return periodicity[:half_size], intensity[:half_size]
+from wps_spacing import fft
 
 
 def highest_periodicity(wps_array):
@@ -40,7 +31,7 @@ def find_tss_periodicity(bw_prefix, chrom, tss_start, tss_end):
         wps_array = bw.values(chrom, tss_start, tss_end)
         signs = np.sign(wps_array)
         signs[signs==0] = -1
-        peak_count = np.where(np.diff(signs)>0)[0] 
+        peak_count = np.where(np.diff(signs)>0)[0]
         if len(peak_count) > 15:
             result =  highest_periodicity(wps_array)
         bw.close()
@@ -53,8 +44,8 @@ def main():
     ref_path = os.environ['REF']
     protein_bed = ref_path + '/GRCh38/Bed_for_counts_only/protein.bed'
     project_path =  '/stor/work/Lambowitz/cdw2854/plasmaDNA/genomeWPS'
-    bw_path = project_path + '/bigwig_files'
-    bw_prefix = bw_path + '/PD_merged'
+    bw_path = project_path + '/bigWig_files'
+    bw_prefix = bw_path + '/P1022_2_S4'
     bw_prefix = bw_path + '/SRR2130051'
 
     preiodicity_func = partial(find_tss_periodicity, bw_prefix)
@@ -64,8 +55,7 @@ def main():
         start = long(fields[1])
         end = long(fields[2])
         strand = fields[5]
-        interval =2
-        
+
         if strand == '-':
             tss_start, tss_end  = end - 2000, end + 2000
         elif strand == '+':
