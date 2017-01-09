@@ -17,7 +17,9 @@ filter_freq = 1/np.arange(5,100,4)
 def daniell_spectrum(signal):
     arr = np.asarray(signal)
     # recursive_filter
-    filtered_signal = recursive_filter(signal,  ar_coeff=filter_freq, init = signal[:24])
+    filtered_signal = recursive_filter(signal,
+                                       ar_coeff=filter_freq,
+                                       init = signal[:24])
     # demean
     filtered_signal = filtered_signal - filtered_signal.mean()
     # detrending and smoothing before spectrogram
@@ -26,6 +28,25 @@ def daniell_spectrum(signal):
     periodicity = 1 / np.array(p.frequencies())
     intensity = p.psd
     return np.array(periodicity), np.array(intensity)
+
+
+def daniell_smoother(weight_array):
+    def smooth(arr):
+        return (arr * weight_array).mean()
+    return smooth
+
+
+def daniell_spectrum(arr):
+    arr = arr - arr.mean()
+    arr = re_filt(arr)
+    arr = pd.Series(arr)\
+        .rolling(window=3)\
+        .apply(daniell_smoother([1,1,0.5]))\
+        .fillna(0)
+    f,s = periodogram(arr, detrend='linear')
+    p = 1/f
+    return p, s
+
 
 def fft(array):
     '''

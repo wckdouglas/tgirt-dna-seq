@@ -9,6 +9,7 @@ import pandas as pd
 from multiprocessing import Pool
 import glob
 import os
+import sys
 from wps_spacing import highest_periodicity
 
 
@@ -47,7 +48,10 @@ def run_file(protein_bed, out_path, bw_path, bw_prefix):
                 end = long(fields[2])
                 strand = fields[5]
 
-                max_periodicity, max_intensity = preiodicity_func(chrom, start, end)
+                try:
+                    max_periodicity, max_intensity = preiodicity_func(chrom, start, end)
+                except:
+                    sys.exit('%s:%i-%i' %(chrom, start, end))
                 out.write('%s\t%s\t%s\n' %(bed_record.rstrip(), str(max_periodicity),str(max_intensity)))
                 if gene_count % 1000 == 0 and gene_count != 0:
                     print 'Analyzed %i genes' %gene_count
@@ -64,7 +68,8 @@ def main():
         os.mkdir(out_path)
     bw_prefix = ['PD_merged', 'SRR2130052']
     run_file_func = partial(run_file, protein_bed, out_path, bw_path)
-    Pool(2).map(run_file_func, bw_prefix)
+#    Pool(2).map(run_file_func, bw_prefix)
+    map(run_file_func, bw_prefix)
 
 
 if __name__ == '__main__':
