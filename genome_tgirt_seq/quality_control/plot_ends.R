@@ -17,6 +17,7 @@ read_files <- function(filename){
     d <- datapath %>%
         str_c(filename,sep='/') %>%
         read_csv() %>%
+        select(positions,read_end,base,base_count,base_fraction) %>%
         mutate(filename = sample_name)
     return(d)
 }
@@ -26,10 +27,11 @@ files <- list.files(path = datapath, pattern = '.csv')
 df <- files %>%
     map(read_files) %>%
     reduce(rbind) %>%
-    filter(!grepl('sim|Ecoli|cluster|q5|phus',filename)) %>%
+    filter(!grepl('sim|Ecoli|cluster|q5|phus|SRR',filename)) %>%
     mutate(prep = case_when(grepl('nextera',.$filename) ~ 'Nextera XT',
                             grepl('pb',.$filename) ~ 'Pacbio',
                             grepl('sim',.$filename) ~ 'Covaris Sim',
+                            grepl('SRR',.$filename) ~ 'Covaris SRR',
                             grepl('NEB',.$filename) ~ 'TGIRT-seq Fragmentase')) %>%
     mutate(prep = ifelse(is.na(prep),'TGIRT-seq Covaris',prep))  %>%
     mutate(read_end = ifelse(read_end == "5'", 'Read 1', 'Read 2')) %>%
@@ -38,7 +40,7 @@ df <- files %>%
     mutate(bit = -log2(base_fraction)) %>%
     mutate(read_end = as.character(read_end))
 
-colors <- c('light sky blue','salmon','green')
+colors <- c('light sky blue','salmon','green','yellow')
 p <- ggplot(data = df, aes(x = actual_positions, 
                            color = prep, 
                            group=filename, 

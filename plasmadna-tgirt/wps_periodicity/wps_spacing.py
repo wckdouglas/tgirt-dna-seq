@@ -2,14 +2,30 @@
 
 import pyBigWig as pbw
 import numpy as np
-from scipy import fftpack
 from itertools import izip
 from functools import partial
 import pandas as pd
 from multiprocessing import Pool
 import glob
 import os
+import sys
+from spectrum import pdaniell
+from statsmodels.tsa.filters.filtertools import recursive_filter
 
+
+filter_freq = 1/np.arange(5,100,4)
+def daniell_spectrum(signal):
+    arr = np.asarray(signal)
+    # recursive_filter
+    filtered_signal = recursive_filter(signal,  ar_coeff=filter_freq, init = signal[:24])
+    # demean
+    filtered_signal = filtered_signal - filtered_signal.mean()
+    # detrending and smoothing before spectrogram
+    p = pdaniell(filtered_signal, 3, detrend='linear')
+    p()
+    periodicity = 1 / np.array(p.frequencies())
+    intensity = p.psd
+    return np.array(periodicity), np.array(intensity)
 
 def fft(array):
     '''
@@ -22,11 +38,23 @@ def fft(array):
     intensity = fftpack.fft(array)
     intensity = abs(intensity)**2
     freq = fftpack.fftfreq(sample_size)
+    usable_indice = freq > 0
+    intensity = intensity[usable_indice]
+    freq = freq[usable_indice]
     periodicity = 1/(freq)
     return periodicity[:half_size], intensity[:half_size]
 
+def highest_periodicity(wps_array):
+    periodicity, intensity = daniell_spectrum(wps_array)
+    usable_indices = (periodicity<500) & (periodicity > 100)
+    periodicity = periodicity[usable_indices]
+    intensity = intensity[usable_indices]
+    argmax = np.argmax(intensity)
+    max_periodicity = periodicity[argmax]
+    max_intensity = intensity[argmax]
+    return max_periodicity, max_intensity
 
-def highest_periodicity(bw, chromosome, input_arg):
+def max_period_from_chrom(bw, chromosome, input_arg):
     '''
     From a bigWig value array
     using start and end to extract desired region,
@@ -40,14 +68,7 @@ def highest_periodicity(bw, chromosome, input_arg):
     peak_count = np.where(np.diff(signs)>0)[0]
     max_periodicity, max_intensity = 0, 0
     if len(peak_count) > 20:
-        periodicity, intensity = fft(wps_array)
-        usable_indices = periodicity<500
-        periodicity = periodicity[usable_indices]
-        intensity = intensity[usable_indices]
-
-        argmax = np.argmax(intensity)
-        max_periodicity = periodicity[argmax]
-        max_intensity = intensity[argmax]
+        max_periodicity, max_intensity = highest_periodicity(wps_array)
 
     if bin_count % 10000 == 0:
         print 'Analyzed %i bin' %bin_count
@@ -56,9 +77,9 @@ def highest_periodicity(bw, chromosome, input_arg):
 
 def analyze_file(samplename, bw_name):
     samplename = os.path.basename(bw_name).split('.')[0]
-    bw = pbw.open(bw_name,'r')
     chromosome = bw_name.split('.')[1]
-    print 'Reading %s from %s' %(chromosome, samplename)
+    print 'Reading chromosome: %s from %s' %(chromosome, samplename)
+    bw = pbw.open(bw_name,'r')
     chromosome_info = bw.chroms()
     window_size = 5000
     chrom_length = chromosome_info[chromosome]
@@ -66,7 +87,7 @@ def analyze_file(samplename, bw_name):
     start_positions = np.linspace(0, chrom_length, no_of_bins)
     start_positions = np.array(start_positions, dtype=np.int64)
     end_positions = np.roll(start_positions,-1)[:-1]
-    get_periodicity = partial(highest_periodicity, bw, chromosome)
+    get_periodicity = partial(max_period_from_chrom, bw, chromosome)
 
     iterator =  enumerate(izip(start_positions, end_positions))
     results = map(get_periodicity, iterator)
