@@ -14,7 +14,7 @@ do
 		\| sort -k1,1 -k2,2n -k3,3n \
 		\| bedtools merge -i - -s -c 4 -o collapse -delim \",\" \
 		\| tee $OUT_PATH/${SAMLENAME}.collapse.bed \
-		\| python unique_bed.py \
+		\| python unique_bed.py --infile=- --threshold=2 \
 		\> $OUT_PATH/${SAMLENAME}_unique.bed
 done
 
