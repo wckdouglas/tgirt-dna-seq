@@ -9,27 +9,7 @@ import pandas as pd
 from multiprocessing import Pool
 import glob
 import os
-<<<<<<< HEAD
-import sys
-=======
-<<<<<<< HEAD
-from wps_spacing import fft
-
-
-def highest_periodicity(wps_array):
-    periodicity, intensity = fft(wps_array)
-    usable_indices = periodicity<500
-    periodicity = periodicity[usable_indices]
-    intensity = intensity[usable_indices]
-
-    argmax = np.argmax(intensity)
-    max_periodicity = periodicity[argmax]
-    max_intensity = intensity[argmax]
-    return max_periodicity, max_intensity
-=======
->>>>>>> 2690e8a2a928950f93c6a455bf4b97249914dc3c
 from wps_spacing import highest_periodicity
->>>>>>> 2874aea2875a61a45cf4d654b69334708421022e
 
 
 def find_tss_periodicity(bw_prefix, chrom, tss_start, tss_end):
@@ -49,28 +29,15 @@ def find_tss_periodicity(bw_prefix, chrom, tss_start, tss_end):
     return result
 
 
-<<<<<<< HEAD
-def main():
-    ref_path = os.environ['REF']
-    protein_bed = ref_path + '/GRCh38/Bed_for_counts_only/protein.bed'
-    project_path =  '/stor/work/Lambowitz/cdw2854/plasmaDNA/genomeWPS'
-    bw_path = project_path + '/bigWig_files'
-    bw_prefix = bw_path + '/P1022_2_S4'
-    bw_prefix = bw_path + '/SRR2130051'
-=======
 def run_file(protein_bed, out_path, bw_path, bw_prefix):
     out_file = out_path + '/' + bw_prefix + '.bed'
     bw_prefix = bw_path + '/' + bw_prefix
->>>>>>> 2874aea2875a61a45cf4d654b69334708421022e
 
     chroms = range(1,23)
     chroms.extend(['X','Y'])
     chroms = map(str, chroms)
     preiodicity_func = partial(find_tss_periodicity, bw_prefix)
-<<<<<<< HEAD
     fail = 0
-=======
-<<<<<<< HEAD
     for bed_record in open(protein_bed, 'r'):
         fields = bed_record.split('\t')
         chrom = fields[0]
@@ -82,8 +49,6 @@ def run_file(protein_bed, out_path, bw_path, bw_prefix):
             tss_start, tss_end  = end - 2000, end + 2000
         elif strand == '+':
             tss_start, tss_end = start - 2000, start + 2000
-=======
->>>>>>> 2690e8a2a928950f93c6a455bf4b97249914dc3c
     with open(out_file,'w') as out, open(protein_bed, 'r') as genes:
         out.write('chrom\tstart\tend\tname\tscore\tstrand\ttype\tid\tperiodicity\tintensity\n')
         for gene_count, bed_record in enumerate(genes):
@@ -93,23 +58,12 @@ def run_file(protein_bed, out_path, bw_path, bw_prefix):
                 start = long(fields[1])
                 end = long(fields[2])
                 strand = fields[5]
-<<<<<<< HEAD
-                
                 try:
                     max_periodicity, max_intensity = preiodicity_func(chrom, start, end)
                     out.write('%s\t%s\t%s\n' %(bed_record.rstrip(), str(max_periodicity),str(max_intensity)))
                 except:
                     fail += 1
                     pass
-=======
->>>>>>> 2874aea2875a61a45cf4d654b69334708421022e
-
-                max_periodicity, max_intensity = preiodicity_func(chrom, start, end)
-                out.write('%s\t%s\t%s\n' %(bed_record.rstrip(), str(max_periodicity),str(max_intensity)))
->>>>>>> 2690e8a2a928950f93c6a455bf4b97249914dc3c
-                if gene_count % 1000 == 0 and gene_count != 0:
-                    print 'Analyzed %i genes' %gene_count
-    print 'written: %s, failed %i' %(out_file,fail)
     return 0
 
 def main():
@@ -120,7 +74,7 @@ def main():
     out_path = project_path + '/tss_periodicity'
     if not os.path.isdir(out_path):
         os.mkdir(out_path)
-    bw_prefix = ['PD_merged', 'SRR2130052']
+    bw_prefix = ['PD_merged_1022_1203', 'SRR2130051']
     run_file_func = partial(run_file, protein_bed, out_path, bw_path)
     Pool(2).map(run_file_func, bw_prefix)
 
