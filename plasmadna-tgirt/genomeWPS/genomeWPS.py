@@ -132,12 +132,12 @@ def calculateWPS(bam, chrom, start, end, tssWindow, wpsWindow, halfWPSwindow, up
 def adjust_median(wps_array):
     rolling_median = pd.Series(wps_array)\
             .rolling(window = 1000)\
-            .median()
+            .median() 
     adjusted_wps = np.nan_to_num(wps_array - rolling_median)
     return adjusted_wps
 
 
-def extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
+def extract_wps(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
         lowerBound, chrom, chromSize, samplename):
     '''
     adding up wps track for all genes
@@ -148,7 +148,6 @@ def extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
         wpsTSS, coverage = calculateWPS(bam, chrom, start, end,
                     tssWindow, wpsWindow, halfWPSwindow, upperBound, lowerBound)
         chromArray[start:end] += wpsTSS
-    chromArray = savgol_filter(adjust_median(chromArray), window_length = 21, polyorder=2)
     return chromArray
 
 
@@ -277,11 +276,11 @@ def write_peaks(outputWig, outputBed, samplename, lenType):
     bw = pbw.open(outputWig)
     chrom, length = bw.chroms().items()[0]
     chromArray = np.array(bw.values(chrom,0,length))
+    chromArray = savgol_filter(adjust_median(chromArray), window_length = 21, polyorder=2)
 
     with open(outputBed,'w') as outBed:
         if 'Long' in lenType:
             findIntercepts(chromArray, outBed, chrom, samplename)
-#        elif 'Short' in lenType:
 #
     return 0
 
@@ -305,7 +304,7 @@ def make_wps_array(tempBam, chromosome, tssWindow, wpsWindow,
             sys.exit('Wrong chromosome name: %s!' %chromosome)
         chromLength = np.array(bam.lengths)
         chromSize = int(chromLength[chroms==chromosome][0])
-        chromArray = extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
+        chromArray = extract_wps(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
                 lowerBound, chromosome, chromSize, samplename)
     return chromArray
 
