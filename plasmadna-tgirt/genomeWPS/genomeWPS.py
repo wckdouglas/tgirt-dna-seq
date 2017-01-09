@@ -16,7 +16,7 @@ import sys
 import pyBigWig as pbw
 from sys import stderr, argv
 from multiprocessing import Pool
-from scipy.signal import savgol_filter, medfilt
+from scipy.signal import savgol_filter
 import pandas as pd
 from functools import partial
 from itertools import izip
@@ -132,12 +132,12 @@ def calculateWPS(bam, chrom, start, end, tssWindow, wpsWindow, halfWPSwindow, up
 def adjust_median(wps_array):
     rolling_median = pd.Series(wps_array)\
             .rolling(window = 1000)\
-            .median()
+            .median() 
     adjusted_wps = np.nan_to_num(wps_array - rolling_median)
     return adjusted_wps
 
 
-def extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
+def extract_wps(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
         lowerBound, chrom, chromSize, samplename):
     '''
     adding up wps track for all genes
@@ -148,7 +148,6 @@ def extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
         wpsTSS, coverage = calculateWPS(bam, chrom, start, end,
                     tssWindow, wpsWindow, halfWPSwindow, upperBound, lowerBound)
         chromArray[start:end] += wpsTSS
-    chromArray = savgol_filter(adjust_median(chromArray), window_length = 21, polyorder=2)
     return chromArray
 
 
@@ -166,7 +165,7 @@ def merge_peaks(peak_start, peak_end):
     new_end = []
     tolerance_unprotected = 5
     i = 0
-    while i < len(peak_start)-1:
+    while i < len(peak_start)-2:
         new_start.append(peak_start[i])
         j = i
         while peak_start[j+1] - peak_end[j] <= tolerance_unprotected:
@@ -179,7 +178,9 @@ def merge_peaks(peak_start, peak_end):
     return np.array(new_start), np.array(new_end)
 
 def maxSubArray(ls):
-#https://gist.github.com/alabid/3734606
+    '''
+    #https://gist.github.com/alabid/3734606
+    '''
     if len(ls) == 0:
        raise Exception("Array empty") # should be non-empty
 
@@ -203,6 +204,10 @@ def maxSubArray(ls):
 
 
 def pick_peak(above_median_starts, above_median_ends, sub_wps):
+    '''
+        from region that has 50 < size < 150,
+        pick best peak (with maximum wps score)
+    '''
     sub_wps = np.asarray(sub_wps)
     above_median_ends = np.asarray(above_median_ends)
     above_median_starts = np.asarray(above_median_starts)
@@ -212,6 +217,12 @@ def pick_peak(above_median_starts, above_median_ends, sub_wps):
 
 
 def calling_peaks(chromosome, wpsArray, peak_start, peak_end, peak_count, outFile, peak_size_filter):
+    '''
+        using peak start and end from wps array,
+        find maximum sub array
+        and export start and end from maximum subarray
+        peak score determine from maximum wps score. 
+    '''
     sub_wps = wpsArray[peak_start:peak_end]
     median_sub_wps = np.median(sub_wps)
     adjusted_sub_wps = sub_wps - median_sub_wps
@@ -223,12 +234,7 @@ def calling_peaks(chromosome, wpsArray, peak_start, peak_end, peak_count, outFil
         above_median_starts, above_median_ends =  pick_peak(above_median_starts, above_median_ends, sub_wps) 
 
     for above_median_start, above_median_end in izip(above_median_starts, above_median_ends):
-        try:
-            sub_peak_wps = sub_wps[above_median_start:above_median_end]
-        except TypeError:
-            print above_median_start, above_median_end
-            print above_median_starts, above_median_ends
-            sys.exit()
+        sub_peak_wps = sub_wps[above_median_start:above_median_end]
         nucleosome_start , nucleosome_end = maxSubArray(sub_peak_wps)
 
 
@@ -246,7 +252,7 @@ def calling_peaks(chromosome, wpsArray, peak_start, peak_end, peak_count, outFil
     return peak_count
 
 
-def findIntercepts(wpsArray, outFile, chromosome,samplename, lenType):
+def findIntercepts(wpsArray, outFile, chromosome,samplename):
     '''
     looking for the positions that across 0 in the de-noised signal
     '''
@@ -270,9 +276,12 @@ def write_peaks(outputWig, outputBed, samplename, lenType):
     bw = pbw.open(outputWig)
     chrom, length = bw.chroms().items()[0]
     chromArray = np.array(bw.values(chrom,0,length))
+    chromArray = savgol_filter(adjust_median(chromArray), window_length = 21, polyorder=2)
 
     with open(outputBed,'w') as outBed:
-        findIntercepts(chromArray, outBed, chrom, samplename, lenType)
+        if 'Long' in lenType:
+            findIntercepts(chromArray, outBed, chrom, samplename)
+#
     return 0
 
 
@@ -295,11 +304,15 @@ def make_wps_array(tempBam, chromosome, tssWindow, wpsWindow,
             sys.exit('Wrong chromosome name: %s!' %chromosome)
         chromLength = np.array(bam.lengths)
         chromSize = int(chromLength[chroms==chromosome][0])
-        chromArray = extractTSSaln(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
+        chromArray = extract_wps(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
                 lowerBound, chromosome, chromSize, samplename)
     return chromArray
 
 def runFile(tempBam, outprefix, genome, tssWindow, samplename, chromosome, upperBound, lowerBound, lenType, wpsWindow):
+    ''' using bam_file from bed->bam, and analyze the given length type of fragment
+        1. Short (35-80bp) WPS_window = 16
+        2. Long (120-180bp) WPS_window=120
+    '''
     output_folder = os.path.dirname(outprefix)
     bed_folder = output_folder + '/bed_files'
     bigwig_folder = output_folder + '/bigWig_files'

@@ -48,7 +48,7 @@ def make_graph(df):
 
 def unique_barcode_from_graph(graph):
     unique_barcode = []
-    for subgraph in nx.connected_components(graph):
+    for subgraph in connected_components(graph):
         subgraph = list(subgraph)
         subgraph_size = len(subgraph)
         if subgraph_size == 1:
