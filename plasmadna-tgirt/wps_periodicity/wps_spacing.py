@@ -2,7 +2,6 @@
 
 import pyBigWig as pbw
 import numpy as np
-from scipy import fftpack
 from itertools import izip
 from functools import partial
 import pandas as pd
@@ -10,7 +9,23 @@ from multiprocessing import Pool
 import glob
 import os
 import sys
+from spectrum import pdaniell
+from statsmodels.tsa.filters.filtertools import recursive_filter
 
+
+filter_freq = 1/np.arange(5,100,4)
+def daniell_spectrum(arr):
+    arr = np.asarray(arr)
+    # recursive_filter
+    filtered = recursive_filter(signal,  ar_coeff=filter_freq, init = arr[:24])
+    # demean
+    filtered = filtered - filtered.mean()
+    # detrending and smoothing before spectrogram
+    p = pdaniell(arr, 3, detrend='linear')
+    p()
+    periodicity = 1 / np.array(p.frequencies())
+    intensity = p.psd
+    return np.array(periodicity), np.array(intensity)
 
 def fft(array):
     '''
@@ -30,8 +45,8 @@ def fft(array):
     return periodicity[:half_size], intensity[:half_size]
 
 def highest_periodicity(wps_array):
-    periodicity, intensity = fft(wps_array)
-    usable_indices = (periodicity<200) & (periodicity > 150)
+    periodicity, intensity = daniell_spectrum(wps_array)
+    usable_indices = (periodicity<500) & (periodicity > 100)
     periodicity = periodicity[usable_indices]
     intensity = intensity[usable_indices]
     argmax = np.argmax(intensity)

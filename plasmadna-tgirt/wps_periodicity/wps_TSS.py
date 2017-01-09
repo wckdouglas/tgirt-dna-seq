@@ -20,7 +20,7 @@ def find_tss_periodicity(bw_prefix, chrom, tss_start, tss_end):
         wps_array = bw.values(chrom, tss_start, tss_end)
         signs = np.sign(wps_array)
         signs[signs==0] = -1
-        peak_count = np.where(np.diff(signs)>0)[0] 
+        peak_count = np.where(np.diff(signs)>0)[0]
         if len(peak_count) > 15:
             result =  highest_periodicity(wps_array)
         bw.close()
@@ -29,29 +29,28 @@ def find_tss_periodicity(bw_prefix, chrom, tss_start, tss_end):
     return result
 
 
-chroms = np.array(np.arange(1,23),dtype='string')
 def run_file(protein_bed, out_path, bw_path, bw_prefix):
     out_file = out_path + '/' + bw_prefix + '.bed'
-    bw_prefix = bw_path + '/' + bw_prefix 
+    bw_prefix = bw_path + '/' + bw_prefix
 
+    chroms = range(1,23)
+    chroms.extend(['X','Y'])
+    chroms = map(str, chroms)
     preiodicity_func = partial(find_tss_periodicity, bw_prefix)
-    with open(out_file,'w') as out:
+    with open(out_file,'w') as out, open(protein_bed, 'r') as genes:
         out.write('chrom\tstart\tend\tname\tscore\tstrand\ttype\tid\tperiodicity\tintensity\n')
-        for bed_record in open(protein_bed, 'r'):
-            fields = bed_record.split('\t')
+        for gene_count, bed_record in enumerate(genes):
+            fields = bed_record.rstrip().split('\t')
             chrom = fields[0]
-            start = long(fields[1])
             if chrom in chroms:
+                start = long(fields[1])
                 end = long(fields[2])
                 strand = fields[5]
-            
-                if strand == '-':
-                    tss_start, tss_end  = end - 2000, end + 2000
-                elif strand == '+':
-                    tss_start, tss_end = start - 2000, start + 2000
 
-                max_periodicity, max_intensity = preiodicity_func(chrom, tss_start, tss_end)
+                max_periodicity, max_intensity = preiodicity_func(chrom, start, end)
                 out.write('%s\t%s\t%s\n' %(bed_record.rstrip(), str(max_periodicity),str(max_intensity)))
+                if gene_count % 1000 == 0 and gene_count != 0:
+                    print 'Analyzed %i genes' %gene_count
     print 'written: %s' %out_file
     return 0
 
