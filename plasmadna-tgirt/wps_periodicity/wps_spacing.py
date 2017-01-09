@@ -14,14 +14,14 @@ from statsmodels.tsa.filters.filtertools import recursive_filter
 
 
 filter_freq = 1/np.arange(5,100,4)
-def daniell_spectrum(arr):
-    arr = np.asarray(arr)
+def daniell_spectrum(signal):
+    arr = np.asarray(signal)
     # recursive_filter
-    filtered = recursive_filter(signal,  ar_coeff=filter_freq, init = arr[:24])
+    filtered_signal = recursive_filter(signal,  ar_coeff=filter_freq, init = signal[:24])
     # demean
-    filtered = filtered - filtered.mean()
+    filtered_signal = filtered_signal - filtered_signal.mean()
     # detrending and smoothing before spectrogram
-    p = pdaniell(arr, 3, detrend='linear')
+    p = pdaniell(filtered_signal, 3, detrend='linear')
     p()
     periodicity = 1 / np.array(p.frequencies())
     intensity = p.psd
