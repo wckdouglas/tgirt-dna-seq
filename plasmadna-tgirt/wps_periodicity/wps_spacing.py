@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 import pyBigWig as pbw
@@ -11,69 +12,36 @@ import os
 import sys
 from spectrum import pdaniell
 from statsmodels.tsa.filters.filtertools import recursive_filter
-from scipy.signal import periodogram
 
 
-filter_freq = 1/np.arange(5,100,4)
-def ts_filter(signal):
-    return recursive_filter(signal,
-                    ar_coeff=filter_freq,
-                    init = signal[:24])
+def shift_array(signal):
+    signal = np.array(signal)
+    signal = np.append(signal[:300], signal)
+    return signal
 
-def daniell_spectrum(signal):
-    arr = np.asarray(signal)
-    # recursive_filter
-    filtered_signal = ts_filter(arr)
-    # demean
-    filtered_signal = filtered_signal - filtered_signal.mean()
+filter_freq = 1.0/np.arange(5,100,4)
+def recursive_filter_function(signal):
+    signal = shift_array(signal)
+    filter_length = len(filter_freq)
+    signal = recursive_filter(signal, filter_freq)[300:]
+    return signal
+
+def demean(arr):
+    return arr-arr.mean()
+
+def daniell_spectrum(signal, sample_rate):
+    filtered_signal = recursive_filter_function(signal)
+    filtered_signal = demean(filtered_signal)
     # detrending and smoothing before spectrogram
-    p = pdaniell(filtered_signal, 3, detrend='linear')
+    p = pdaniell(filtered_signal, 2, detrend='linear', sampling = sample_rate)
     p()
-    periodicity = 1 / np.array(p.frequencies())
-    intensity = p.psd
-    return np.array(periodicity), np.array(intensity)
-
-
-def daniell_smoother(weight_array):
-    def smooth(arr):
-        return (arr * weight_array).mean()
-    return smooth
-
-
-filter_freq = 1/np.arange(5,100,4)
-def daniell_spectrum_customize(arr):
-    arr = np.asarray(arr)
-    arr = arr - arr.mean()
-    arr = ts_filter(arr)
-    arr = pd.Series(arr)\
-        .rolling(window=3)\
-        .apply(daniell_smoother([1,1,0.5]))\
-        .fillna(0)
-    f,s = periodogram(arr, detrend='linear')
-    p = 1/f
-    return p, s
-
-
-def fft(array):
-    '''
-    Feed in a WPS array and return:
-        1. range of periodicity
-        2. intensity
-    '''
-    sample_size = len(array)
-    half_size = sample_size/2
-    intensity = fftpack.fft(array)
-    intensity = abs(intensity)**2
-    freq = fftpack.fftfreq(sample_size)
-    usable_indice = freq > 0
-    intensity = intensity[usable_indice]
-    freq = freq[usable_indice]
-    periodicity = 1/(freq)
-    return periodicity[:half_size], intensity[:half_size]
+    psd = p.psd
+    freq = p.frequencies()
+    return 1/np.array(freq), np.array(psd)
 
 def highest_periodicity(wps_array):
     periodicity, intensity = daniell_spectrum(wps_array)
-    usable_indices = (periodicity<500) & (periodicity > 100)
+    usable_indices = (periodicity<=280) & (periodicity>=120)
     periodicity = periodicity[usable_indices]
     intensity = intensity[usable_indices]
     argmax = np.argmax(intensity)
