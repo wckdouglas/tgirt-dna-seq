@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECTPATH=/scratch/02727/cdw2854/plasmaDNA
-DATAPATH=$PROJECTPATH/rawData
+DATAPATH=$PROJECTPATH/rawData/umi2id
 RESULTPATH=$PROJECTPATH/splittedFastq
 SRCPATH=/work/02727/cdw2854/lonestar/src
 PROGRAM=$SRCPATH/fastq-tools/bin/splitFastq
