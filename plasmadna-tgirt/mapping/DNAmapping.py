@@ -18,7 +18,7 @@ def getOpt():
 # running in shell
 def runProcess(command, samplename):
     sys.stderr.write('[%s] %s\n' %(samplename, command))
-    #result = subprocess.call('time ' + command, shell=True)
+    result = subprocess.call('time ' + command, shell=True)
     return 0
 
 #Trimming

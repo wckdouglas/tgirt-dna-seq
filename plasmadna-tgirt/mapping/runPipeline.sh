@@ -7,7 +7,7 @@ DATAPATH1=$PROJECTPATH/splittedFastq
 INDEXPATH=$SCRATCH/GRCh38/hg38_rDNA
 INDEX=$INDEXPATH/genome_rDNA
 PYTHON=$(which python)
-CORES=3
+CORES=10
 
 for FQ in $DATAPATH1/*R1_001.fastq.gz  $DATAPATH2/*R1*.fastq.gz
 do
