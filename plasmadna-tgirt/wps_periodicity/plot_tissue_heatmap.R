@@ -7,12 +7,27 @@ library(purrr)
 library(cowplot)
 library(parallel)
 
-gene_expression <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/genes/rna.csv'
-ge <- read_csv(gene_expression) %>%
+datapath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/genomeWPS/tss_periodicity'
+gene_expression_table <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/genes/rna.csv'
+cell_lines_table <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/genes/labels.txt'
+cell_lines <- read_tsv(cell_lines_table) %>%
+    set_names(c('tissue_type','cells','cell_type','description','rname'))  %>%
+    select(tissue_type, cells)  %>% 
+    tbl_df
+ge <- read_csv(gene_expression_table) %>%
     set_names(c('id','name','cells','TPM','unit')) %>%
-    select(-unit) 
-cell_lines <- read_tsv('/stor/work/Lambowitz/cdw2854/plasmaDNA/genes/labels.txt')  %>%
-    set_names(c('tissue_type','cells','cell_type','description','rname')) 
+    select(-unit)  %>%
+    group_by(id,name) %>% 
+    do(data_frame(
+        cells = .$cells, 
+        zeros = sum(.$TPM==0), 
+        TPM=.$TPM
+    )) %>%
+    filter(zeros >= 3) %>%
+    filter(TPM>3) %>%
+    mutate(TPM = log2(TPM)) %>%
+    inner_join(cell_lines)
+
 
 make_cor_df <- function(filename, datapath){
     periodogram <- datapath %>%
@@ -20,28 +35,59 @@ make_cor_df <- function(filename, datapath){
         read_tsv() %>%
         filter(periodicity < 199, periodicity > 193) %>%
         group_by(id, name, type) %>%
-        summarize(intensity = mean(intensity)) %>%
+        summarize(intensity = mean(sqrt(intensity))) %>%
         inner_join(ge) %>%
-        group_by(cells) %>%
-        summarize(correlation = cor(TPM, intensity, method='pearson')) %>%
+        group_by(cells, tissue_type) %>%
+        summarize(correlation = cor(TPM, intensity, method='pearson', 
+                                    use="pairwise.complete.obs")) %>%
         ungroup() %>%
-        inner_join(cell_lines) %>%
-        arrange(abs(correlation)) %>%
-        mutate(rank = seq(1:nrow(.))) %>%
+        mutate(abs_cor = abs(correlation)) %>%
+        arrange(abs_cor) %>%
+        mutate(rank = 1:nrow(.)) %>%
         mutate(samplename = str_replace(filename,'.bed','')) %>%
         tbl_df
     return(periodogram)
 }
 
-datapath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/genomeWPS/tss_periodicity'
+
 files <- list.files(path = datapath, pattern='.bed', full.names = F)
 df <- files %>%
     mclapply(.,make_cor_df, datapath, mc.cores=12) %>%
     reduce(rbind) %>%
     tbl_df
 
-tissue_plot <- ggplot(data=tissue_df, 
+tissues <- c("Abdominal" ,'Brain',"Breast/Female Reproductive","Lung","Lymphoid", 
+            "Myeloid","Sarcoma", "Skin", "Urinary/Male Reproductive",
+            "Other","Primary Tissue")
+plot_df <- df %>% 
+    #filter(grepl('SRR|cluster',samplename)) %>%
+    filter(grepl('rmdup|SRR',samplename)) %>%
+    filter(!grepl('PD[34]|sim',samplename)) %>%
+    mutate(tissue_type = factor(tissue_type, levels = tissues))
+
+color_palette <- c('red','green','orange','purple','khaki3','khaki2',
+                   'brown','pink','slateblue','darkgrey','skyblue')
+tissue_plot <- ggplot(data=plot_df, 
                       aes(x=samplename,y=rank,fill=tissue_type)) + 
-    geom_tile() +
-    theme(axis.text.x = element_text(angle=90))+
-    ylim(40,60)
+    geom_tile(width=0.9, height=0.9, color = 'white') +
+    theme(axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5))+
+    scale_fill_manual(values = color_palette) +
+    labs(y=str_c('<-- Rank (',max(plot_df$rank),' cells/tissues) <--'),x = ' ', fill = ' ') +
+    ylim(max(plot_df$rank)-20,max(plot_df$rank))+
+    theme(axis.line = element_blank()) +
+    theme(axis.text.y  = element_blank()) +
+    theme(axis.ticks = element_blank()) 
+
+
+pca_rank <- df %>% 
+    select(-abs_cor, -correlation) %>% 
+    filter(!grepl('sim|PD[34]',samplename))%>% 
+    spread(samplename, rank) %>% 
+    select(-cells,-tissue_type) %>% 
+    prcomp() %>% 
+    .$rotation %>% 
+    data.frame() %>% 
+    tibble::rownames_to_column('samplename') %>% 
+    mutate(prep = ifelse(grepl('SRR',samplename),'ssDNA-seq','TGIRT-seq')) %>%
+    ggplot(aes(x=PC1, y =PC2, label = samplename)) + 
+        geom_text(aes(color = prep))

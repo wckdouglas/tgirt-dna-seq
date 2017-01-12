@@ -12,6 +12,7 @@ import os
 import sys
 from spectrum import pdaniell
 from statsmodels.tsa.filters.filtertools import recursive_filter
+from scipy.signal import detrend
 
 
 def shift_array(signal):
@@ -30,7 +31,8 @@ def demean(arr):
     return arr-arr.mean()
 
 def daniell_spectrum(signal, sample_rate):
-    filtered_signal = recursive_filter_function(signal)
+    filtered_signal = detrend(signal, type='linear')
+    filtered_signal = recursive_filter_function(filtered_signal)
     filtered_signal = demean(filtered_signal)
     # detrending and smoothing before spectrogram
     p = pdaniell(filtered_signal, 2, detrend='linear', sampling = sample_rate)

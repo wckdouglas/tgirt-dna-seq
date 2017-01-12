@@ -8,9 +8,18 @@ library(cowplot)
 library(parallel)
 
 gene_expression <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/genes/rna.csv'
-ge <- read_csv(gene_expression) %>%
+ge <- read_csv(gene_expression_table) %>%
     set_names(c('id','name','cells','TPM','unit')) %>%
-    select(-unit) 
+    select(-unit)  %>%
+    group_by(id,name) %>% 
+    do(data_frame(
+        cells = .$cells, 
+        zeros = sum(.$TPM==0), 
+        TPM=.$TPM
+    )) %>%
+    filter(zeros >= 3) %>%
+    filter(TPM>3) %>%
+    mutate(TPM = log2(TPM))
 cell_lines <- read_tsv('/stor/work/Lambowitz/cdw2854/plasmaDNA/genes/labels.txt')  %>%
     set_names(c('tissue_type','cells','cell_type','description','rname')) 
 
@@ -20,7 +29,7 @@ make_cor_df <- function(filename, datapath){
         read_tsv() %>%
         mutate(group = cut(periodicity, breaks = seq(120,280,10))) %>%
         group_by(group, id, type, name) %>%
-        summarize(intensity = sum(intensity)) %>%
+        summarize(intensity = mean(intensity)) %>%
         ungroup() %>%
         inner_join(ge) %>%
         group_by(cells, group) %>%
@@ -41,9 +50,7 @@ df <- files %>%
     reduce(rbind) %>%
     tbl_df
 
-
-p<-ggplot(data = df %>%
-              filter(samplename %in% c('PD_1203_merged','SRR2130051')), 
+p<-ggplot(data = df %>% filter(samplename %in% c('SRR2130051','PD_1203_merged')),
           aes(x=periodicity, y = correlation,
               group = cells,color = cell_kind)) +
     geom_line(alpha=0.5) +
