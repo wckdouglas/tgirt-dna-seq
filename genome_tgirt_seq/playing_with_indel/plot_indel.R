@@ -46,7 +46,8 @@ df <- list.files(path = indel_table_path, pattern = '.tsv', full.names = T) %>%
     
 form <- y ~ poly(x,1, raw=T)
 p<-ggplot(data = df, aes(x = indel_index, y = normalized_indel, color = prep))+
-    geom_smooth(method='lm', formula =form, se = F) +
+#    geom_smooth(method='lm', formula =form, se = F) +
+    geom_smooth(se = F,method = 'loess') +
     geom_point() +
 #    ggpmisc::stat_poly_eq(aes(label = ..eq.label..), 
 #                 formula = form, 
@@ -58,10 +59,12 @@ p<-ggplot(data = df, aes(x = indel_index, y = normalized_indel, color = prep))+
 #                 label.y.npc = "center",
 #                 label.x.npc = 'center',
 #                 parse = TRUE)+
-#    scale_color_manual(values = c('lightskyblue','salmon'))+
-    labs(x = 'Repeat Index on Genome', y = 'Average Indel per Read', color = ' ')+
-    scale_x_continuous(breaks = seq(0,10),name='Repeat units') +
-    theme(legend.position = c(0.2,0.8))
+    scale_color_manual(values = c('lightskyblue','salmon'))+
+    labs(y = 'Average Indel per Read per Runs', color = ' ')+
+    scale_x_continuous(breaks = seq(0,10),name='Mononucleotide Runs') +
+    theme(legend.position = c(0.2,0.8)) +
+    theme(text = element_text(size = 25, face='bold')) +
+    theme(axis.text = element_text(size = 25, face='bold')) 
 figure_name <- str_c(indel_table_path,'/indel_per_repeat.pdf')
-ggsave(p, file = figurename)
-message('Plotted: ', figurename)
+ggsave(p, file = figure_name, width = 9, height = 9)
+message('Plotted: ', figure_name)

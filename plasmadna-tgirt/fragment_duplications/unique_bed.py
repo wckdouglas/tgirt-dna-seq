@@ -2,9 +2,7 @@
 
 import numpy as np
 from scipy.spatial.distance import hamming
-import fileinput
 from itertools import combinations
-import pandas as pd
 from functools import partial
 from collections import defaultdict
 from networkx import Graph, connected_components
@@ -31,20 +29,21 @@ def get_opt():
     return args
 
 
-def hamming_barcode(a, b):
+def hamming_barcode(barcode_pair, threshold):
+    a, b = barcode_pair
     assert len(a) == len(b), 'Wrong barcode extraction'
-    return hamming(list(a), list(b)) * len(a)
+    is_path =  1 if hamming(list(a), list(b)) * len(a) <= threshold else 0
+    return (a,b,is_path)
 
 
-def make_graph(df):
+def make_graph(barcode_array):
     G = Graph()
-    for i in range(len(df)):
-        d = df.iloc[i,:]
-        if d.distance == 0:
-            G.add_edge(d.a,d.b)
+    for pair in barcode_array:
+        if pair[2] == 1:
+            G.add_edge(pair[0],pair[1])
         else:
-            G.add_node(d.a)
-            G.add_node(d.b)
+            G.add_node(pair[0])
+            G.add_node(pair[1])
     return G
 
 
@@ -62,10 +61,8 @@ def unique_barcode_from_graph(graph):
 
 def demultiplex(barcodes, threshold):
     comparison = combinations(set(barcodes),r=2)
-    df = pd.DataFrame(list(comparison), columns = ['a','b']) \
-        .assign(distance = lambda d: map(hamming_barcode, d.a, d.b )) \
-        .assign(distance = lambda d: map(lambda x: 0 if x <= threshold else 1, d.distance ))
-    graph = make_graph(df)
+    barcode_array = [hamming_barcode(barcode_pair, threshold) for barcode_pair in comparison]
+    graph = make_graph(barcode_array)
     unique_barcode =  unique_barcode_from_graph(graph)
     #print 'In: %i, out: %i' %(len(barcodes), len(unique_barcode))
     return unique_barcode

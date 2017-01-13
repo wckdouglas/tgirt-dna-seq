@@ -2,7 +2,7 @@
 
 PROJECTPATH=$WORK/cdw2854/ecoli_genome
 #PROJECTPATH=$WORK/cdw2854/genomeDNA
-DATAPATH=$PROJECTPATH/rawData/k12
+DATAPATH=$PROJECTPATH/rawData/k12/umi2id
 INDEXPATH=$REF/Ecoli
 INDEX=$INDEXPATH/k12_mg1655.fa
 #INDEX=$REF//hg19/Sequence/WholeGenomeFasta/genome.fa

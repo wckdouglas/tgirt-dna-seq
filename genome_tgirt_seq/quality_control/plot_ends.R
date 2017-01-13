@@ -27,7 +27,10 @@ files <- list.files(path = datapath, pattern = '.csv')
 df <- files %>%
     map(read_files) %>%
     reduce(rbind) %>%
-    filter(!grepl('sim|Ecoli|cluster|q5|phus|SRR',filename)) %>%
+    filter(!grepl('subsampled|sim|Ecoli|q5|phus|SRR',filename)) %>%
+    filter(grepl('nextera|NEB|kq|kh',filename)) %>%
+    filter(grepl('MarkDuplicate',filename)) %>%
+    filter(grepl('nextera|clustered',filename)) %>%
     mutate(prep = case_when(grepl('nextera',.$filename) ~ 'Nextera XT',
                             grepl('pb',.$filename) ~ 'Pacbio',
                             grepl('sim',.$filename) ~ 'Covaris Sim',
