@@ -1,13 +1,13 @@
 #!/bin/bash
 
 PROJECTPATH=/scratch/02727/cdw2854/plasmaDNA
-DATAPATH=$PROJECTPATH/rawData/umi2id
+DATAPATH=$PROJECTPATH/rawData
 RESULTPATH=$PROJECTPATH/splittedFastq
 SRCPATH=/work/02727/cdw2854/lonestar/src
 PROGRAM=$SRCPATH/fastq-tools/bin/splitFastq
 mkdir -p $RESULTPATH
 
-for FASTQ in $(ls $DATAPATH/*gz | grep -v 'try\|93\|50')
+for FASTQ in $(ls $DATAPATH/*fq.gz | grep -v 'try\|93\|50')
 do 
 	SAMPLE=$(basename $FASTQ)
 	SUFFIX=$(echo $SAMPLE | rev | cut -d'.' -f1 | rev )

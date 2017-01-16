@@ -2,7 +2,7 @@
 
 PROJECTPATH=/scratch/02727/cdw2854/plasmaDNA
 BEDPATH=${PROJECTPATH}/bedFiles
-SPLITBED=${BEDPATH}/splittedBed
+SPLITBED=${BEDPATH}/umi_splitted
 mkdir -p ${SPLITBED}
 #rm -f ${SPLITBED}/*bed
 

@@ -9,5 +9,5 @@
 		{"id":"secondPairReverse",
 			"alignmentFlag" : "147"}
 	],
-	"rule": "firstPairForward | firstPairReverse | secondPairReverse | secondPairForward"
+	"rule": "firstPairForward | firstPairReverse | secondPairReverse | secondPairForward "
 }

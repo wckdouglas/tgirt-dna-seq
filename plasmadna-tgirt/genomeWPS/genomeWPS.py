@@ -324,8 +324,8 @@ def runFile(tempBam, outprefix, genome, tssWindow, samplename, chromosome, upper
     printMessage('Finished calculating WPS for chromosome %s' %(chromosome), samplename)
     writeWig(chromArray, outputWig, chromosome, samplename)
     printMessage('Witten %s' %outputWig, samplename)
-    write_peaks(outputWig, outputBed, samplename, lenType)
-    printMessage('Witten %s' %outputBed, samplename)
+    #write_peaks(outputWig, outputBed, samplename, lenType)
+    #printMessage('Witten %s' %outputBed, samplename)
     return 0
 
 def main(inFile, outprefix, genome, tssWindow, chromosome):
