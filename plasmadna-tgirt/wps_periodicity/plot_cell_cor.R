@@ -18,7 +18,7 @@ ge <- read_csv(gene_expression_table) %>%
         TPM=.$TPM
     )) %>%
     filter(zeros >= 3) %>%
-    filter(TPM>3) %>%
+    filter(TPM>0) %>%
     mutate(TPM = log2(TPM))
 cell_lines <- read_tsv('/stor/work/Lambowitz/cdw2854/plasmaDNA/genes/labels.txt')  %>%
     set_names(c('tissue_type','cells','cell_type','description','rname')) 
@@ -50,12 +50,13 @@ df <- files %>%
     reduce(rbind) %>%
     tbl_df
 
-p<-ggplot(data = df %>% filter(samplename %in% c('SRR2130051','PD_1203_merged')),
+p<-ggplot(data = df ,
           aes(x=periodicity, y = correlation,
               group = cells,color = cell_kind)) +
     geom_line(alpha=0.5) +
    # theme(legend.position = 'none')+
     scale_color_manual(values = c('black','grey')) +
     scale_x_continuous(breaks = seq(160,220,10),limits = c(160,220)) +
-    facet_wrap(~samplename)
+    facet_wrap(~samplename) +
+    labs(color = ' ')
 

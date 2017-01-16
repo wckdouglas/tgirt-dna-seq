@@ -13,6 +13,8 @@ import sys
 from spectrum import pdaniell
 from statsmodels.tsa.filters.filtertools import recursive_filter
 from scipy.signal import detrend
+from rpy2 import robjects
+from rpy2.robjects import numpy2ri
 
 
 def shift_array(signal):
@@ -40,6 +42,20 @@ def daniell_spectrum(signal, sample_rate):
     psd = p.psd
     freq = p.frequencies()
     return 1/np.array(freq), np.array(psd)
+
+def r_spectrum(signal):
+    filtered_signal = detrend(signal, type='linear')
+    filtered_signal = recursive_filter_function(filtered_signal)
+    filtered_signal = demean(filtered_signal)
+    periodogram = robjects.r('spec.pgram')
+    res = periodogram(numpy2ri.numpy2ri(filtered_signal),
+                        pad=0.3,tap=0.3,
+                        span=2,plot=False,detrend=True,
+                        demean=True)
+    freq = numpy2ri.ri2py(res.rx2('freq'))
+    psd = numpy2ri.ri2py(res.rx2('spec'))
+    return 1/freq, psd
+
 
 def highest_periodicity(wps_array):
     periodicity, intensity = daniell_spectrum(wps_array)

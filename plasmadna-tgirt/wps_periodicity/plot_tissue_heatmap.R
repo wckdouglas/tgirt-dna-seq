@@ -4,6 +4,7 @@ library(readr)
 library(tidyr)
 library(dplyr)
 library(purrr)
+library(stringr)
 library(cowplot)
 library(parallel)
 
@@ -21,10 +22,10 @@ ge <- read_csv(gene_expression_table) %>%
     do(data_frame(
         cells = .$cells, 
         zeros = sum(.$TPM==0), 
-        TPM=.$TPM
+        TPM= .$TPM
     )) %>%
     filter(zeros >= 3) %>%
-    filter(TPM>3) %>%
+    filter(TPM>0) %>%
     mutate(TPM = log2(TPM)) %>%
     inner_join(cell_lines)
 
@@ -38,8 +39,7 @@ make_cor_df <- function(filename, datapath){
         summarize(intensity = mean(sqrt(intensity))) %>%
         inner_join(ge) %>%
         group_by(cells, tissue_type) %>%
-        summarize(correlation = cor(TPM, intensity, method='pearson', 
-                                    use="pairwise.complete.obs")) %>%
+        summarize(correlation = cor(TPM, intensity, method='pearson')) %>%
         ungroup() %>%
         mutate(abs_cor = abs(correlation)) %>%
         arrange(abs_cor) %>%
@@ -60,8 +60,8 @@ tissues <- c("Abdominal" ,'Brain',"Breast/Female Reproductive","Lung","Lymphoid"
             "Myeloid","Sarcoma", "Skin", "Urinary/Male Reproductive",
             "Other","Primary Tissue")
 plot_df <- df %>% 
-    #filter(grepl('SRR|cluster',samplename)) %>%
-    filter(grepl('rmdup|SRR',samplename)) %>%
+#    filter(grepl('SRR|cluster',samplename)) %>%
+#    filter(grepl('rmdup|SRR',samplename)) %>%
     filter(!grepl('PD[34]|sim',samplename)) %>%
     mutate(tissue_type = factor(tissue_type, levels = tissues))
 
@@ -73,7 +73,7 @@ tissue_plot <- ggplot(data=plot_df,
     theme(axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5))+
     scale_fill_manual(values = color_palette) +
     labs(y=str_c('<-- Rank (',max(plot_df$rank),' cells/tissues) <--'),x = ' ', fill = ' ') +
-    ylim(max(plot_df$rank)-20,max(plot_df$rank))+
+    #ylim(max(plot_df$rank)-20,max(plot_df$rank))+
     theme(axis.line = element_blank()) +
     theme(axis.text.y  = element_blank()) +
     theme(axis.ticks = element_blank()) 

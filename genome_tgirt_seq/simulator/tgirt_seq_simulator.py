@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from matplotlib import use
-use('Agg')
-from scipy.stats import rv_discrete
+from matplotlib import use as mpl_use
+mpl_use('Agg')
+from scipy.stats import rv_discrete, bernoulli
 from scipy import random
 import numpy as np
 from pyfaidx import Fasta
@@ -18,7 +18,62 @@ from multiprocessing import Pool, Manager
 from collections import defaultdict
 import os
 
-complement = string.maketrans('ACTGNactgn','TGACNtgacn')
+
+class seq_simulator:
+    def __init__(self, base_dist, insert_dist, fasta, position, shift, chrom, chrom_len,
+                 seq_count, tri_nucleotide_5, reverse_tri_nucleotide_5, fold):
+        self.base_dist = base_dist
+        self.insert_dist = insert_dist
+        self.fasta = fasta
+        self.position = position
+        self.shift = shift
+        self.chrom = chrom
+        self.chrom_len = chrom_len
+        self.seq_count = seq_count
+        self.tri_nucleotide_5 = tri_nucleotide_5
+        self.reverse_tri_nucleotide_5 = reverse_tri_nucleotide_5
+        self.fold = fold
+        self.seq_lines = ''
+
+    def start_simulation(self):
+        for cov in xrange(self.fold):
+            strand = bernoulli(p = 0.5) # positive = 0, negative = 1
+            if strand == 0:
+                self.simulate_positive()
+            else:
+                self.simulate_negative()
+
+    def generate_line(start, end, seq_count, insert_size, strand):
+        self.seq_lines += '{chrom}\t{start_site}\t{end_site}\tSeq_{chrom}_{seq_count}\t{isize}\t{strand}\n'\
+                .format(chrom = self.chrom, start_site = start, end_site = end,
+                        seq_count = self.seq_count.value, isize = insert_size,
+                        strand = strand)
+
+
+    def simulate_positive(self):
+        out = bernoulli(p = self.base_dist["5'"][self.tri_nucleotide_5])
+        if out == 0:
+            insert_size = insert_dist.rvs()
+            start_site = self.shift + self.position - 1  #is for adjusting the 0-base python?
+            end_site = int(start_site + insert_size)
+            if end_site < self.chrom_len:
+                tri_nucleotide_3 = str(fasta.get_seq(chrom, end_site - 2, end_site))
+                if 'N' not in tri_nucleotide_3 and bernoulli(p = base_dist["3'"][tri_nucleotide_3]) == 0:
+                    generate_line(start_site, end_site, seq_count, insert_sizea, '+')
+                    seq_count.value += 1
+
+    def simulate_negative(self):
+        out = bernoulli(p = self.base_dist["5'"][self.reverse_tri_nucleotide_5])
+        if out == 0:
+            insert_size = insert_dist.rvs()
+            end_site = self.shift + self.position + 2 #reversed This is the start when the read is reversed
+            start_site = int(end_site - insert_size) #this is the end site
+            if start_site > 0:
+                tri_nucleotide_3 = reverse_complement(str(fasta.get_seq(chrom, start_site, start_site + 2)))
+                if 'N' not in reverse_tri_nucleotide_3 and bernoulli(p = base_dist["3'"][tri_nucleotide_3]) == 0:
+                    generate_line(start_site, end_site, seq_count, insert_sizea, '-')
+                    seq_count.value += 1
+
 
 def plot_dist(dist, outprefix):
     d = pd.DataFrame.from_dict(dist) \
@@ -39,6 +94,7 @@ def plot_dist(dist, outprefix):
     sys.stderr.write('Written %s\n' %figurename)
 
 
+complement = string.maketrans('ACTGNactgn','TGACNTGACN')
 def reverse_complement(sequence):
     return sequence.translate(complement)[::-1]
 
@@ -57,39 +113,14 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
     outfile = open(outfile_name, 'w')
     for i in xrange(len(sequence) - 3):
         tri_nucleotide_5 = str(sequence[i:i+ 3])
-        reverse_tri_nucleotide_5  = reverse_complement(tri_nucleotide_5)
         if 'N' not in tri_nucleotide_5:
-            for cov in xrange(fold):
-                strand = random.binomial(1, p = 0.5) # positive = 0, negative = 1
-                if strand == 0:
-                    out = random.binomial(1, p = base_dist["5'"][tri_nucleotide_5])
-                    if out == 1:
-                        insert_size = insert_dist.rvs()
-                        start_site = s + i  - 1  #is for adjusting the 0-base python?
-                        end_site = int(start_site + insert_size)
-                        if end_site < chrom_len:
-                            tri_nucleotide_3 = str(fasta.get_seq(chrom, end_site - 2, end_site))
-                            if 'N' not in tri_nucleotide_3:
-                                if random.binomial(1, p = base_dist["3'"][tri_nucleotide_3]) == 1:
-                                    line = '%s\t%i\t%i\tSeq_%s_%i\t%i\t+\n' %(chrom, start_site, end_site,
-                                                                chrom, seq_count.value, insert_size)
-                                    outfile.write(line)
-                                    seq_count.value += 1
-
-                else:
-                    out = random.binomial(1, p = base_dist["5'"][reverse_tri_nucleotide_5])
-                    if out == 1:
-                        insert_size = insert_dist.rvs()
-                        end_site = s + i + 2 #reversed This is the start when the read is reversed
-                        start_site = int(end_site - insert_size) #this is the end site
-                        if start_site > 0:
-                            reverse_tri_nucleotide_3 = reverse_complement(str(fasta.get_seq(chrom, start_site, start_site + 2)))
-                            if 'N' not in reverse_tri_nucleotide_3:
-                                if random.binomial(1, p = base_dist["3'"][reverse_tri_nucleotide_3]) == 1:
-                                    line = '%s\t%i\t%i\tSeq_%s_%i\t%i\t-\n' %(chrom, start_site - 1, end_site,
-                                                                chrom, seq_count.value, insert_size)
-                                    outfile.write(line)
-                                    seq_count.value += 1
+            reverse_tri_nucleotide_5  = reverse_complement(tri_nucleotide_5)
+            simulator = seq_simulator(base_dist, insert_dist, fasta, i, s, chrom, chrom_len,
+                 seq_count, tri_nucleotide_5, reverse_tri_nucleotide_5, fold)
+            simulator.start_simulation()
+            outfile.write(simulator.seq_lines)
+        if i % 1000000 == 0 and i != 0:
+            print 'Parsed %i positions' %(i)
     outfile.close()
     return outfile_name
 
