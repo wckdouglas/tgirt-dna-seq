@@ -15,7 +15,7 @@ do
 		\| tr \'_\' \''\t'\' \
 		\| awk \''{print $1,$2,$3,$4,$(NF-1),$(NF)}'\' OFS=\''\t'\' \
 		\| sort -k1,1 -k2,2n -k3,3n -T $TMP_DIR \
-		\| bedtools merge -i - -s -c 4 -o collapse -delim \",\" \
+		\| datamash -g 1,2,3,6 collapse 4 \
 		\| tee $OUT_PATH/${SAMLENAME}.collapse.bed \
 		\| $(which python) ${PROGRAM_PATH}/unique_bed.py --infile=- --threshold=2 \
 		\> $OUT_PATH/${SAMLENAME}_unique.bed

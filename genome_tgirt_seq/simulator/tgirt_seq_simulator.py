@@ -33,7 +33,7 @@ class seq_simulator:
         self.tri_nucleotide_5 = tri_nucleotide_5
         self.reverse_tri_nucleotide_5 = reverse_tri_nucleotide_5
         self.fold = fold
-        self.seq_lines = ''
+        self.line = ''
 
     def start_simulation(self):
         for cov in xrange(self.fold):
@@ -44,7 +44,7 @@ class seq_simulator:
                 self.simulate_negative()
 
     def generate_line(start, end, seq_count, insert_size, strand):
-        self.seq_lines += '{chrom}\t{start_site}\t{end_site}\tSeq_{chrom}_{seq_count}\t{isize}\t{strand}\n'\
+        self.line += '{chrom}\t{start_site}\t{end_site}\tSeq_{chrom}_{seq_count}\t{isize}\t{strand}\n'\
                 .format(chrom = self.chrom, start_site = start, end_site = end,
                         seq_count = self.seq_count.value, isize = insert_size,
                         strand = strand)
@@ -73,25 +73,6 @@ class seq_simulator:
                 if 'N' not in reverse_tri_nucleotide_3 and bernoulli(p = base_dist["3'"][tri_nucleotide_3]) == 0:
                     generate_line(start_site, end_site, seq_count, insert_sizea, '-')
                     seq_count.value += 1
-
-
-def plot_dist(dist, outprefix):
-    d = pd.DataFrame.from_dict(dist) \
-        .reset_index() \
-        .rename(columns = {'index':'tri_nucleotides'})  \
-        .pipe(pd.melt, id_vars = ['tri_nucleotides'],
-            var_name = 'ends', value_name='fraction') \
-        .assign(third = lambda d: map(lambda x: x[2],d.tri_nucleotides))\
-        .assign(first = lambda d:map(lambda x: x[0],d.tri_nucleotides))
-
-    with sns.plotting_context('paper'):
-        p = sns.FacetGrid(data = d, row = 'ends',
-                    sharex=False, sharey=False, aspect= 2, row_order = ["5'","3'"])
-    p.map(sns.barplot, 'tri_nucleotides', 'fraction')
-    [ax.set_xticklabels(ax.get_xticklabels(),rotation=90, fontsize = 7) for ax in p.fig.axes]
-    figurename = outprefix + '.pdf'
-    p.savefig(figurename)
-    sys.stderr.write('Written %s\n' %figurename)
 
 
 complement = string.maketrans('ACTGNactgn','TGACNTGACN')
@@ -145,16 +126,17 @@ def profile_to_distribution(insert_profile_table, base_profile_table, side):
         .assign(px = lambda d: np.true_divide(d['count'].values,d['count'].values.sum()))
     insert_dist = rv_discrete(name='custm', values=(insert_df.isize, insert_df.px))
 
-    base_df = pd.read_csv(base_profile_table)
+    base_df = pd.read_csv(base_profile_table)  
 
     base_dist = defaultdict(lambda: defaultdict(float))
 
     extract_prob = partial(get_prob, base_df, side)
-    for tri_nucleotides in  product('ACTG',repeat=3):
-        tri_nucleotides = ''.join(tri_nucleotides)
+    k = 6
+    for kmer in  product('ACTG',repeat=k):
+        kmer = ''.join(kmer)
         for end in ["5'","3'"]:
-            base_fraction = [extract_prob(pos+1, nuc, end) for pos, nuc in enumerate(tri_nucleotides)]
-            base_dist[end][tri_nucleotides] = np.prod(base_fraction)
+            base_fraction = [extract_prob(pos+1, nuc, end) for pos, nuc in enumerate(kmer)]
+            base_dist[end][kmer] = np.prod(base_fraction)
 
     return insert_dist, base_dist
 
