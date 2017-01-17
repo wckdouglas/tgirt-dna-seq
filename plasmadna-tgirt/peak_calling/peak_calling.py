@@ -144,6 +144,7 @@ def write_short_peaks(wps, start, end, out_bed, chromosome):
         peak_count += 1
         peak_name = '%s_peak%i' %(chromosome, peak_count)
         peak_score = wps[peak_start:peak_end].max()
+        peak_center = long((peak_end - peak_start) /2)
         variables = map(str,[chromosome, peak_start, peak_end, peak_name, peak_score, '+', peak_center])
         line = '\t'.join(variables)
         out_bed.write(line+'\n')
@@ -205,7 +206,7 @@ def main():
     output_path = project_path + '/bed_files'
     bigwig_files = glob.glob(bigwig_path + '/*.bigWig')
     bigwig_func = partial(process_bigwig, output_path)
-    p = Pool(24)
+    p = Pool(6)
     p.map(bigwig_func, bigwig_files)
     p.close()
     p.join()
