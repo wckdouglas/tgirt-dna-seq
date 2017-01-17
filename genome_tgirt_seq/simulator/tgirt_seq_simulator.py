@@ -33,7 +33,7 @@ class seq_simulator:
         self.tri_nucleotide_5 = tri_nucleotide_5
         self.reverse_tri_nucleotide_5 = reverse_tri_nucleotide_5
         self.fold = fold
-        self.line = ''
+        self.seq_lines = ''
 
     def start_simulation(self):
         for cov in xrange(self.fold):
@@ -44,7 +44,7 @@ class seq_simulator:
                 self.simulate_negative()
 
     def generate_line(start, end, seq_count, insert_size, strand):
-        self.line += '{chrom}\t{start_site}\t{end_site}\tSeq_{chrom}_{seq_count}\t{isize}\t{strand}\n'\
+        self.seq_lines += '{chrom}\t{start_site}\t{end_site}\tSeq_{chrom}_{seq_count}\t{isize}\t{strand}\n'\
                 .format(chrom = self.chrom, start_site = start, end_site = end,
                         seq_count = self.seq_count.value, isize = insert_size,
                         strand = strand)
@@ -131,7 +131,7 @@ def profile_to_distribution(insert_profile_table, base_profile_table, side):
     base_dist = defaultdict(lambda: defaultdict(float))
 
     extract_prob = partial(get_prob, base_df, side)
-    k = 6
+    k = 8
     for kmer in  product('ACTG',repeat=k):
         kmer = ''.join(kmer)
         for end in ["5'","3'"]:

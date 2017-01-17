@@ -41,9 +41,6 @@ make_cor_df <- function(filename, datapath){
         group_by(cells, tissue_type) %>%
         summarize(correlation = cor(TPM, intensity, method='pearson')) %>%
         ungroup() %>%
-        mutate(abs_cor = abs(correlation)) %>%
-        arrange(abs_cor) %>%
-        mutate(rank = 1:nrow(.)) %>%
         mutate(samplename = str_replace(filename,'.bed','')) %>%
         tbl_df
     return(periodogram)
@@ -54,6 +51,9 @@ files <- list.files(path = datapath, pattern='.bed', full.names = F)
 df <- files %>%
     mclapply(.,make_cor_df, datapath, mc.cores=12) %>%
     reduce(rbind) %>%
+    mutate(abs_cor = abs(correlation)) %>%
+    group_by(samplename) %>%
+    mutate(rank = rank(abs_cor)) %>%
     tbl_df
 
 tissues <- c("Abdominal" ,'Brain',"Breast/Female Reproductive","Lung","Lymphoid", 

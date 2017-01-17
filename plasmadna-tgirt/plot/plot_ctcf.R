@@ -2,7 +2,7 @@
 
 library(readr)
 library(dplyr)
-library(stringi)
+library(stringr)
 library(tidyr)
 library(cowplot)
 library(FBN)
@@ -17,9 +17,9 @@ message('Plotted isize')
 source('/stor/home/cdw2854/tgirt-dna-seq/plasmadna-tgirt/plot/plot_wps_intersample.R')
 message('plotted wps intersample')
 project_path <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/'
-wps_data_path <- stri_c(project_path,'/wpsCTCF')
-figure_path <- stri_c(project_path,'/figures')
-figurename <- stri_c(figure_path,'/wps_distribution_merged.pdf')
+wps_data_path <- str_c(project_path,'/wpsCTCF')
+figure_path <- str_c(project_path,'/figures')
+figurename <- str_c(figure_path,'/wps_distribution_merged.pdf')
 
 
 ctcf_df <- wps_data_path %>%
@@ -35,6 +35,7 @@ ctcf_df <- wps_data_path %>%
     ungroup() %>%
     mutate(prep = case_when(grepl('^P|^TGIRT',.$samplename) ~ 'TGIRT-seq',
                                 grepl('SRR',.$samplename) ~ 'ssDNA-seq'))  %>%
+    mutate(type = str_replace(type,'bp','nt')) %>%
     tbl_df
 
 wps_p <- ggplot(ctcf_df) +

@@ -23,10 +23,6 @@ rename_enzyme <- function(x){
     }
 }
 
-make_prep <- function(x){
-    ifelse(grepl('nextera',x),'Nextera XT','TGIRT-seq')
-}
-
 read_wgs_table <- function(filename, datapath){
     samplename <- str_split(filename,'\\.')[[1]][1]
     df <- datapath %>%
@@ -53,7 +49,10 @@ df <- table_names %>%
     mutate(line_type = 'WGS') %>%
 #    select(-subsampled) %>%
     dplyr::filter(grepl('nextera|^K12_kh|^K12_kq', samplename)) %>%
-    mutate(prep = make_prep(samplename))%>%
+    dplyr::filter(grepl('nextera|umi2id', samplename)) %>%
+    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera XT',
+                            grepl('NEB',.$samplename) ~ 'TGIRT-seq Fragmentase',
+                            grepl('kh|kq',.$samplename) ~ 'TGIRT-seq Covaris'))%>%
     tbl_df
 
 base_df <- df %>%
@@ -86,7 +85,7 @@ rsqrd_df <- plot_df %>%
     ) %>%
     ungroup() %>%
     mutate(rsqrd = 1 - sum_res/ sum_var) %>%
-    filter(grepl('nextera|clustered',samplename)) 
+    filter(grepl('nextera|umi',samplename)) 
 
 rsqrd <- rsqrd_df %>%
     group_by(prep) %>%
@@ -104,11 +103,14 @@ wgs_p <- ggplot() +
     scale_color_manual(values = c('light sky blue','salmon'))+
     scale_size_manual(guide = 'none', values = rep(1.2, length(unique(plot_df$samplename))))+
     scale_linetype_discrete(guide = guide_legend(ncol = 1))+
-	theme(text = element_text(size = 20)) +
-	theme(axis.text = element_text(size = 18)) +
+	theme(text = element_text(size = 25, face='bold')) +
+	theme(axis.text = element_text(size = 25, face='bold')) +
 	labs(x ='Level of Coverage', y = '% of Genome', 
 	     color =' ', linetype = ' ') +
-    theme(legend.position = c(0.8,0.5))
+    theme(legend.position = c(0.7,0.5)) +
+    theme(legend.key.height=unit(2,"line"))
+ggsave(wgs_p, file = figurename, height=7,width=10)
+message('Plotted: ', figurename)
 
 
 # rsqrd_p <- ggplot(data = rsqrd_df, aes(x = prep, y = rsqrd, 

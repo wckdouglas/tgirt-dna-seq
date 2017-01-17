@@ -1,7 +1,7 @@
 #!/usr/bin/env python -u
 
-import matplotlib
-matplotlib.use('Agg')
+from matplotlib import use as mpl_use
+mpl_use('Agg')
 import pysam
 import numpy as np
 import seaborn as sns
@@ -24,7 +24,7 @@ def get_isize(bamFile, samplename):
     aln_count = 0
     with pysam.Samfile(bamFile, 'rb') as bam:
         for aln in bam:
-            if (abs(aln.isize) < 300 and abs(aln.isize) > 30):
+            if (abs(aln.isize) <= 500 and abs(aln.isize) >= 10):
                 isize_dict[aln.reference_name][abs(aln.isize)] += 1
                 aln_count += 1
     print 'Extacted %i alignments from %s' %(aln_count, samplename)
@@ -69,10 +69,10 @@ def make_isize_df(isize_dict):
 def parse_bam(table_path, bamFile):
     samplename = os.path.basename(bamFile).split('.')[0]
     insert_table_name = table_path + '/' + samplename + '.csv'
-    #isize_dict = get_isize(bamFile, samplename)
-    #df = make_isize_df(isize_dict) \
-    #    .assign(samplename = samplename)
-    #df.to_csv(insert_table_name, index=False)
+    isize_dict = get_isize(bamFile, samplename)
+    df = make_isize_df(isize_dict) \
+        .assign(samplename = samplename)
+    df.to_csv(insert_table_name, index=False)
     print 'Finished %s and written %s ' %(samplename,insert_table_name)
     return insert_table_name
 

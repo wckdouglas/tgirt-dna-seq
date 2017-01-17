@@ -23,7 +23,6 @@ read_gc_table <- function(filename, datapath){
 project_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/'
 picard_path <- str_c( project_path, '/picard_results')
 figure_path  <- str_c(project_path, '/figures')
-figurename <- str_c(figure_path, '/gc_plot.pdf')
 table_names <- list.files(path = picard_path, pattern = 'gc_metrics')
 table_names<- table_names[!grepl('pb',table_names)]
 df <- table_names %>%
@@ -49,8 +48,8 @@ plot_gc <-function(df){
         geom_hline(yintercept = 1, linetype = 2, alpha = 0.9) +
         geom_bar(data = windows_df, aes(x = GC, y = rol_window), 
              stat='identity', fill='springgreen1', alpha = 1)  +
-        theme(text = element_text(size = 20)) +
-        theme(axis.text = element_text(size = 18)) +
+        theme(text = element_text(size = 25, face='bold')) +
+        theme(axis.text = element_text(size = 25, face='bold')) +
         scale_linetype_manual(guide='none',values = rep(1,8)) +
         labs(x = 'GC %', y = 'Normalized Coverage', color = ' ')+
         ylim(0,4)
@@ -62,8 +61,12 @@ gc_p <- df %>%
 #    filter(grepl('nextera|clustered',samplename)) %>%
     filter(grepl('nextera|_[EF]_|K12_kh|pb',samplename)) %>%
     filter(!grepl('SRR',samplename)) %>%
-    plot_gc()# +
-#        theme(legend.position =  'None') 
+    plot_gc() +
+        theme(legend.position =  c(0.3,0.7))+
+        theme(legend.key.height = unit(2,'line'))
+figurename <- str_c(figure_path, '/gc_plot.pdf')
+ggsave(gc_p, file = figurename , height = 7, width = 9)
+message('Plotted: ', figurename)
 
 rename_sim <- function(x){
 }

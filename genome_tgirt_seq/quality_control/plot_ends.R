@@ -50,7 +50,7 @@ p <- ggplot(data = df, aes(x = actual_positions,
                            y = base_fraction)) +
     geom_line(size = 1.3, alpha=0.6) +
     facet_grid(base~read_end, scale ='free_x') +
-    labs(x = 'Relative position to fragment ends',y='Fraction of base',color=' ') +
+    labs(x = 'Position Relative to Read ends',y='Fraction of Reads',color=' ') +
     panel_border() +
     scale_color_manual(values = colors)+
     theme(strip.text.x = element_text(size = 20, face='bold')) +
