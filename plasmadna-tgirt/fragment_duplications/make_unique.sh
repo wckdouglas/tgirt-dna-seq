@@ -6,7 +6,7 @@ OUT_PATH=$BED_PATH/demultiplexed
 PROGRAM_PATH=$HOME/TGIRT_UMI
 mkdir -p $OUT_PATH
 
-for BED in $BED_PATH/*.bed
+for BED in $BED_PATH/*umi2id*.bed
 do
 	SAMLENAME=$(basename ${BED%.bed})
 	TMP_DIR=$OUT_PATH/$SAMLENAME

@@ -32,7 +32,7 @@ def trimming(fq1, threads, trim_path, samplename, adaptor):
         '-basein %s ' %(fq1) + \
         '-baseout %s/%s.fq.gz ' %(trim_path, samplename) + \
         options
-    runProcess(command,samplename)
+    #runProcess(command,samplename)
     return 0
 
 #MAPPING
@@ -41,7 +41,7 @@ def mappingProcess(samplename, trim_path, index, threads, bam_path):
     file1 = trim_path + '/' + samplename + '_1P.fq.gz'
     file2 = file1.replace('1P','2P')
     bam_file = '%s/%s.bam' %(bam_path, samplename)
-    runProcess('bwa shm %s' %(index), samplename)
+    #runProcess('bwa shm %s' %(index), samplename)
     command = 'bwa mem -t %i ' %(threads)+\
 	    '%s %s %s ' %(index, file1, file2 ) +\
             '| samtools view -@ %i -b ' %(threads) +\
@@ -53,12 +53,13 @@ def makeBed(bam_file, samplename, bed_path):
     sys.stderr.write('Running post mapping processes with %s\n' %samplename)
     bed_file = '%s/%s.bed' %(bed_path, samplename)
     #command = 'bamtools filter -script flag_filter.json -in %s' %(bam_file)+\
-    command = 'samtools view -F2048 -F1024 -F512 -F256 -F4 -F8 %s' %(bam_file)+\
+    command = 'samtools view -bF2048 -F1024 -F512 -F256 -F4 -F8 %s' %(bam_file)+\
 	'| samtools fixmate -r - -' + \
         '| bedtools bamtobed -mate1 -bedpe '+\
         "| awk '$1!=\".\" && $NF!=$(NF-1) && $1==$4 "+\
                 "{start=$2;end=$3} {if($5<start) start=$5} {if($6>end) end=$6} "+\
                 "{print $1,start,end,$7,end-start,$9}' OFS='\\t'"+\
+        "| awk '$(NF-1) < 1000'" +\
         '> %s' %(bed_file)
     runProcess(command,samplename)
     return bed_file

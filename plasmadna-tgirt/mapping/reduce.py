@@ -31,8 +31,8 @@ def main():
     make_dir(outpath)
 
 
-    map_files = glob(path + '/*' + file_type)
-    group_name = get_group(map_files)
+    map_files = np.array(glob(path + '/*' + file_type))
+    group_name = np.array(get_group(map_files))
 
     group_file = np.unique(group_name)
 
@@ -43,15 +43,16 @@ def main():
             command = 'samtools cat %s > %s/%s ' %(joined_files, outpath, group)
         elif not args.rmdup:
             command = 'cat %s > %s/%s ' %(joined_files, outpath, group)
-        elif args.rmdup and file_type == 'bed':
-            temp_dir = ('%s/%s' %(outpath, group)).replace('.bed','')
-            make_dir(temp_dir)            
-            command = 'cat %s ' %(joined_files) + \
+        elif args.rmdup:
+            if file_type == 'bed':
+                temp_dir = ('%s/%s' %(outpath, group)).replace('.bed','')
+                make_dir(temp_dir)            
+                command = 'cat %s ' %(joined_files) + \
                     '| sort -k1,1 -k2,2n -k3,3n -k6,6 '+\
                         '--temporary-directory=%s -u ' %(temp_dir)  +\
                     '> %s/%s ' %(outpath, group)
-        else:
-            sys.exit('Cannot run rmdup with files other than BED')
+            else:
+                sys.exit('Cannot run rmdup with files other than BED')
         if not args.dry:
             os.system(command)
         print command
