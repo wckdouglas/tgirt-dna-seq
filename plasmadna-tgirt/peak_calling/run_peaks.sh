@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT_PATH=/stor/work/Lambowitz/cdw2854/plasmaDNA
+PROJECT_PATH=/scratch/02727/cdw2854/plasmaDNA
 BW_PATH=$PROJECT_PATH/genomeWPS/bigWig_files
 BED_PATH=$PROJECT_PATH/genomeWPS/bed_files
 

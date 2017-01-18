@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECTPATH=/scratch/02727/cdw2854/plasmaDNA
-BEDPATH=${PROJECTPATH}/bedFiles/merged
+BEDPATH=${PROJECTPATH}/bedFiles/merged_rmdup
 SPLITBED=${BEDPATH}/splittedBed
 mkdir -p ${SPLITBED}
 rm -f ${SPLITBED}/*bed

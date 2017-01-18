@@ -194,7 +194,7 @@ def process_bigwig(peak_bed, inputWig, chromosome, length_type):
     filename = os.path.basename(inputWig)
 
     #print message
-    print 'Running %s as %s for chrom: %s' %(filename, length_type, chrom)
+    print 'Running %s as %s for chrom: %s' %(filename, length_type, chromosome)
 
     # read in data
     bw = pbw.open(inputWig)
