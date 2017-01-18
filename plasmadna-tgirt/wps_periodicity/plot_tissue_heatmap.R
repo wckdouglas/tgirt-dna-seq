@@ -72,11 +72,25 @@ tissue_plot <- ggplot(data=plot_df,
     geom_tile(width=0.9, height=0.9, color = 'white') +
     theme(axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5))+
     scale_fill_manual(values = color_palette) +
-    labs(y=str_c('<-- Rank (',max(plot_df$rank),' cells/tissues) <--'),x = ' ', fill = ' ') +
-    #ylim(max(plot_df$rank)-20,max(plot_df$rank))+
+    labs(y=' ',x = ' ', fill = ' ') +
+    ylim(max(plot_df$rank)-20,max(plot_df$rank))+
     theme(axis.line = element_blank()) +
     theme(axis.text.y  = element_blank()) +
     theme(axis.ticks = element_blank()) 
+t_d <- data_frame(y=c(10,10,1), 
+                  x=c(1, 2, 2))
+triangle <- ggplot(t_d) +
+    geom_polygon(aes(x=x,y=y), fill = 'grey')+
+    theme(axis.line = element_blank()) +
+    theme(axis.text  = element_blank()) +
+    theme(axis.ticks = element_blank()) +
+    labs(x= ' ', y = ' ') 
+ggdraw()+
+    draw_plot(triangle, 0,0.25,0.1,0.75) +
+    draw_plot(tissue_plot, 0.05,0,0.95,1)+
+    draw_plot_label(str_c('Rank by Correlation (',max(plot_df$rank),' cells/tissues)'),
+                    0,0.2,angle=90)
+    
 
 
 pca_rank <- df %>% 

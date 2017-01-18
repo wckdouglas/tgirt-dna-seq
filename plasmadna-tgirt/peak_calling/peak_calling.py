@@ -10,6 +10,20 @@ import glob
 from multiprocessing import Pool
 from functools import partial
 from itertools import izip
+import argparse
+
+def get_opt():
+    chromosomes = np.arange(1,23)
+    chromosomes = map(str, np.append(['X','Y'], chromosomes))
+    parser = argparse.ArgumentParser(description='Given a WPS file in bigwig format '+\
+                                     'output peak coordinates in  bed file')
+    parser.add_argument('-i', '--in_bigwig', help = 'Input bigWig', required=True)
+    parser.add_argument('-o', '--out_bed', help = 'Output bed file name', required=True)
+    parser.add_argument('-l','--length_type', help = 'short or long WPS?', default = 'Long',
+                        choices = ['Short','Long'])
+    parser.add_argument('-c','--chrom', help='Which chromosome?', choices = np.arange(1,23), required=True)
+    args = parser.parse_args()
+    return args
 
 def adjust_median(wps_array):
     """
@@ -177,14 +191,9 @@ def write_peaks(wps, peak_bed, length_type, chrom):
     return 0
 
 
-def process_bigwig(outputpath, inputWig):
+def process_bigwig(peak_bed, inputWig, chrom, length_type):
     # get bigwig information
     filename = os.path.basename(inputWig)
-    peak_bed = outputpath + '/' + filename.replace('.bigWig','.bed')
-    samplename_fragments = inputWig.split('.')
-    samplename = samplename_fragments[0]
-    chrom = samplename_fragments[1]
-    length_type = samplename_fragments[2]
 
     #print message
     print 'Running %s as %s for chrom: %s' %(filename, length_type, chrom)
@@ -202,15 +211,12 @@ def process_bigwig(outputpath, inputWig):
 
 
 def main():
-    project_path = os.environ['WORK'] + '/cdw2854/plasmaDNA/genomeWPS'
-    bigwig_path = project_path + '/bigWig_files'
-    output_path = project_path + '/bed_files'
-    bigwig_files = glob.glob(bigwig_path + '/*.bigWig')
-    bigwig_func = partial(process_bigwig, output_path)
-    p = Pool(8)
-    p.map(bigwig_func, bigwig_files)
-    p.close()
-    p.join()
+    args = get_opt()
+    bigwig_file = args.in_bigwig
+    peak_bed = args.out_bed
+    chromosome = args.chrom
+    length_type = args.length_type
+    process_bigwig(peak_bed, bigwig_file, chromosome, length_type)
     return 0
 
 
