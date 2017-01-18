@@ -22,14 +22,13 @@ def adjust_median(wps_array):
     return adjusted_wps
 
 
-def find_peak_region(wpsArray):
+def find_peak_region(wps):
     """
     given a wps array, output list of cooridinate of:
     start and end of peaks
     looking for the positions that across 0 in the de-noised signal
     """
-    wpsArray = np.asarray(wpsArray)
-    signs = np.sign(wpsArray)
+    signs = np.sign(wps)
     signs[signs==0] = -1
     start = np.where(np.diff(signs)>0)[0]
     end = np.where(np.diff(signs)<0)[0]
@@ -115,7 +114,7 @@ def calling_long_peaks(chromosome, wps, peak_start, peak_end, peak_count, outFil
         above_median_starts, above_median_ends =  pick_peak(above_median_starts, above_median_ends, adjusted_sub_wps)
 
     for above_median_start, above_median_end in izip(above_median_starts, above_median_ends):
-        sub_peak_wps = sub_wps[above_median_start:above_median_end]
+        sub_peak_wps = adjusted_sub_wps[above_median_start:above_median_end]
         nucleosome_start , nucleosome_end = maxSubArray(sub_peak_wps)
 
 
@@ -125,7 +124,7 @@ def calling_long_peaks(chromosome, wps, peak_start, peak_end, peak_count, outFil
         peak_center = (nucleosome_start + nucleosome_end)/2
         nucleosome_size = abs(nucleosome_end - nucleosome_start)
         if (peak_size_filter and 50 < nucleosome_size  < 150 ) or (not peak_size_filter and nucleosome_size > 5):
-            peak_score = wpsArray[nucleosome_start:nucleosome_end].max()
+            peak_score = wps[nucleosome_start:nucleosome_end].max()
             peak_count += 1
             peak_name = '%s_peak%i' %(chromosome, peak_count)
             line = '\t'.join(map(str,[chromosome, nucleosome_start, nucleosome_end, peak_name, peak_score, '+', peak_center]))
@@ -148,7 +147,7 @@ def write_short_peaks(wps, start, end, out_bed, chromosome):
         variables = map(str,[chromosome, peak_start, peak_end, peak_name, peak_score, '+', peak_center])
         line = '\t'.join(variables)
         out_bed.write(line+'\n')
-    print 'Written %i peaks to %s' %(peak_count, peak_bed)
+    return peak_count
 
 
 def write_long_peaks(wps, start, end, out_bed, chromosome):
@@ -162,16 +161,18 @@ def write_long_peaks(wps, start, end, out_bed, chromosome):
         elif 150 < peak_size <= 450:
             peak_count = calling_long_peaks(chromosome, wps, peak_start, peak_end, peak_count,
                                             out_bed, peak_size_filter = True)
-    return 0
+    return peak_count
 
 
 def write_peaks(wps, peak_bed, length_type, chrom):
     with open(peak_bed, 'w') as out_bed:
         start, end = find_peak_region(wps)
         if length_type == 'Long':
-            write_long_peaks(wps, start, end, out_bed, chrom)
+            peak_count = write_long_peaks(wps, start, end, out_bed, chrom)
         elif length_type == 'Short':
-            write_short_peaks(wps, start, end, out_bed, chrom)
+            peak_count = write_short_peaks(wps, start, end, out_bed, chrom)
+        else:
+            sys.exit('Undetermined length type')
     print 'Written %i peaks to %s' %(peak_count, peak_bed)
     return 0
 
@@ -206,7 +207,7 @@ def main():
     output_path = project_path + '/bed_files'
     bigwig_files = glob.glob(bigwig_path + '/*.bigWig')
     bigwig_func = partial(process_bigwig, output_path)
-    p = Pool(6)
+    p = Pool(8)
     p.map(bigwig_func, bigwig_files)
     p.close()
     p.join()
