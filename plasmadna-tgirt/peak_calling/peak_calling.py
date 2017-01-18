@@ -58,7 +58,7 @@ def merge_peaks(peak_start, peak_end):
     while i < len(peak_start)-2:
         new_start.append(peak_start[i])
         j = i
-        while peak_start[j+1] - peak_end[j] <= tolerance_unprotected:
+        while j < len(peak_start)-2 and peak_start[j+1] - peak_end[j] <= tolerance_unprotected:
             j += 1
         new_end.append(peak_end[j])
         j += 1
@@ -147,10 +147,7 @@ def calling_long_peaks(chromosome, wps, peak_start, peak_end, peak_count, outFil
     return peak_count
 
 
-def filter_long_wps(wps):
-    wps = adjust_median(wps)
-    wps = savgol_filter(wps, window_length = 21, polyorder=2)
-    return wps
+
 
 def write_short_peaks(wps, start, end, out_bed, chromosome):
     peak_count = 0
@@ -170,7 +167,7 @@ def write_long_peaks(wps, start, end, out_bed, chromosome):
     start, end = merge_peaks(start, end)
     for peak_start, peak_end  in izip(start, end):
         peak_size = np.abs(peak_end - peak_start)
-        if 50 <= peak_size <= 150:
+        if 40 <= peak_size <= 150:
             peak_count = calling_long_peaks(chromosome, wps, peak_start, peak_end, peak_count,
                                             out_bed, peak_size_filter = False)
         elif 150 < peak_size <= 450:
@@ -192,7 +189,7 @@ def write_peaks(wps, peak_bed, length_type, chrom):
     return 0
 
 
-def process_bigwig(peak_bed, inputWig, chrom, length_type):
+def process_bigwig(peak_bed, inputWig, chromosome, length_type):
     # get bigwig information
     filename = os.path.basename(inputWig)
 
@@ -202,10 +199,12 @@ def process_bigwig(peak_bed, inputWig, chrom, length_type):
     # read in data
     bw = pbw.open(inputWig)
     chrom, length = bw.chroms().items()[0]
+    assert chrom == chromosome, 'Wrong chromosomes'
     wps = np.array(bw.values(chrom,0,length))
     bw.close()
+    wps = adjust_median(wps)
     if length_type == 'Long':
-        wps = filter_long_wps(wps)
+        wps = savgol_filter(wps, window_length = 21, polyorder=2)
 
     write_peaks(wps, peak_bed, length_type, chrom)
     return 0

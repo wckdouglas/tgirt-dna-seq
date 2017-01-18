@@ -13,6 +13,7 @@ from wps_spacing import daniell_spectrum, recursive_filter_function, demean
 from rpy2 import robjects
 from rpy2.robjects import numpy2ri
 from scipy.signal import detrend
+from collections import defaultdict
 
 periodogram = robjects.r('spec.pgram')
 def r_spectrum(signal):
@@ -36,17 +37,13 @@ def extract_fft(wps_array):
     return periodicity, intensity
 
 
-def find_tss_periodicity(bw_prefix, chrom, tss_start, tss_end):
+def find_tss_periodicity(wps):
     result = None
-    bw_file = '%s.%s.Long.bigWig' %(bw_prefix,chrom)
-    bw = pbw.open(bw_file, 'r')
-    wps_array = bw.values(chrom, tss_start, tss_end)
-    signs = np.sign(wps_array)
+    signs = np.sign(wps)
     signs[signs==0] = -1
     peak_count = np.where(np.diff(signs)>0)[0]
-    if len(peak_count) > 2:
-        result =  extract_fft(wps_array)
-    bw.close()
+    #if len(peak_count) > 2:
+    result =  extract_fft(wps)
     return result
 
 
@@ -59,36 +56,56 @@ def make_tss_region(start, end, strand):
         tss_end = start + 10000
     return tss_start, tss_end
 
-def run_file(protein_bed, out_path, bw_path, chroms, bw_prefix):
+
+def run_chrom_genes(chrom_genes, wps, gene_count, out):
+    for count, gene in chrom_genes.iterrows():
+        start = gene['start']
+        end = gene['end']
+        strand = gene['strand']
+        tss_start, tss_end = make_tss_region(start, end, strand)
+
+        wps_array = wps[tss_start:tss_end]
+        result = find_tss_periodicity(wps_array)
+        if result is not None:
+            line_info = '\t'.join(map(str,[gene['name'] ,gene['type'], gene['id']]))
+            for period, intensity in zip(*result):
+                out.write('{info}\t{period}\t{intensity}\n'.format(info = line_info,
+                                                            period = period,
+                                                            intensity = intensity))
+        gene_count += 1
+        if gene_count % 5000 == 0:
+            print 'Parsed {gene_count} for {filename}'.format(gene_count = gene_count,
+                                                        filename = filename)
+    return gene_count
+
+
+def run_file(protein_df, out_path, bw_path, bw_prefix):
     filename = bw_prefix
-    print 'Running {filename}'.format(filename=filename)
     out_file = out_path + '/' + bw_prefix + '.bed'
     bw_prefix = bw_path + '/' + bw_prefix
 
-    preiodicity_func = partial(find_tss_periodicity, bw_prefix)
     fail = 0
-    with open(out_file,'w') as out, open(protein_bed, 'r') as genes:
+    gene_count = 0
+    with open(out_file,'w') as out:
         out.write('name\ttype\tid\tperiodicity\tintensity\n')
-        for gene_count, bed_record in enumerate(genes):
-            fields = bed_record.rstrip().split('\t')
-            chrom = fields[0]
-            if chrom in chroms:
-                start = long(fields[1])
-                end = long(fields[2])
-                strand = fields[5]
-                tss_start, tss_end = make_tss_region(start, end, strand)
-
-                result = preiodicity_func(chrom, tss_start, tss_end)
-                if result is not None:
-                    line_info = fields[3] +'\t' + fields[6] + '\t'+fields[7]
-                    for period, intensity in zip(*result):
-                        out.write('{info}\t{period}\t{intensity}\n'.format(info = line_info,
-                                                                      period = period,
-                                                                      intensity = intensity))
-            if gene_count % 5000 == 0:
-                print 'Parsed {gene_count} for {filename}'.format(gene_count = gene_count,
-                                                                   filename = filename)
+        chromosomes = protein_df.chrom.unique()
+        for chrom in chromosomes:
+            print 'Running {filename} for chrom: {chrom}'.format(filename=filename, chrom=chrom)
+            chrom_genes = protein_df.query("chrom == '%s'" %chrom)
+            bw_file = '%s.%s.Long.bigWig' %(bw_prefix,chrom)
+            bw = pbw.open(bw_file, 'r')
+            bw_length = bw.chroms()[chrom]
+            wps = np.array(bw.values(chrom, 0, bw_length))
+            gene_count = run_chrom_genes(chrom_genes, wps, gene_count, out)
+            bw.close()
     return 0
+
+
+def genes_to_mem(protein_bed):
+    colnames = ['chrom','start','end','name','score','strand','type','id']
+    gene_df = pd.read_table(protein_bed, names = colnames)
+    print 'Read genes'
+    return gene_df
 
 
 def main():
@@ -104,8 +121,10 @@ def main():
     chroms = range(1,23)
     chroms.extend(['X','Y'])
     chroms = map(str, chroms)
-    run_file_func = partial(run_file, protein_bed, out_path, bw_path, chroms)
-    p = Pool(24)
+    protein_df = genes_to_mem(protein_bed)\
+        .pipe(lambda d: d[np.in1d(d.chrom, chroms)])
+    run_file_func = partial(run_file, protein_df, out_path, bw_path)
+    p = Pool(20)
     p.map(run_file_func, list(bw_prefix))
     p.close()
     p.join()
