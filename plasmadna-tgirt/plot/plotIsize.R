@@ -22,6 +22,7 @@ insert_df <- insert_data_path %>%
     read_tsv()%>%
     filter(grepl('SRR2130052|P1',samplename))  %>%
     filter(!grepl('cluster',samplename))  %>%
+    filter(isize > 22) %>%
     mutate(samplename = rename(samplename))  %>%
     group_by(isize,samplename) %>%
     summarize(count = sum(count)) %>%

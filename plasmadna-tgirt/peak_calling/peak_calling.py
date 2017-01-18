@@ -13,15 +13,16 @@ from itertools import izip
 import argparse
 
 def get_opt():
-    chromosomes = np.arange(1,23)
-    chromosomes = map(str, np.append(['X','Y'], chromosomes))
+    chromosomes = range(1,23)
+    chromosomes.extend(list('XY'))
+    chromosomes = map(str, chromosomes)
     parser = argparse.ArgumentParser(description='Given a WPS file in bigwig format '+\
                                      'output peak coordinates in  bed file')
     parser.add_argument('-i', '--in_bigwig', help = 'Input bigWig', required=True)
     parser.add_argument('-o', '--out_bed', help = 'Output bed file name', required=True)
     parser.add_argument('-l','--length_type', help = 'short or long WPS?', default = 'Long',
                         choices = ['Short','Long'])
-    parser.add_argument('-c','--chrom', help='Which chromosome?', choices = np.arange(1,23), required=True)
+    parser.add_argument('-c','--chrom', help='Which chromosome?', choices = chromosomes, required=True)
     args = parser.parse_args()
     return args
 
