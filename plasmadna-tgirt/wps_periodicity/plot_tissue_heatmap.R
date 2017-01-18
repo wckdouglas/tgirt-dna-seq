@@ -85,7 +85,7 @@ triangle <- ggplot(t_d) +
     theme(axis.text  = element_blank()) +
     theme(axis.ticks = element_blank()) +
     labs(x= ' ', y = ' ') 
-ggdraw()+
+p <- ggdraw()+
     draw_plot(triangle, 0,0.25,0.1,0.75) +
     draw_plot(tissue_plot, 0.05,0,0.95,1)+
     draw_plot_label(str_c('Rank by Correlation (',max(plot_df$rank),' cells/tissues)'),

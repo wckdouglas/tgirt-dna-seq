@@ -39,6 +39,7 @@ def extract_fft(wps_array):
 
 def find_tss_periodicity(wps):
     result = None
+    wps = np.asarray(wps)
     signs = np.sign(wps)
     signs[signs==0] = -1
     peak_count = np.where(np.diff(signs)>0)[0]
@@ -57,14 +58,15 @@ def make_tss_region(start, end, strand):
     return tss_start, tss_end
 
 
-def run_chrom_genes(chrom_genes, wps, gene_count, out):
+def run_chrom_genes(chrom_genes, bw, gene_count, out):
     for count, gene in chrom_genes.iterrows():
+        chrom = gene['chrom']
         start = gene['start']
         end = gene['end']
         strand = gene['strand']
         tss_start, tss_end = make_tss_region(start, end, strand)
 
-        wps_array = wps[tss_start:tss_end]
+        wps_array = bw.values(chrom, tss_start, tss_end)
         result = find_tss_periodicity(wps_array)
         if result is not None:
             line_info = '\t'.join(map(str,[gene['name'] ,gene['type'], gene['id']]))
@@ -75,7 +77,7 @@ def run_chrom_genes(chrom_genes, wps, gene_count, out):
         gene_count += 1
         if gene_count % 5000 == 0:
             print 'Parsed {gene_count} for {filename}'.format(gene_count = gene_count,
-                                                        filename = filename)
+                                                        filename = out.name)
     return gene_count
 
 
@@ -94,9 +96,7 @@ def run_file(protein_df, out_path, bw_path, bw_prefix):
             chrom_genes = protein_df.query("chrom == '%s'" %chrom)
             bw_file = '%s.%s.Long.bigWig' %(bw_prefix,chrom)
             bw = pbw.open(bw_file, 'r')
-            bw_length = bw.chroms()[chrom]
-            wps = np.array(bw.values(chrom, 0, bw_length))
-            gene_count = run_chrom_genes(chrom_genes, wps, gene_count, out)
+            gene_count = run_chrom_genes(chrom_genes, bw, gene_count, out)
             bw.close()
     return 0
 
