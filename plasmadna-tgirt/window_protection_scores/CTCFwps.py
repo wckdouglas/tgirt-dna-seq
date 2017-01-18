@@ -6,8 +6,8 @@
 #        gtf file
 #        fai file
 
-import matplotlib
-matplotlib.use('Agg')
+from matplotlib import use as mpl_use
+mpl_use('Agg')
 from pybedtools import BedTool, set_tempdir
 from pybedtools.cbedtools import Interval
 import numpy as np
@@ -65,7 +65,7 @@ def extractTSSaln(bam, tssBed, windowSize, wpsWindow, halfWPSwindow, upperBound,
         wpsTSS, coverage = wpsTools.calculateWPS(bam, tss, windowSize, wpsWindow, halfWPSwindow, upperBound, lowerBound)
         wps += wpsTSS
         if geneCount % 5000 == 0:
-            print 'Parsing %i genes' %geneCount
+            print 'Parsing %i CTCF sites' %geneCount
     return wps
 
 def plotResult(df, figurename):
@@ -131,7 +131,7 @@ def makedir(directory):
 
 def main():
     #define folders/paths
-    threads = 20
+    threads = 12
     projectPath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     referencePath = '/stor/work/Lambowitz/ref/GRCh38/hg38_rDNA'
     #bedPath = projectPath + '/rmdupBedFiles'
