@@ -60,10 +60,13 @@ tissues <- c("Abdominal" ,'Brain',"Breast/Female Reproductive","Lung","Lymphoid"
             "Myeloid","Sarcoma", "Skin", "Urinary/Male Reproductive",
             "Other","Primary Tissue")
 plot_df <- df %>% 
-#    filter(grepl('SRR|cluster',samplename)) %>%
-#    filter(grepl('rmdup|SRR',samplename)) %>%
-    filter(!grepl('PD[34]|sim',samplename)) %>%
-    mutate(tissue_type = factor(tissue_type, levels = tissues))
+    #filter(grepl('SRR|merge|RNa',samplename)) %>%
+    #filter(grepl('rmdup|1022|1203',samplename)) %>%
+    #filter(!grepl('_1_S3',samplename)) %>%
+    mutate(tissue_type = factor(tissue_type, levels = tissues)) %>%
+    mutate(sample_type = ifelse(grepl('005[12]|^P1',samplename),'Healthy','Breast Cancer')) %>%
+    mutate(prep_type = ifelse(grepl('SRR',samplename), 'ssDNA-seq','TGIRT-seq')) %>%
+    tbl_df
 
 color_palette <- c('red','green','orange','purple','khaki3','khaki2',
                    'brown','pink','slateblue','darkgrey','skyblue')

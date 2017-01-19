@@ -143,7 +143,7 @@ def extract_wps(bam, tssWindow, wpsWindow, halfWPSwindow, upperBound,
     return chromArray
 
 
-def writeWig(chromArray, outputWig, chromosome, samplename):
+def writeWig(chromArray, outputWig, chromosome):
     outWig =  pbw.open(outputWig,'w')
     chrom_length = len(chromArray)
     outWig.addHeader([(chromosome,chrom_length)])
@@ -180,7 +180,7 @@ def runFile(tempBam, outprefix, genome, tssWindow, samplename, chromosome, upper
     chromArray = make_wps_array(tempBam, chromosome, tssWindow, wpsWindow,
                                 upperBound, lowerBound, lenType, samplename)
     printMessage('Finished calculating WPS for chromosome %s' %(chromosome), samplename)
-    writeWig(chromArray, outputWig, chromosome, samplename)
+    writeWig(chromArray, outputWig, chromosome)
     printMessage('Witten %s' %outputWig, samplename)
     return 0
 

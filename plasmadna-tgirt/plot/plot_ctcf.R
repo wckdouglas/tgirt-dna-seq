@@ -25,16 +25,21 @@ figurename <- str_c(figure_path,'/wps_distribution_merged.pdf')
 ctcf_df <- wps_data_path %>%
     stri_c('CTCFwps.tsv',sep='/') %>%
     read_tsv()   %>%
-    filter(samplename %in% c('SRR2130052','P1022_merge'))  %>%
-    group_by(samplename, type) %>%
+    filter(grepl('SRR|P1022', samplename))  %>%
+    filter(grepl('0052|umi', samplename))  %>%
+    filter(grepl('rmdup|umi', samplename))  %>%
+    mutate(prep = case_when(grepl('^P|^TGIRT',.$samplename) ~ 'TGIRT-seq',
+                                grepl('SRR',.$samplename) ~ 'ssDNA-seq'))  %>%
+    group_by(prep, type, position) %>%
+    summarize(wps = sum(wps)) %>%
+    ungroup() %>%
+    group_by(prep, type) %>%
     do(data_frame(
         scale_wps = c(scale(.$wps)),
         position = .$position,
         wps = .$wps
     )) %>%
     ungroup() %>%
-    mutate(prep = case_when(grepl('^P|^TGIRT',.$samplename) ~ 'TGIRT-seq',
-                                grepl('SRR',.$samplename) ~ 'ssDNA-seq'))  %>%
     mutate(type = str_replace(type,'bp','nt')) %>%
     tbl_df
 
@@ -48,7 +53,7 @@ wps_p <- ggplot(ctcf_df) +
     theme(axis.text.x = element_text(size=35, angle=50, hjust=1, face='plain',family = 'Arial'))+
     theme(axis.text.y = element_text(size=30,face='plain',family = 'Arial')) +
     theme(legend.position = 'none') +
-    scale_color_manual(values = c('black','salmon'))
+    scale_color_manual(values = c('salmon','black'))
 wps_p <- ggdraw() +
     draw_plot(wps_p, 0.02,0,0.99,1) +
     draw_plot_label('Scaled WPS', 0, 0.37, angle = 90, size = 35)
