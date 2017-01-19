@@ -15,21 +15,24 @@ def coverage(resultpath, ref_bed_name, header, bedFile):
     with open(outFile,'w') as out_file:
         out_file.write(header)
         for line in BedTool(ref_bed_name)\
-                .coverage(b = sorted_bed.fn, counts=True, f=0.8, r=True, sorted=True):
-            out_file.write('\t'.join(line.fields).strip() + '\n')
+                .intersect(b = sorted_bed.fn, wb=True, f=0.3, r=True, sorted=True):
+            ref_line = line.fields[:24]
+            score = line.fields[-3]
+            ref_line.append(score)
+            out_file.write('\t'.join(ref_line) + '\n')
         print 'Written %s' %out_file.name
     return 0
 
 def main():
     projectpath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
-    bedpath = projectpath + '/bedFiles'
+    bedpath = projectpath + '/genomeWPS/bed_files'
     resultpath = projectpath + '/tissueContribution'
     os.system('mkdir -p %s' %resultpath)
     set_tempdir(resultpath)
-    refpath = '/stor/work/Lambowitz/ref/ctcfData'
+    refpath = os.environ['REF'] + '/ctcfData'
     refBed = refpath + '/cellCTCF.bed'
-    bedFiles = glob.glob(bedpath + '/*.bed')
-    bedFiles = filter(lambda x: re.search('SRR|PD',x),bedFiles)
+    bedFiles = glob.glob(bedpath + '/*.Short.bed')
+    bedFiles = filter(lambda x: re.search('SRR|P1022',x),bedFiles)
 
     #process reference bed
     bedString = open(refBed,'ru').readlines()
@@ -37,10 +40,11 @@ def main():
     BedTool(('\n'.join(bedString[1:])),from_string=True)\
         .sort()\
         .moveto(ref_bed_name)
-    header = bedString[0].strip() + '\t' + 'coverage\n'
+    header = bedString[0].strip() + '\t' + 'WPS\n'
 
     coverage_func = partial(coverage, resultpath, ref_bed_name, header)
     Pool(12).map(coverage_func, bedFiles)
+    #map(coverage_func, bedFiles)
     return 0
 
 

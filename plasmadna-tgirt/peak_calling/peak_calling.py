@@ -26,12 +26,12 @@ def get_opt():
     args = parser.parse_args()
     return args
 
-def adjust_median(wps_array):
+def adjust_median(wps_array, window_size=1000):
     """
     running median filter
     """
     rolling_median = pd.Series(wps_array)\
-            .rolling(window = 1000)\
+            .rolling(window = window_size)\
             .median()
     adjusted_wps = np.nan_to_num(wps_array - rolling_median)
     return adjusted_wps
@@ -202,8 +202,8 @@ def process_bigwig(peak_bed, inputWig, chromosome, length_type):
     assert chrom == chromosome, 'Wrong chromosomes'
     wps = np.array(bw.values(chrom,0,length))
     bw.close()
-    wps = adjust_median(wps)
     if length_type == 'Long':
+        wps = adjust_median(wps, window_size=1000)
         wps = savgol_filter(wps, window_length = 21, polyorder=2)
 
     write_peaks(wps, peak_bed, length_type, chrom)

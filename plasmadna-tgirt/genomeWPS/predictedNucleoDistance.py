@@ -62,7 +62,7 @@ def main():
     figurename = figurepath + '/predictedNucleosomeDistance.pdf'
     tablename = figurename.replace('pdf','tsv')
     makeDir(figurepath)
-    file1 = 'PD_merged'
+    file1 = 'P1022_2_S4_umi2id_unique'
     file2 = 'SRR2130051'
     chromosomes = map(str,np.arange(1,23))
     chromosomes = np.concatenate([chromosomes,['X','Y']])

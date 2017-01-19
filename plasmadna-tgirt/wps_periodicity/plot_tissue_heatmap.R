@@ -7,6 +7,8 @@ library(purrr)
 library(stringr)
 library(cowplot)
 library(parallel)
+library(RColorBrewer)
+
 
 datapath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/genomeWPS/tss_periodicity'
 gene_expression_table <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/genes/rna.csv'
@@ -21,10 +23,11 @@ ge <- read_csv(gene_expression_table) %>%
     group_by(id,name) %>% 
     do(data_frame(
         cells = .$cells, 
-        zeros = sum(.$TPM==0), 
+        non_zeros = sum(.$TPM!=0), 
         TPM= .$TPM
     )) %>%
-    filter(zeros >= 3) %>%
+    ungroup() %>%
+    filter(non_zeros >= 3) %>%
     filter(TPM>0) %>%
     mutate(TPM = log2(TPM)) %>%
     inner_join(cell_lines)
@@ -60,15 +63,22 @@ tissues <- c("Abdominal" ,'Brain',"Breast/Female Reproductive","Lung","Lymphoid"
             "Myeloid","Sarcoma", "Skin", "Urinary/Male Reproductive",
             "Other","Primary Tissue")
 plot_df <- df %>% 
-    #filter(grepl('SRR|merge|RNa',samplename)) %>%
-    #filter(grepl('rmdup|1022|1203',samplename)) %>%
-    #filter(!grepl('_1_S3',samplename)) %>%
+    filter(grepl('SRR|P10',samplename)) %>%
+    filter(grepl('rmdup|umi',samplename)) %>%
+    filter(!grepl('clustered_rmdup|clustered|S[0-9]_rmdup|[345]$',samplename)) %>%
     mutate(tissue_type = factor(tissue_type, levels = tissues)) %>%
-    mutate(sample_type = ifelse(grepl('005[12]|^P1',samplename),'Healthy','Breast Cancer')) %>%
+    mutate(sample_type = case_when(
+            grepl('005[12]|^P1',.$samplename)~'Healthy',
+            grepl('SRR2130004',.$samplename)~'Breast cancer (Invasive/infiltrating ductal)',
+            grepl('0011|0032|0045',.$samplename)~'Breast cancer (Invasive/infiltrating lobular)',
+            grepl('0043|0033',.$samplename)~'Breast cancer (Ductal carcinoma in situ)'
+        )) %>%
     mutate(prep_type = ifelse(grepl('SRR',samplename), 'ssDNA-seq','TGIRT-seq')) %>%
+    mutate(name =samplename) %>%
+    mutate(samplename = str_c(sample_type,': ', prep_type, '-',samplename)) %>%
     tbl_df
 
-color_palette <- c('red','green','orange','purple','khaki3','khaki2',
+color_palette <- c('red','green','orange','purple','lightgoldenrod2','khaki1',
                    'brown','pink','slateblue','darkgrey','skyblue')
 tissue_plot <- ggplot(data=plot_df, 
                       aes(x=samplename,y=rank,fill=tissue_type)) + 
@@ -79,8 +89,10 @@ tissue_plot <- ggplot(data=plot_df,
     ylim(max(plot_df$rank)-20,max(plot_df$rank))+
     theme(axis.line = element_blank()) +
     theme(axis.text.y  = element_blank()) +
-    theme(axis.ticks = element_blank()) 
-t_d <- data_frame(y=c(10,10,1), 
+    theme(axis.ticks = element_blank())  +
+    theme(legend.text = element_text(size = 25, face='bold'))+
+    theme(legend.key.size  = unit(2, 'line'))
+t_d <- data_frame(y=c(1,1,10), 
                   x=c(1, 2, 2))
 triangle <- ggplot(t_d) +
     geom_polygon(aes(x=x,y=y), fill = 'grey')+
@@ -88,18 +100,39 @@ triangle <- ggplot(t_d) +
     theme(axis.text  = element_blank()) +
     theme(axis.ticks = element_blank()) +
     labs(x= ' ', y = ' ') 
+label_coloring <- ggplot(data= plot_df %>% 
+                             select(samplename,sample_type,prep_type)  %>%
+                             unique() %>%
+                             gather(category, fill_type, -samplename))+    
+    geom_tile(aes(y = category, x = samplename, fill = fill_type)) +
+    theme(axis.line = element_blank()) +
+    theme(axis.text  = element_blank()) +
+    theme(axis.ticks = element_blank()) +
+    labs(y= ' ', x=' ', fill = ' ') +
+    theme(legend.position = 'bottom') +
+    scale_fill_manual(values= brewer.pal(8,'Dark2')) +
+    theme(legend.text = element_text(size = 25, face='bold')) +
+    theme(legend.key.size  = unit(2, 'line'))
+
 p <- ggdraw()+
-    draw_plot(triangle, 0,0.25,0.1,0.75) +
-    draw_plot(tissue_plot, 0.05,0,0.95,1)+
+    draw_plot(triangle, 0.02,0.09,0.06,0.7) +
+    draw_plot(tissue_plot + theme(axis.text.x = element_blank(),
+                                  legend.position = 'top') , 
+              0.05,0.07,0.95,0.82)+
+    draw_plot(label_coloring, 0.05, 0 ,0.95,0.14) +
     draw_plot_label(str_c('Rank by Correlation (',max(plot_df$rank),' cells/tissues)'),
-                    0,0.2,angle=90)
-    
+                    0,0,angle=90, size =30, hjust = -0.4) 
+figurename <- str_c(datapath,'tissue_inference.pdf',sep='/')
+ggsave(p, file = figurename, width=20,height=15)
+message('Plotted: ', figurename)
+
+
 
 
 pca_rank <- df %>% 
-    select(-abs_cor, -correlation) %>% 
+    select(-rank, -abs_cor) %>% 
     filter(!grepl('sim|PD[34]',samplename))%>% 
-    spread(samplename, rank) %>% 
+    spread(samplename, correlation) %>% 
     select(-cells,-tissue_type) %>% 
     prcomp() %>% 
     .$rotation %>% 
