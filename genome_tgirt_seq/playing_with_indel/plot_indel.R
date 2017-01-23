@@ -42,10 +42,15 @@ df <- list.files(path = indel_table_path, pattern = '.tsv', full.names = T) %>%
     summarize(number_of_indel = sum(number_of_indel)) %>%
     inner_join(indel_count_df) %>%
     mutate(normalized_indel = number_of_indel / count) %>%
-    tbl_df
+
+    tbl_df 
     
+d <- df %>%
+    mutate(normalized_indel = log2(normalized_indel)) %>%
+    mutate(indel_index = log2(indel_index)) %>%
+
 form <- y ~ poly(x,2)
-p<-ggplot(data = df, aes(x = indel_index, y = normalized_indel, color = prep))+
+p<-ggplot(data = d, aes(x = indel_index, y = normalized_indel, color = prep))+
 #    geom_smooth(se = F,method = 'loess') +
 geom_smooth(se = F,formula=form, method='lm') +
     geom_point() +
