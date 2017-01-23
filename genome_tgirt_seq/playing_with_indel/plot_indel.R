@@ -44,9 +44,10 @@ df <- list.files(path = indel_table_path, pattern = '.tsv', full.names = T) %>%
     mutate(normalized_indel = number_of_indel / count) %>%
     tbl_df
     
-form <- y ~ poly(x,1, raw=T)
+form <- y ~ poly(x,2)
 p<-ggplot(data = df, aes(x = indel_index, y = normalized_indel, color = prep))+
-    geom_smooth(se = F,method = 'loess') +
+#    geom_smooth(se = F,method = 'loess') +
+geom_smooth(se = F,formula=form, method='lm') +
     geom_point() +
     scale_color_manual(values = c('lightskyblue','salmon'))+
     labs(y = 'Average Indel per Read\nper Mononucleotide Run', color = ' ')+
@@ -58,3 +59,18 @@ p<-ggplot(data = df, aes(x = indel_index, y = normalized_indel, color = prep))+
 figure_name <- str_c(indel_table_path,'/indel_per_repeat.pdf')
 ggsave(p, file = figure_name, width = 7, height = 7)
 message('Plotted: ', figure_name)
+
+
+library(broom)
+dodge <- position_dodge(width=0.9)
+model_p <- df %>% 
+    group_by(prep)%>% 
+    nest() %>% 
+    mutate(model = map(data, ~lm(normalized_indel~poly(indel_index,2),data = .))) %>% 
+    mutate(model_res = map(model, tidy)) %>%
+    unnest(model_res) %>%
+    tbl_df %>%
+    ggplot(aes(x=term, y = estimate, fill=prep))+
+        geom_bar(position=dodge, stat='identity') +
+        geom_errorbar(position=dodge, width=0.5,
+                      aes(ymax=estimate+std.error, ymin = estimate-std.error))

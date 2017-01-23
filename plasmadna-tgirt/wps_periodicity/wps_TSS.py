@@ -9,28 +9,13 @@ import pandas as pd
 from multiprocessing import Pool
 import glob
 import os
-from wps_spacing import daniell_spectrum, recursive_filter_function, demean
-from rpy2 import robjects
-from rpy2.robjects import numpy2ri
-from scipy.signal import detrend
+from wps_spacing import daniell_spectrum, r_spectrum
 from collections import defaultdict
 
-periodogram = robjects.r('spec.pgram')
-def r_spectrum(signal):
-    filtered_signal = detrend(signal, type='linear')
-    filtered_signal = recursive_filter_function(filtered_signal)
-    filtered_signal = demean(filtered_signal)
-    res = periodogram(numpy2ri.numpy2ri(filtered_signal),
-                        pad=0.3,tap=0.3,
-                        span=2,plot=False,detrend=True,
-                        demean=True)
-    freq = numpy2ri.ri2py(res.rx2('freq'))
-    psd = numpy2ri.ri2py(res.rx2('spec'))
-    return 1/freq, psd
 
 def extract_fft(wps_array):
-    #periodicity, intensity = daniell_spectrum(wps_array, 0.1)
-    periodicity, intensity = r_spectrum(wps_array)
+    periodicity, intensity = daniell_spectrum(wps_array)
+    #periodicity, intensity = r_spectrum(wps_array)
     usable_indices = (periodicity<=280) & (periodicity>=120)
     periodicity = periodicity[usable_indices]
     intensity = intensity[usable_indices]

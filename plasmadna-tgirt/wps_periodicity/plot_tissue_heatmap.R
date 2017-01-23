@@ -63,12 +63,13 @@ tissues <- c("Abdominal" ,'Brain',"Breast/Female Reproductive","Lung","Lymphoid"
             "Myeloid","Sarcoma", "Skin", "Urinary/Male Reproductive",
             "Other","Primary Tissue")
 plot_df <- df %>% 
-    filter(grepl('SRR|P10',samplename)) %>%
-    filter(grepl('rmdup|umi',samplename)) %>%
-    filter(!grepl('clustered_rmdup|clustered|S[0-9]_rmdup|[345]$',samplename)) %>%
+    filter(grepl('SRR|UMI',samplename)) %>%
+    filter(grepl('rmdup|UMI_merge',samplename)) %>%
+    #filter(grepl('rmdup|SRR|merge',samplename)) %>%
+    #filter(!grepl('clustered_rmdup|clustered|S[0-9]_rmdup|[345]$',samplename)) %>%
     mutate(tissue_type = factor(tissue_type, levels = tissues)) %>%
     mutate(sample_type = case_when(
-            grepl('005[12]|^P1',.$samplename)~'Healthy',
+            grepl('005[12]|^P1|^PD',.$samplename)~'Healthy',
             grepl('SRR2130004',.$samplename)~'Breast cancer (Invasive/infiltrating ductal)',
             grepl('0011|0032|0045',.$samplename)~'Breast cancer (Invasive/infiltrating lobular)',
             grepl('0043|0033',.$samplename)~'Breast cancer (Ductal carcinoma in situ)'
@@ -86,7 +87,7 @@ tissue_plot <- ggplot(data=plot_df,
     theme(axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5))+
     scale_fill_manual(values = color_palette) +
     labs(y=' ',x = ' ', fill = ' ') +
-    ylim(max(plot_df$rank)-20,max(plot_df$rank))+
+    ylim(max(plot_df$rank)-30,max(plot_df$rank))+
     theme(axis.line = element_blank()) +
     theme(axis.text.y  = element_blank()) +
     theme(axis.ticks = element_blank())  +
@@ -130,9 +131,9 @@ message('Plotted: ', figurename)
 
 
 pca_rank <- df %>% 
-    select(-rank, -abs_cor) %>% 
+    select(-correlation, -abs_cor) %>% 
     filter(!grepl('sim|PD[34]',samplename))%>% 
-    spread(samplename, correlation) %>% 
+    spread(samplename, rank) %>% 
     select(-cells,-tissue_type) %>% 
     prcomp() %>% 
     .$rotation %>% 
@@ -141,3 +142,19 @@ pca_rank <- df %>%
     mutate(prep = ifelse(grepl('SRR',samplename),'ssDNA-seq','TGIRT-seq')) %>%
     ggplot(aes(x=PC1, y =PC2, label = samplename)) + 
         geom_text(aes(color = prep))
+
+cor_df <- df %>%
+    filter(!grepl('rmdup',samplename))%>%
+    select(-correlation, - abs_cor) %>% 
+    spread(samplename, rank) %>% 
+    select(-cells,-tissue_type) %>% 
+    cor %>%
+    data.frame() 
+
+library(heatmap3)
+heatmap3(cor_df)
+#    tibble::rownames_to_column('sample1') %>%
+#    gather(sample2, cor_value,-sample1) %>%
+#    ggplot(aes(x=sample1, y = sample2, fill = cor_value)) +
+#        geom_tile() + 
+#        viridis::scale_fill_viridis()

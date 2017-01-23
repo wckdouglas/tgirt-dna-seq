@@ -1,6 +1,6 @@
 library(dplyr)
 
-d <- read.table('/stor/work/Lambowitz/cdw2854/plasmaDNA/genomeWPS/a',
+d <- read.table('/stor/work/Lambowitz/cdw2854/plasmaDNA/genomeWPS/try.wig',
                 as.is=T,header=F)                                                                                                                                                                       
                                                                                                                                                                                                                                              
 tseries <- as.ts(d$V2)                                                                                                                                                                                                                
