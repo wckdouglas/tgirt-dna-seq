@@ -9,13 +9,14 @@ import pandas as pd
 from multiprocessing import Pool
 import glob
 import os
-from wps_spacing import daniell_spectrum, r_spectrum
+from wps_spacing import daniell_spectrum, r_spectrum, r_spec_pgram
 from collections import defaultdict
 
 
+r_periodogram = r_spec_pgram()
 def extract_fft(wps_array):
-    periodicity, intensity = daniell_spectrum(wps_array)
-    #periodicity, intensity = r_spectrum(wps_array)
+    #periodicity, intensity = daniell_spectrum(wps_array)
+    periodicity, intensity = r_spectrum(wps_array, r_periodogram)
     usable_indices = (periodicity<=280) & (periodicity>=120)
     periodicity = periodicity[usable_indices]
     intensity = intensity[usable_indices]
@@ -109,7 +110,7 @@ def main():
     protein_df = genes_to_mem(protein_bed)\
         .pipe(lambda d: d[np.in1d(d.chrom, chroms)])
     run_file_func = partial(run_file, protein_df, out_path, bw_path)
-    p = Pool(8)
+    p = Pool(16)
     p.map(run_file_func, list(bw_prefix))
     p.close()
     p.join()

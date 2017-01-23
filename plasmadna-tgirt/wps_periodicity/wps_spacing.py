@@ -7,8 +7,11 @@ from scipy.signal import detrend, periodogram
 from rpy2 import robjects
 from rpy2.robjects import numpy2ri
 
-r_periodogram = robjects.r('spec.pgram')
-def r_spectrum(signal):
+def r_spec_pgram():
+    r_periodogram = robjects.r('spec.pgram')
+    return r_periodogram
+
+def r_spectrum(signal, r_periodogram):
     filtered_signal = detrend(signal, type='linear')
     filtered_signal = recursive_filter_function(filtered_signal)
     filtered_signal = demean(filtered_signal)
