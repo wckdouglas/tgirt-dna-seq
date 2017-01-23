@@ -24,6 +24,7 @@ freq_df <- data.frame(freq = resA1$freq, spec = resA1$spec) %>%
     filter(freq <= 280, freq >= 120) %>%
     tbl_df
 library(ggplot2)
-ggplot(data=freq_df, aes(x = freq, y = spec)) + 
+p<-ggplot(data=freq_df, aes(x = freq, y = spec)) + 
     geom_line() +
-    scale_x_continuous(name = seq(120,280,10),breaks=seq(120,280,10))
+    scale_x_continuous(name = seq(120,280,10),breaks=seq(120,280,10))+
+    theme(axis.text.x = element_text(angle=90))

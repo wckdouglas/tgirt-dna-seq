@@ -87,7 +87,7 @@ tissue_plot <- ggplot(data=plot_df,
     theme(axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5))+
     scale_fill_manual(values = color_palette) +
     labs(y=' ',x = ' ', fill = ' ') +
-    ylim(max(plot_df$rank)-30,max(plot_df$rank))+
+    ylim(max(plot_df$rank)-25,max(plot_df$rank))+
     theme(axis.line = element_blank()) +
     theme(axis.text.y  = element_blank()) +
     theme(axis.ticks = element_blank())  +

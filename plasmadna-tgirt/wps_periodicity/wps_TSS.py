@@ -101,7 +101,7 @@ def main():
     out_path = project_path + '/tss_periodicity'
     if not os.path.isdir(out_path):
         os.mkdir(out_path)
-    bw_files = glob.glob(bw_path + '/*merged*.bigWig')
+    bw_files = glob.glob(bw_path + '/*.bigWig')
     bw_prefix = set(map(lambda x: os.path.basename(x).split('.')[0], bw_files))
     chroms = range(1,23)
     chroms.extend(['X','Y'])
@@ -109,7 +109,7 @@ def main():
     protein_df = genes_to_mem(protein_bed)\
         .pipe(lambda d: d[np.in1d(d.chrom, chroms)])
     run_file_func = partial(run_file, protein_df, out_path, bw_path)
-    p = Pool(6)
+    p = Pool(8)
     p.map(run_file_func, list(bw_prefix))
     p.close()
     p.join()
