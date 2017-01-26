@@ -2,7 +2,7 @@
 
 import pandas as pd
 import numpy as np
-from scipy.signal import savgol_filter
+from scipy.signal import savgol_filter, medfilt
 import os
 import sys
 import pyBigWig as pbw
@@ -25,16 +25,6 @@ def get_opt():
     parser.add_argument('-c','--chrom', help='Which chromosome?', choices = chromosomes, required=True)
     args = parser.parse_args()
     return args
-
-def adjust_median(wps_array, window_size=1000):
-    """
-    running median filter
-    """
-    rolling_median = pd.Series(wps_array)\
-            .rolling(window = window_size)\
-            .median()
-    adjusted_wps = np.nan_to_num(wps_array - rolling_median)
-    return adjusted_wps
 
 
 def find_peak_region(wps):
@@ -203,8 +193,10 @@ def process_bigwig(peak_bed, inputWig, chromosome, length_type):
     wps = np.array(bw.values(chrom,0,length))
     bw.close()
     if length_type == 'Long':
-        wps = adjust_median(wps, window_size=1000)
+        wps = medfilt(wps, kernel_size=1001)
         wps = savgol_filter(wps, window_length = 21, polyorder=2)
+    if length_type == 'Short':
+        wps = medfilt(wps, kernel_size=5)
 
     write_peaks(wps, peak_bed, length_type, chrom)
     return 0
