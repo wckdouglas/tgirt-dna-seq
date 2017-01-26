@@ -55,10 +55,11 @@ insert_p_merge <- ggplot(data = insert_df) +
     theme(text = element_text(size=35, face='bold',family = 'Arial'))+
     labs(x='Fragment length (nt)',y='Percent Reads', color = ' ')+
     theme(legend.key.size = unit(11,'mm')) +
+    theme(legend.position = c(0.8,0.9)) +
     scale_x_continuous(breaks=seq(0,401,50), limits=c(0,400)) +
     geom_vline(data = peaks_df, aes(xintercept = peak), 
                linetype= 2, size=1, color = 'gray1', alpha = 0.5) +
-    theme(legend.position = c(0.8,0.5)) +
+    theme(legend.position = c(0.8,0.4)) +
     geom_segment(y = 2.4,x = 200, yend = 2.1, xend = 170,
                  arrow = arrow(length = unit(0.5, "cm"))) +
     annotate(geom='text', x = 234, y = 2.5, label = '167 nt', size = 12, fontface='bold') +

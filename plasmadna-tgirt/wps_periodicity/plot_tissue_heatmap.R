@@ -151,8 +151,8 @@ cor_df <- df %>%
     cor %>%
     data.frame() 
 
-library(heatmap3)
-heatmap3(cor_df)
+heatmap3::heatmap3(cor_df, col = viridis::viridis(1000),
+         symm=T)
 #    tibble::rownames_to_column('sample1') %>%
 #    gather(sample2, cor_value,-sample1) %>%
 #    ggplot(aes(x=sample1, y = sample2, fill = cor_value)) +
