@@ -23,10 +23,10 @@ nucleo_p <- ggplot(data = df, aes(x = distance, weights=count/10000)) +
     theme(text = element_text(size=30, family='Arial', face='bold')) +
     theme(axis.text.x = element_text(size=30,face='plain', family='Arial',angle=50, hjust=0.5, vjust=0.5)) +
     theme(axis.text.y = element_text(size=30,face='plain', family='Arial')) +
-    labs(x = 'Distance to the Nearest Nucleosome Center (bp)\n[ssDNA-seq (ref.2) & TGIRT-seq]', y = 'Peak Count') 
+    labs(x = 'Distance to the nearest nucleosome Center (bp)\n[ssDNA-seq (ref.2) & TGIRT-seq]', y = 'Peak Count') 
 label <- expression(paste('x10'^{'5'}))
 nucleo_p <- ggdraw(nucleo_p) +
-    draw_label(label, x = 0.11, y = 0.95, size = 25, fontface ='bold')
+    draw_label(label, x = 0.15, y = 0.95, size = 25, fontface ='bold')
 figurename <- str_c(datapath, '/predictedNucleosomeDistance.pdf')
 ggsave(nucleo_p, file=figurename, width = 11,height = 10)
 message('Plotted: ', figurename)

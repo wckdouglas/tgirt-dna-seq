@@ -30,11 +30,11 @@ df <- list.files(path = indel_table_path, pattern = '.tsv', full.names = T) %>%
     map_df(read_indel_table) %>%
     inner_join(indel_index_df)%>% 
     select(grep('samplename|num_D|num_I|index',names(.))) %>%
-    filter(!grepl('MiSeq|Ecoli|phus|q5|NEB',samplename)) %>%
+    filter(!grepl('MiSeq|Ecoli|phus|q5',samplename)) %>%
     mutate(prep = case_when(grepl('nextera', .$samplename)~'Nextera XT',
                             grepl('clustered', .$samplename)~'Clustered TGIRT-seq',
-                            grepl('NEB', .$samplename)~'NEB TGIRT-seq',
-                            grepl('K12', .$samplename)~'TGIRT-seq')) %>%
+                            grepl('NEB', .$samplename)~'TGIRT-Fragmentase',
+                            grepl('K12', .$samplename)~'TGIRT-Covaris')) %>%
     filter(!grepl('clustered',samplename)) %>%
     mutate(indel_index = negative_index + positive_index ) %>%
     mutate(number_of_indel = num_D + num_I) %>%
@@ -42,7 +42,6 @@ df <- list.files(path = indel_table_path, pattern = '.tsv', full.names = T) %>%
     summarize(number_of_indel = sum(number_of_indel)) %>%
     inner_join(indel_count_df) %>%
     mutate(normalized_indel = number_of_indel / count) %>%
-
     tbl_df 
     
 d <- df %>%
@@ -54,10 +53,10 @@ form <- y ~ poly(x,2)
 #form <- y ~ poly(x,1)
 p<-ggplot(data = df, aes(x = indel_index, y = normalized_indel, color = prep))+
 #    geom_smooth(se = F,method = 'loess') +
-geom_smooth(se = F,formula=form, method='lm') +
+    geom_smooth(se = F,formula=form, method='lm') +
     geom_point() +
-    scale_color_manual(values = c('lightskyblue','salmon'))+
-    labs(y = 'Average Indel per Read\nper Mononucleotide Run', color = ' ')+
+    scale_color_manual(values = c('lightskyblue','salmon','green'))+
+    labs(y = 'Average indel per read\nper mononucleotide run', color = ' ')+
     scale_x_continuous(breaks = seq(0,10),name='Run Length (nt)') +
     theme(legend.position = c(0.2,0.8)) +
     theme(text = element_text(size = 25, face='bold')) +

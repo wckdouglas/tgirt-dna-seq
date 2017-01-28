@@ -5,6 +5,7 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 library(cowplot)
+library(extrafont)
 
 read_file <- function(tablename){
     
@@ -35,7 +36,7 @@ dinucleotide_p <- ggplot(data = df, aes(x = position, y = adjusted_signal, color
         theme(legend.key = element_rect(size = 25)) + 
 	    scale_x_continuous(breaks= seq(min(df$position)-1,max(df$position),20)) +
         scale_color_manual(values = c('gold4','blue')) +
-	    labs(color = ' ', x = 'Positions Relative to Center of 167 nt Fragments', y ='Normalized Count') +
+	    labs(color = ' ', x = 'Positions relative to center of 167-nt fragments', y ='Normalized count') +
         theme(legend.position = c(0.45,0.9))+
         theme(legend.key.height=unit(1.5,"line"))
 figurename <- str_c(figurepath, '/dinucleotide.pdf')

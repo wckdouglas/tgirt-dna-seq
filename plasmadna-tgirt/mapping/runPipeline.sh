@@ -1,12 +1,14 @@
 #!/bin/bash
 
 PROJECTPATH=$SCRATCH/plasmaDNA
+PROJECTPATH=$WORK/cdw2854/plasmaDNA
 DATAPATH=$PROJECTPATH/splittedFastq
+DATAPATH=/stor/work/Lambowitz/Data/NGS/JA17030/umi2id
 #DATAPATH=$DATA/SA16172/dna_plasma_genome/clipped_id
-INDEXPATH=$SCRATCH/GRCh38/hg38_rDNA
+INDEXPATH=$REF/GRCh38/hg38_rDNA
 INDEX=$INDEXPATH/genome_rDNA
 PYTHON=$(which python)
-CORES=10
+CORES=14
 
 for FQ in $DATAPATH/*R1_001.fastq.gz
 do

@@ -28,13 +28,14 @@ df <- files %>%
     map(read_files) %>%
     reduce(rbind) %>%
     filter(!grepl('subsampled|sim|Ecoli|q5|phus|SRR',filename)) %>%
-    filter(grepl('nextera|NEB|kq|kh',filename)) %>%
+    filter(grepl('nextera|NEB|kq|kh|UMI',filename)) %>%
     filter(grepl('MarkDuplicate',filename)) %>%
     filter(grepl('nextera|clustered|umi2id',filename)) %>%
     mutate(prep = case_when(grepl('nextera',.$filename) ~ 'Nextera XT',
                             grepl('pb',.$filename) ~ 'Pacbio',
                             grepl('sim',.$filename) ~ 'Covaris Sim',
                             grepl('SRR',.$filename) ~ 'Covaris SRR',
+                            grepl('UMI',.$filename) ~ 'TGIRT-seq 13N direct ligation',
                             grepl('NEB',.$filename) ~ 'TGIRT-seq Fragmentase')) %>%
     mutate(prep = ifelse(is.na(prep),'TGIRT-seq Covaris',prep))  %>%
     mutate(read_end = ifelse(read_end == "5'", 'Read 1', 'Read 2')) %>%

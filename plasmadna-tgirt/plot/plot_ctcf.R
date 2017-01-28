@@ -53,7 +53,7 @@ wps_p <- ggplot(ctcf_df) +
     theme(axis.text.x = element_text(size=35, angle=50, hjust=1, face='plain',family = 'Arial'))+
     theme(axis.text.y = element_text(size=30,face='plain',family = 'Arial')) +
 #    theme(legend.position = 'none') +
-    theme(legend.position = c(0.8,0.5)) +
+    theme(legend.position = c(0.8,0.3)) +
     scale_color_manual(values = c('salmon','black'))
 wps_p <- ggdraw() +
     draw_plot(wps_p, 0.02,0,0.99,1) +
