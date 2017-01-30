@@ -48,11 +48,15 @@ df <- table_names %>%
     reduce(rbind) %>%
     mutate(line_type = 'WGS') %>%
 #    select(-subsampled) %>%
-    dplyr::filter(grepl('nextera|^K12_kh|^K12_kq', samplename)) %>%
     dplyr::filter(grepl('nextera|umi2id', samplename)) %>%
     mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera XT',
-                            grepl('NEB',.$samplename) ~ 'TGIRT-seq Fragmentase',
-                            grepl('kh|kq',.$samplename) ~ 'TGIRT-seq Covaris'))%>%
+                            grepl('pb',.$samplename) ~ 'Pacbio',
+                            grepl('sim',.$samplename) ~ 'Covaris Sim',
+                            grepl('SRR',.$samplename) ~ 'Covaris SRR',
+                            grepl('UMI',.$samplename) ~ 'TGIRT-seq 13N direct ligation',
+                            grepl('kh|kq',.$samplename) ~ 'TGIRT-seq Covaris',
+                            grepl('NEB',.$samplename) ~ 'TGIRT-seq Fragmentase')) %>%
+    filter(!is.na(prep)) %>%
     tbl_df
 
 base_df <- df %>%
@@ -100,7 +104,7 @@ wgs_p <- ggplot() +
 	geom_line(data = plot_df, aes(x = coverage, y = density * 100, 
 	                   color = prep, size = samplename, linetype=line_type)) + 
 	xlim(1,50) +
-    scale_color_manual(values = c('light sky blue','salmon'))+
+    #scale_color_manual(values = c('light sky blue','salmon'))+
     scale_size_manual(guide = 'none', values = rep(1.2, length(unique(plot_df$samplename))))+
     scale_linetype_discrete(guide = guide_legend(ncol = 1))+
 	theme(text = element_text(size = 25, face='bold')) +

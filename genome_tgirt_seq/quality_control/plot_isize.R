@@ -5,9 +5,6 @@ library(dplyr)
 library(stringr)
 library(cowplot)
 
-make_prep <- function(x){
-    ifelse(grepl('nextera',x),'Nextera XT','TGIRT-seq')
-}
 
 bampath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/bamFiles/figures'
 isize_table <- bampath %>%
@@ -21,7 +18,13 @@ isize_table <- bampath %>%
     ungroup() %>%
     dplyr::filter(!grepl('clustered|sim',samplename)) %>%
     dplyr::filter(grepl('nextera|^K12_kh|^K12_kq', samplename)) %>%
-    mutate(prep = make_prep(samplename)) %>%
+    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera XT',
+                            grepl('pb',.$samplename) ~ 'Pacbio',
+                            grepl('sim',.$samplename) ~ 'Covaris Sim',
+                            grepl('SRR',.$samplename) ~ 'Covaris SRR',
+                            grepl('UMI',.$samplename) ~ 'TGIRT-seq 13N direct ligation',
+                            grepl('kh|kq',.$samplename) ~ 'TGIRT-seq Covaris',
+                            grepl('NEB',.$samplename) ~ 'TGIRT-seq Fragmentase')) %>%
  	tbl_df 
 
 

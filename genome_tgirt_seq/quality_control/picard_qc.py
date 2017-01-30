@@ -115,7 +115,7 @@ def main():
     bam_files = filter(lambda x: 'pb' not in x, bam_files)
     bam_files = filter(lambda x: '7N' in x, bam_files)
     picard_func = partial(pipeline, result_path, figures_path, ref)
-    p = Pool(12)
+    p = Pool(20)
     p.map(picard_func, bam_files)
     p.close()
     p.join()

@@ -42,6 +42,32 @@ windows_df <- df %>%
 	mutate(rol_window = normalize_windows * 10) %>%
 	mutate(roll_mean_window = zoo::rollmean(rol_window, k = 10,fill=0, align='center'))
 
+gini_df <- df %>% 
+    filter(GC>=12, GC<=80) %>%
+    group_by(samplename, prep) %>% 
+    summarize(gini=ineq(NORMALIZED_COVERAGE,type='Gini')) %>%
+    filter(grepl('nextera|_[EF]_|K12_kh|pb|K12_UMI',samplename)) %>%
+    filter(!grepl('clustered', samplename)) %>%
+    filter(gini < 0.5) %>%
+    ungroup() %>%
+    tbl_df
+
+gini_p <- ggplot(data=gini_df, aes(x = prep, y=gini, color=prep)) +
+    geom_point(size = 4) +
+    #geom_violin(size = 2) +
+    labs(x = ' ', y = 'Gini Coefficient', color = ' ') +
+    theme(axis.text.x = element_blank())+
+    theme(axis.ticks.x = element_blank())+
+    theme(text = element_text(size = 25, face='bold')) +
+    theme(axis.text = element_text(size = 25, face='bold')) +
+    theme(legend.key.height = unit(2,'line')) +
+    theme(legend.position='bottom')+
+    guides(col = guide_legend(ncol=2))
+figurename <- str_c(figure_path, '/gc_gini_plot.pdf')
+ggsave(gini_p, file = figurename , height = 7, width = 7)
+message('Plotted: ', figurename)
+
+
 
 plot_gc <-function(df){
     p <- ggplot(data = df, aes(x = GC, y = NORMALIZED_COVERAGE)) +
@@ -57,12 +83,29 @@ plot_gc <-function(df){
     return(p)
 }
 
+index_annotation <- gini_df %>% 
+    group_by(prep) %>% 
+    summarize(
+        mean_gini = mean(gini), 
+        sd_gini=sd(gini)
+    ) %>%
+    ungroup() %>%
+    mutate(annotation = str_c('Gini: ', signif(mean_gini,3),'±',signif(sd_gini,3))) %>%
+    select(prep, annotation) %>%
+    tbl_df
+
 gc_p <- df %>% 
 #    filter(grepl('nextera|^K12_kh|^K12_kq', samplename)) %>%
 #    filter(grepl('nextera|clustered',samplename)) %>%
     filter(grepl('nextera|_[EF]_|K12_kh|pb|K12_UMI',samplename)) %>%
-    filter(!grepl('SRR',samplename)) %>%
+    filter(!grepl('^SRR',samplename)) %>%
+    filter(!grepl('SRR1536433',samplename)) %>%
+    filter(grepl('UMI|nextera',samplename)) %>% #added for poster
+    inner_join(index_annotation) %>% # added for poster
+    mutate(prep = str_c(prep, '(', annotation, ')')) %>% #added for poster
+    mutate(prep = str_replace_all(prep,'13N','')) %>% #added for poster
     plot_gc() +
+        scale_color_manual(values = c('light sky blue','salmon'))+
         theme(legend.position =  c(0.3,0.7))+
         theme(legend.key.height = unit(2,'line'))
 figurename <- str_c(figure_path, '/gc_plot.pdf')
@@ -107,33 +150,29 @@ csdf <- supplemental_df %>%
         cc = cumsum(.$NORMALIZED_COVERAGE)
     )) %>%
     ungroup()
-ggplot(csdf, aes(x=gc, y = cc, color=samplename)) + 
+cs_p <- ggplot(csdf, aes(x=gc, y = cc, color=samplename)) + 
     geom_line() + 
     geom_abline(intercept=-10, slope=1)
 
 
-gini_df <- df %>% 
-    filter(GC>=12, GC<=80) %>%
-    group_by(samplename, prep) %>% 
-    summarize(gini=ineq(NORMALIZED_COVERAGE,type='Gini')) %>%
+
+
+lonrenz_df <-df %>% 
+    filter(GC>=12, GC<=80) %>% 
     filter(grepl('nextera|_[EF]_|K12_kh|pb|K12_UMI',samplename)) %>%
     filter(!grepl('clustered', samplename)) %>%
-    filter(gini < 0.5) %>%
-    ungroup() %>%
-    tbl_df
-
-gini_p <- ggplot(data=gini_df, aes(x = prep, y=gini, color=prep)) +
-    geom_point(size = 4) +
-    #geom_violin(size = 2) +
-    labs(x = ' ', y = 'Gini Index', color = ' ') +
-    theme(axis.text.x = element_blank())+
-    theme(axis.ticks.x = element_blank())+
-    theme(text = element_text(size = 25, face='bold')) +
-    theme(axis.text = element_text(size = 25, face='bold')) +
-    theme(legend.key.height = unit(2,'line')) +
-    theme(legend.position='bottom')+
-    guides(col = guide_legend(ncol=2))
-figurename <- str_c(figure_path, '/gc_gini_plot.pdf')
-ggsave(gini_p, file = figurename , height = 7, width = 7)
+    filter(!grepl('SRR1536433',samplename)) %>%
+    group_by(samplename, prep) %>% 
+    nest() %>% 
+    mutate(lc = map(data,~Lc(.$NORMALIZED_COVERAGE))) %>% 
+    mutate(l = map(lc, function(x) x$L)) %>% 
+    mutate(p = map(lc, function(x) x$p)) %>% 
+    unnest(l,p)
+lonrenz_curve <- ggplot(data = lonrenz_df, aes(y= l,x = p, group=samplename, color=prep)) + 
+    geom_line(alpha=0.5) + 
+    geom_abline(intercept = 0, slope = 1)+
+    scale_x_continuous(breaks = seq(0,1,0.25), labels = seq(0,1,0.25) * (80-12) + 12)+
+    labs(x = '% of GC', y = 'Cumulative coverage', color = ' ')#, title = 'Lonrenze Curve')
+figurename <- str_c(figure_path, '/gc_lonrez_curve.pdf')
+ggsave(lonrenz_curve, file = figurename , height = 7, width = 7)
 message('Plotted: ', figurename)
-        

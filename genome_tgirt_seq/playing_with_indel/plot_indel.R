@@ -31,10 +31,12 @@ df <- list.files(path = indel_table_path, pattern = '.tsv', full.names = T) %>%
     inner_join(indel_index_df)%>% 
     select(grep('samplename|num_D|num_I|index',names(.))) %>%
     filter(!grepl('MiSeq|Ecoli|phus|q5',samplename)) %>%
-    mutate(prep = case_when(grepl('nextera', .$samplename)~'Nextera XT',
-                            grepl('clustered', .$samplename)~'Clustered TGIRT-seq',
-                            grepl('NEB', .$samplename)~'TGIRT-Fragmentase',
-                            grepl('K12', .$samplename)~'TGIRT-Covaris')) %>%
+    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera XT',
+                            grepl('pb',.$samplename) ~ 'Pacbio',
+                            grepl('sim',.$samplename) ~ 'Covaris Sim',
+                            grepl('SRR',.$samplename) ~ 'Covaris SRR',
+                            grepl('UMI',.$samplename) ~ 'TGIRT-seq 13N direct ligation',
+                            grepl('NEB',.$samplename) ~ 'TGIRT-seq Fragmentase')) %>%
     filter(!grepl('clustered',samplename)) %>%
     mutate(indel_index = negative_index + positive_index ) %>%
     mutate(number_of_indel = num_D + num_I) %>%
