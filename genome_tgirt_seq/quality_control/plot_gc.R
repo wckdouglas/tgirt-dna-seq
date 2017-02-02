@@ -5,6 +5,7 @@ library(readr)
 library(dplyr)
 library(cowplot)
 library(purrr)
+library(ineq)
 
 read_gc_table <- function(filename, datapath){
 
@@ -24,7 +25,7 @@ project_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/'
 picard_path <- str_c( project_path, '/picard_results')
 figure_path  <- str_c(project_path, '/figures')
 table_names <- list.files(path = picard_path, pattern = 'gc_metrics')
-#table_names<- table_names[!grepl('pb',table_names)]
+table_names<- table_names[grepl('^75',table_names)]
 df <- table_names %>%
 	map(read_gc_table, picard_path) %>%
 	reduce(rbind) %>%
@@ -109,6 +110,8 @@ gc_p <- df %>%
         theme(legend.position =  c(0.3,0.7))+
         theme(legend.key.height = unit(2,'line'))
 figurename <- str_c(figure_path, '/gc_plot.pdf')
+source('~/R/legend_to_color.R')
+gc_p<-ggdraw(coloring_legend_text(gc_p))
 ggsave(gc_p, file = figurename , height = 7, width = 9)
 message('Plotted: ', figurename)
 

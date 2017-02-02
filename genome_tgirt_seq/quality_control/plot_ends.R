@@ -62,6 +62,7 @@ p <- ggplot(data = df, aes(x = actual_positions,
     theme(legend.text = element_text(size = 18, face='bold'))+
     theme(legend.key.size=unit(8,'mm'))
 figurename <- str_c(datapath , '/end_bias_plot.pdf')
+
 ggsave(p , file = figurename, height = 8, width = 8)
 message('Plotted: ', figurename)
 
@@ -106,4 +107,30 @@ en_p <- ggplot(data = bit_df, aes(x = actual_positions, y = entropy,
     ylim(0,2)
 figurename <- str_c(datapath, '/ends_entropy.pdf')
 ggsave(p, file=figurename, height=10,width=10)
+message('Plotted: ', figurename)
+
+
+p <- ggplot(data = df %>% 
+                filter(grepl('Next|13N', prep)) %>%
+                mutate(prep = ifelse(grepl('13N', prep),'TGIRT-seq',prep)), 
+            aes(x = actual_positions, 
+                color = prep, 
+                group=filename, 
+                y = base_fraction)) +
+    geom_line(size = 1.3, alpha=0.6) +
+    facet_grid(base~read_end, scale ='free_x') +
+    labs(x = 'Position Relative to Read ends',y='Fraction of Reads',color=' ') +
+    panel_border() +
+    scale_color_manual(values = colors)+
+    theme(strip.text.x = element_text(size = 20, face='bold')) +
+    theme(strip.text.y = element_text(size = 20, face='bold', angle = 0)) +
+    theme(axis.title = element_text(size = 20, face='bold')) +
+    theme(axis.text = element_text(size = 18, face='bold'))  +
+    theme(legend.position = c(0.65,0.45))+
+    theme(legend.text = element_text(size = 18, face='bold'))+
+    theme(legend.key.size=unit(8,'mm'))
+figurename <- str_c(datapath , '/end_bias_plot.pdf')
+source('~/R/legend_to_color.R')
+p <- ggdraw(coloring_legend_text(p))
+ggsave(p , file = figurename, height = 8, width = 8)
 message('Plotted: ', figurename)

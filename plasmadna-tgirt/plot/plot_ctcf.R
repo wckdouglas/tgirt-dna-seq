@@ -55,6 +55,8 @@ wps_p <- ggplot(ctcf_df) +
 #    theme(legend.position = 'none') +
     theme(legend.position = c(0.8,0.3)) +
     scale_color_manual(values = c('salmon','black'))
+source('~/R/legend_to_color.R')
+wps_p <- ggdraw(coloring_legend_text(wps_p))
 wps_p <- ggdraw() +
     draw_plot(wps_p, 0.02,0,0.99,1) +
     draw_plot_label('Scaled WPS', 0, 0.37, angle = 90, size = 35)

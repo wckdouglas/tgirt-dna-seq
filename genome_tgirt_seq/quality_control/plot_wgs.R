@@ -48,7 +48,10 @@ df <- table_names %>%
     reduce(rbind) %>%
     mutate(line_type = 'WGS') %>%
 #    select(-subsampled) %>%
-    dplyr::filter(grepl('nextera|umi2id', samplename)) %>%
+    filter(grepl('^75|UMI', samplename)) %>%
+#    filter(grepl('nextera|UMI|NEB|kh|kq', samplename)) %>%
+    filter(grepl('nextera|UMI',samplename))  %>%
+    filter(grepl('nextera|umi2',samplename)) %>%
     mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera XT',
                             grepl('pb',.$samplename) ~ 'Pacbio',
                             grepl('sim',.$samplename) ~ 'Covaris Sim',
@@ -88,8 +91,7 @@ rsqrd_df <- plot_df %>%
               rmsd = sqrt(sum((wgs-model)^2)/length(wgs))
     ) %>%
     ungroup() %>%
-    mutate(rsqrd = 1 - sum_res/ sum_var) %>%
-    filter(grepl('nextera|umi',samplename)) 
+    mutate(rsqrd = 1 - sum_res/ sum_var) 
 
 rsqrd <- rsqrd_df %>%
     group_by(prep) %>%
@@ -98,22 +100,27 @@ rsqrd <- rsqrd_df %>%
     tbl_df
 
 plot_df <- inner_join(plot_df, rsqrd) %>%
-    mutate(prep = str_c(prep, ' (R-sqrd: ',mean_rsqd,'±',sd_rsqd,')'))
+    mutate(prep = ifelse(grepl('13N', prep),'TGIRT-seq', prep)) %>%
+    mutate(prep = str_c(prep, ' (R-sqrd: ',mean_rsqd,'±',sd_rsqd,')')) %>%
+    tbl_df
     
 wgs_p <- ggplot() +
-	geom_line(data = plot_df, aes(x = coverage, y = density * 100, 
-	                   color = prep, size = samplename, linetype=line_type)) + 
+	geom_line(data = plot_df %>% filter(line_type != 'WGS'), 
+	          aes(x = coverage, y = density * 100, color = prep, group = factor(samplename)), linetype = 'dashed') + 
+	geom_line(data = plot_df %>% filter(line_type == 'WGS'), 
+	          aes(x = coverage, y = density * 100, color = prep, group = factor(samplename))) + 
 	xlim(1,50) +
-    #scale_color_manual(values = c('light sky blue','salmon'))+
-    scale_size_manual(guide = 'none', values = rep(1.2, length(unique(plot_df$samplename))))+
+    scale_color_manual(values = c('light sky blue','salmon'))+
     scale_linetype_discrete(guide = guide_legend(ncol = 1))+
 	theme(text = element_text(size = 25, face='bold')) +
 	theme(axis.text = element_text(size = 25, face='bold')) +
 	labs(x ='Level of Coverage', y = '% of Genome', 
 	     color =' ', linetype = ' ') +
-    theme(legend.position = c(0.7,0.5)) +
-    theme(legend.key.height=unit(2,"line"))
-ggsave(wgs_p, file = figurename, height=7,width=10)
+    theme(legend.position = c(0.75,0.5)) +
+    theme(legend.key.height=unit(2,"line")) 
+source('~/R/legend_to_color.R')
+wgs_p <- ggdraw(coloring_legend_text(wgs_p)) 
+ggsave(wgs_p, file = figurename, height=7,width=11)
 message('Plotted: ', figurename)
 
 

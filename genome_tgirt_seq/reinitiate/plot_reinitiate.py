@@ -37,17 +37,25 @@ def make_simulation_data():
     return sim
 
 
+def make_cdf(df):
+    df['cdf_count'] = np.cumsum(df['normalized_count'])
+    return df
+
+
 def plot_line(d, k, pv, figurename):
+    d = d.reset_index()\
+        .groupby(['samplename']) \
+        .apply(make_cdf)
     plt.figure()
     sns.set_style('white')
     with sns.plotting_context('paper',font_scale=1.2):
         p = sns.FacetGrid(data = d, legend_out = False,
                   hue ='samplename')
-    p.map(plt.plot, 'fragment_counts','normalized_count', alpha=0.5)
+    p.map(plt.plot, 'fragment_counts','cdf_count', alpha=0.5)
     p.add_legend(title = ' ')
-    p.set_axis_labels('cDNA counts per substrate','Probability')
+    p.set_axis_labels('cDNA counts per substrate','Cumulative probability')
     p.set(xticks = range(0,6), xlim=(0,5))
-    p.fig.axes[0].annotate('KS-stat: %.3f\nP-value: %.3f' %(k,pv), xy=(2,0.4))
+    p.fig.axes[0].annotate('KS-stat: %.3f\nP-value: %.3f' %(k,pv), xy=(2,0.996))
     #p.fig.axes[0].spines['top'].set_visible(False)
     #p.fig.axes[0].spines['right'].set_visible(False)
     plt.savefig(figurename, transparent=True)
