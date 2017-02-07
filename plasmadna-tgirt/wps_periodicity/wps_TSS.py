@@ -11,6 +11,8 @@ import glob
 import os
 from wps_spacing import daniell_spectrum, r_spectrum, r_spec_pgram
 from collections import defaultdict
+from rpy2.rinterface import RRuntimeError
+import sys
 
 
 r_periodogram = r_spec_pgram()
@@ -44,22 +46,31 @@ def make_tss_region(start, end, strand):
     return tss_start, tss_end
 
 
+def make_whole_gene(start, end ,strand):
+    return start, end
+
+
 def run_chrom_genes(chrom_genes, bw, gene_count, out):
     for count, gene in chrom_genes.iterrows():
         chrom = gene['chrom']
         start = gene['start']
         end = gene['end']
         strand = gene['strand']
-        tss_start, tss_end = make_tss_region(start, end, strand)
+        #tss_start, tss_end = make_tss_region(start, end, strand)
+        tss_start, tss_end = make_whole_gene(start, end, strand)
 
         wps_array = bw.values(chrom, tss_start, tss_end)
-        result = find_tss_periodicity(wps_array)
-        if result is not None:
-            line_info = '\t'.join(map(str,[gene['name'] ,gene['type'], gene['id']]))
-            for period, intensity in zip(*result):
-                out.write('{info}\t{period}\t{intensity}\n'.format(info = line_info,
+        try:
+            result = find_tss_periodicity(wps_array)
+            if result is not None:
+                line_info = '\t'.join(map(str,[gene['name'] ,gene['type'], gene['id']]))
+                for period, intensity in zip(*result):
+                    out.write('{info}\t{period}\t{intensity}\n'.format(info = line_info,
                                                             period = period,
                                                             intensity = intensity))
+        except RRuntimeError:
+            print gene
+            sys.exit()
         gene_count += 1
         if gene_count % 5000 == 0:
             print 'Parsed {gene_count} for {filename}'.format(gene_count = gene_count,
@@ -89,7 +100,8 @@ def run_file(protein_df, out_path, bw_path, bw_prefix):
 
 def genes_to_mem(protein_bed):
     colnames = ['chrom','start','end','name','score','strand','type','id']
-    gene_df = pd.read_table(protein_bed, names = colnames)
+    gene_df = pd.read_table(protein_bed, names = colnames) \
+            .query('end-start > 1000')
     print 'Read genes'
     return gene_df
 
@@ -100,6 +112,7 @@ def main():
     project_path =  '/stor/work/Lambowitz/cdw2854/plasmaDNA/genomeWPS'
     bw_path = project_path + '/bigWig_files'
     out_path = project_path + '/tss_periodicity'
+    out_path = project_path + '/gene_body_periodicity'
     if not os.path.isdir(out_path):
         os.mkdir(out_path)
     bw_files = glob.glob(bw_path + '/*.bigWig')

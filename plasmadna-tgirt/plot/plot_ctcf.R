@@ -53,6 +53,7 @@ wps_p <- ggplot(ctcf_df) +
     theme(axis.text.x = element_text(size=35, angle=50, hjust=1, face='plain',family = 'Arial'))+
     theme(axis.text.y = element_text(size=30,face='plain',family = 'Arial')) +
 #    theme(legend.position = 'none') +
+    theme(legend.key.height = unit(2,'line')) +
     theme(legend.position = c(0.8,0.3)) +
     scale_color_manual(values = c('salmon','black'))
 source('~/R/legend_to_color.R')
@@ -63,7 +64,7 @@ wps_p <- ggdraw() +
 
 message('Start plotting')
 p <- ggdraw() + 
-    draw_plot(insert_p_merge, x= 0.05,y=0.79, width = 0.95, height=0.18) +
+    draw_plot(insert_p_merge, x= 0.05,y=0.77, width = 0.95, height=0.22) +
     draw_plot(wps_p, x= 0.02,y=0.23, width = 0.98, height=0.5)  +
     #draw_plot(dinucleotide_p + 
     draw_plot(nucleo_p + 
@@ -71,5 +72,5 @@ p <- ggdraw() +
                 theme(strip.text.x = element_blank()), x= 0.02,y=0.0, width = 0.98, height=0.21)  +
         draw_plot_label(c('(a)','(b)','(c)'),x = c(0,0,0), y =c(1,0.77,0.24), size=35,family = 'Arial')
 
-ggsave(p, filename = figurename,height = 24,width=14)
+ggsave(p, filename = figurename,height = 26,width=14)
 message('Plotted:', figurename)

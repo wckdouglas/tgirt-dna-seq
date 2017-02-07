@@ -34,6 +34,8 @@ isize_p <- ggplot(data = isize_table, aes(x = isize, y = counts)) +
 	theme(axis.text = element_text(size = 18)) +
 	labs(x = 'Insert Size', y = '% of fragments', color = ' ') +
     theme(legend.position = 'none') +
+    theme(text = element_text(size = 25, face='bold')) +
+    theme(axis.text = element_text(size = 25, face='bold')) +
     xlim(0,600)
     
     

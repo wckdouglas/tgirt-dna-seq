@@ -69,7 +69,7 @@ def main():
     bedFiles = np.array(glob.glob(datapath + '/*.Long.bed'),dtype='string')
     chromosomes = np.array(map(lambda x: x.split('.')[-3], bedFiles),dtype='string')
     usable_chromosomes = np.append(['X','Y'],np.array(np.arange(23),dtype='string'))
-    bedFiles = bedFiles[(np.in1d(chromosomes,usable_chromosomes))]
+    bedFiles = filter(lambda x: x.split('.')[-3] in usable_chromosomes, bedFiles)    
     p = Pool(12)
     dfs = map(readFile, bedFiles)
     p.close()

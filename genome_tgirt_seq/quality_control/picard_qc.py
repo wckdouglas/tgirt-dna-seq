@@ -50,16 +50,20 @@ def collect_gc(in_bam, figures_path, samplename, result_path, ref):
 
 def subsampling(bam_file):
     fold = 1000000
-    subsampled_bam = bam_file.replace('.bam','.subsampled.bam')
-    command = 'samtools view -bF 256 -F 4 -F 1024 -F 2048 %s ' %(bam_file) +\
-            '| bedtools sample -i - -n %i ' %(fold) +\
+    subsampled_bams = []
+    for seed in xrange(10):
+        subsampled_bam = bam_file.replace('.bam','.%i.subsampled.bam' %(seed))
+        command = 'samtools view -bF 256 -F 4 -F 1024 -F 2048 %s ' %(bam_file) +\
+            '| bedtools sample -i - -n %i -seed %i' %(fold, seed) +\
             '> %s ' %(subsampled_bam)
-    runProcess(command)
+        runProcess(command)
+        subsampled_bams.append(subsampled_bam)
     return subsampled_bam
 
-def collect_wgs(bam_file, ref):
-    out_metric = bam_file.replace('.bam','.wgs_metrics')
-    command = 'picard CollectWgsMetrics '+\
+def collect_wgs(bam_files, ref):
+    for bam_file in bam_files:
+        out_metric = bam_file.replace('.bam','.wgs_metrics')
+        command = 'picard CollectWgsMetrics '+\
             'INPUT=%s ' %bam_file +\
             'COVERAGE_CAP=300 ' +\
             'COUNT_UNPAIRED=true ' +\
@@ -68,16 +72,17 @@ def collect_wgs(bam_file, ref):
             'REFERENCE_SEQUENCE=%s ' %(ref)+\
             'OUTPUT=%s ' %(out_metric) +\
             'INCLUDE_BQ_HISTOGRAM=true'
-    runProcess(command)
+        runProcess(command)
 
-def collect_alignment(bam_file, ref):
-    out_metric = bam_file.replace('.bam','.alignment_metrics')
-    command = 'picard CollectAlignmentSummaryMetrics ' +\
+def collect_alignment(bam_files, ref):
+    for bam_file in bam_files:
+        out_metric = bam_file.replace('.bam','.alignment_metrics')
+        command = 'picard CollectAlignmentSummaryMetrics ' +\
             'REFERENCE_SEQUENCE=%s ' %ref +\
             'INPUT=%s ' %bam_file +\
             'OUTPUT=%s ' %out_metric +\
             'ASSUME_SORTED=true ' 
-    runProcess(command)
+        runProcess(command)
 
 def pipeline(result_path, figures_path, ref, bam_file):
     start = time.time()
@@ -85,10 +90,10 @@ def pipeline(result_path, figures_path, ref, bam_file):
     outNameFunc = partial(outBamName,result_path, samplename)
     filtered_bam = filterBam(bam_file, outNameFunc)
     dedup_bam = MarkDuplicates(filtered_bam, outNameFunc)
-    subsampled_bam = subsampling(dedup_bam)
+    subsampled_bams = subsampling(dedup_bam)
     collect_gc(dedup_bam, figures_path, samplename, result_path, ref)
-    collect_wgs(subsampled_bam, ref)
-    collect_alignment(subsampled_bam, ref)
+    collect_wgs(subsampled_bams, ref)
+    collect_alignment(subsampled_bams, ref)
     
 
     end = time.time()

@@ -107,7 +107,8 @@ gc_p <- df %>%
     mutate(prep = str_replace_all(prep,'13N','')) %>% #added for poster
     plot_gc() +
         scale_color_manual(values = c('light sky blue','salmon'))+
-        theme(legend.position =  c(0.3,0.7))+
+#        theme(legend.position =  c(0.3,0.7))+ #poster
+        theme(legend.position =  c(0.55,0.9))+ #paper
         theme(legend.key.height = unit(2,'line'))
 figurename <- str_c(figure_path, '/gc_plot.pdf')
 source('~/R/legend_to_color.R')

@@ -63,12 +63,18 @@ indel_p<-ggplot(data = df %>%
                     filter(grepl('13N|Nextera',prep)) %>%
                     mutate(prep = ifelse(grepl('13N', prep), 'TGIRT-seq',prep)),
                 aes(x = indel_index, y = normalized_indel, color = prep))+
-#    geom_smooth(se = F,method = 'loess') +
-    geom_smooth(se = F,formula=form, method='lm') +
+    geom_smooth(se = F,method = 'loess') +
+#    geom_smooth(se = F,formula=form, method='lm') +
     geom_point() +
+#    geom_line( data= df %>% 
+#                   filter(grepl('13N|Nextera',prep)) %>%
+#                   mutate(prep = ifelse(grepl('13N', prep), 'TGIRT-seq',prep)) %>%
+#                   group_by(prep, indel_index) %>% 
+#                   summarize(m = max(normalized_indel)),
+#            aes(x=indel_index, color = prep, y = m)) +
     scale_color_manual(values = colors)+
     labs(y = 'Average indel per read\nper mononucleotide run', color = ' ')+
-    scale_x_continuous(breaks = seq(0,10),name='Run Length (nt)') +
+    scale_x_continuous(breaks = seq(0,10),name='Mononucleotide run (nt)') +
     theme(legend.position = c(0.2,0.8)) +
 #    theme(legend.text = element_text(size = 25, color = colors)) +
     theme(text = element_text(size = 25, face='bold')) +
