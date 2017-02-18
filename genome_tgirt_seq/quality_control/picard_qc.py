@@ -49,16 +49,16 @@ def collect_gc(in_bam, figures_path, samplename, result_path, ref):
     runProcess(command)
 
 def subsampling(bam_file):
-    fold = 1000000
+    fold = 500000
     subsampled_bams = []
     for seed in xrange(10):
         subsampled_bam = bam_file.replace('.bam','.%i.subsampled.bam' %(seed))
         command = 'samtools view -bF 256 -F 4 -F 1024 -F 2048 %s ' %(bam_file) +\
-            '| bedtools sample -i - -n %i -seed %i' %(fold, seed) +\
+            '| bedtools sample -n %i -seed %i -i - ' %(fold, seed) +\
             '> %s ' %(subsampled_bam)
         runProcess(command)
         subsampled_bams.append(subsampled_bam)
-    return subsampled_bam
+    return subsampled_bams
 
 def collect_wgs(bam_files, ref):
     for bam_file in bam_files:

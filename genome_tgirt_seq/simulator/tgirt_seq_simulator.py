@@ -49,26 +49,26 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
             insert_sizes = insert_dist.rvs(size = fold)
             for strand, insert_size in zip(strands, insert_sizes):
                 if strand == 1:
-                    out = bernoulli(p = base_dist["5'"][tri_nucleotide_5]).rvs()
+                    out = base_dist["5'"][tri_nucleotide_5].rvs()
                     if out == 1:
                         start_site = start_chrom + position - 1  #is for adjusting the 0-base python?
                         end_site = int(start_site + insert_size)
                         if end_site < chrom_len - kmer:
                             tri_nucleotide_3 = str(fasta.get_seq(chrom, end_site - kmer + 1, end_site))
                             #assert len(tri_nucleotide_3) == kmer, "Wrong extraction of + strand 3' kmer: " + tri_nucleotide_3
-                            if 'N' not in tri_nucleotide_3 and bernoulli(p = base_dist["3'"][tri_nucleotide_3]).rvs() == 1:
+                            if 'N' not in tri_nucleotide_3 and base_dist["3'"][tri_nucleotide_3].rvs() == 1:
                                 line = generate_line(chrom, start_site, end_site, seq_count, insert_size, '+')
                                 seq_count.value += 1
                                 outfile.write(line + '\n')
                 else:
-                    out = bernoulli(p = base_dist["5'"][reverse_tri_nucleotide_5]).rvs()
+                    out = base_dist["5'"][reverse_tri_nucleotide_5].rvs()
                     if out == 1:
                         end_site = start_chrom + position + 2 #reversed This is the start when the read is reversed
                         start_site = int(end_site - insert_size) #this is the end site
                         if start_site > 0:
                             tri_nucleotide_3 = reverse_complement(str(fasta.get_seq(chrom, start_site, start_site + kmer -1)))
                             #assert len(tri_nucleotide_3) == kmer, "Wrong extraction of - strand 3' kmer: " + tri_nucleotide_3
-                            if 'N' not in tri_nucleotide_3 and bernoulli(p = base_dist["3'"][tri_nucleotide_3]).rvs() == 1:
+                            if 'N' not in tri_nucleotide_3 and base_dist["3'"][tri_nucleotide_3].rvs() == 1:
                                 line = generate_line(chrom, start_site, end_site, seq_count, insert_size, '-')
                                 seq_count.value += 1
                                 outfile.write(line + '\n')
@@ -109,7 +109,7 @@ def profile_to_distribution(insert_profile_table, base_profile_table, side, k):
         kmer = ''.join(kmer)
         for end in ["5'","3'"]:
             base_fraction = [extract_prob(pos+1, nuc, end) for pos, nuc in enumerate(kmer)]
-            base_dist[end][kmer] = np.prod(base_fraction)
+            base_dist[end][kmer] = bernoulli(p = np.prod(base_fraction))
 
     return insert_dist, base_dist
 

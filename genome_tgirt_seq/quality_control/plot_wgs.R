@@ -24,7 +24,7 @@ rename_enzyme <- function(x){
 }
 
 read_wgs_table <- function(filename, datapath){
-    samplename <- str_split(filename,'\\.')[[1]][1]
+    samplename <- str_replace_all(filename,'.subsampled.wgs_metrics','')
     df <- datapath %>%
 		str_c(filename, sep='/') %>%
 		read_tsv(skip = 10) %>%
@@ -41,7 +41,7 @@ project_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/'
 picard_path <- str_c( project_path, '/picard_results')
 figure_path <- str_c( project_path, '/figures')
 figurename <- str_c( figure_path, '/wgs_plot.pdf')
-table_names <- list.files(path = picard_path , pattern = '.wgs.metrics')
+table_names <- list.files(path = picard_path , pattern = '.subsampled.wgs.metrics')
     
 df <- table_names %>%
 	map(read_wgs_table, picard_path) %>%
@@ -100,16 +100,21 @@ rsqrd <- rsqrd_df %>%
     tbl_df
 
 plot_df <- inner_join(plot_df, rsqrd) %>%
+    filter(!grepl('clust', prep)) %>%
     mutate(prep = ifelse(grepl('13N', prep),'TGIRT-seq', prep)) %>%
+    mutate(clustered = ifelse(grepl('cluster',samplename),' Clustered','')) %>%
+    mutate(prep = str_c(prep, clustered)) %>%
     mutate(prep = str_c(prep, ' (R-sqrd: ',mean_rsqd,'±',sd_rsqd,')')) %>%
     tbl_df
+
     
+
 wgs_p <- ggplot() +
-	geom_line(data = plot_df %>% filter(line_type != 'WGS'), 
-	          aes(x = coverage, y = density * 100, color = prep, group = factor(samplename)), linetype = 'dashed') + 
-	geom_line(data = plot_df %>% filter(line_type == 'WGS'), 
-	          aes(x = coverage, y = density * 100, color = prep, group = factor(samplename))) + 
-	xlim(1,50) +
+	geom_line(data = plot_df, 
+	          aes(x = coverage, y = density * 100, 
+	              color = prep, linetype=line_type,
+	              size = factor(samplename)), alpha = 0.5) + 
+	xlim(1,30) +
     scale_color_manual(values = c('light sky blue','salmon'))+
     scale_linetype_discrete(guide = guide_legend(ncol = 1))+
 	theme(text = element_text(size = 25, face='bold')) +
@@ -117,9 +122,10 @@ wgs_p <- ggplot() +
 	labs(x ='Level of Coverage', y = '% of Genome', 
 	     color =' ', linetype = ' ') +
     theme(legend.position = c(0.75,0.5)) +
-    theme(legend.key.height=unit(2,"line")) 
-source('~/R/legend_to_color.R')
-wgs_p <- ggdraw(coloring_legend_text(wgs_p)) 
+    theme(legend.key.height=unit(2,"line")) +
+    scale_size_manual(values = rep(1,100), guide='none')
+#source('~/R/legend_to_color.R')
+#wgs_p <- ggdraw(coloring_legend_text(wgs_p)) 
 ggsave(wgs_p, file = figurename, height=7,width=11)
 message('Plotted: ', figurename)
 

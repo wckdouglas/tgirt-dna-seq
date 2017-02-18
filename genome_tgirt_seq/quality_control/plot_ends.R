@@ -28,23 +28,23 @@ df <- files %>%
     map(read_files) %>%
     reduce(rbind) %>%
     filter(!grepl('subsampled|sim|Ecoli|q5|phus|SRR',filename)) %>%
-    filter(grepl('nextera|NEB|kq|kh|UMI',filename)) %>%
+    filter(grepl('nextera|kq|kh|UMI',filename)) %>%
     filter(grepl('MarkDuplicate',filename)) %>%
     filter(grepl('nextera|clustered|umi2id',filename)) %>%
     mutate(prep = case_when(grepl('nextera',.$filename) ~ 'Nextera XT',
                             grepl('pb',.$filename) ~ 'Pacbio',
                             grepl('sim',.$filename) ~ 'Covaris Sim',
                             grepl('SRR',.$filename) ~ 'Covaris SRR',
-                            grepl('UMI',.$filename) ~ 'TGIRT-seq 13N direct ligation',
+                            grepl('UMI',.$filename) ~ 'UMI direct ligation',
                             grepl('NEB',.$filename) ~ 'TGIRT-seq Fragmentase')) %>%
-    mutate(prep = ifelse(is.na(prep),'TGIRT-seq Covaris',prep))  %>%
+    mutate(prep = ifelse(is.na(prep),'UMI + CATCG',prep))  %>%
     mutate(read_end = ifelse(read_end == "5'", 'Read 1', 'Read 2')) %>%
     mutate(read_end = factor(read_end, levels=c("Read 1","Read 2"))) %>%
     mutate(actual_positions = ifelse(read_end == "Read 2", positions-20, positions)) %>%
     mutate(bit = -log2(base_fraction)) %>%
     mutate(read_end = as.character(read_end))
 
-colors <- c('light sky blue','salmon','green','yellow')
+colors <- c('light sky blue','salmon','green4','yellow')
 p <- ggplot(data = df, aes(x = actual_positions, 
                            color = prep, 
                            group=filename, 

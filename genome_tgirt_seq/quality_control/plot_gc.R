@@ -112,7 +112,7 @@ gc_p <- df %>%
         theme(legend.key.height = unit(2,'line'))
 figurename <- str_c(figure_path, '/gc_plot.pdf')
 source('~/R/legend_to_color.R')
-gc_p<-ggdraw(coloring_legend_text(gc_p))
+#gc_p<-ggdraw(coloring_legend_text(gc_p))
 ggsave(gc_p, file = figurename , height = 7, width = 9)
 message('Plotted: ', figurename)
 
@@ -166,6 +166,10 @@ lonrenz_df <-df %>%
     filter(grepl('nextera|_[EF]_|K12_kh|pb|K12_UMI',samplename)) %>%
     filter(!grepl('clustered', samplename)) %>%
     filter(!grepl('SRR1536433',samplename)) %>%
+    filter(grepl('nextera|UMI|K12_[kh]',samplename)) %>%
+    mutate(prep = case_when(grepl('Nextera',.$prep) ~ 'Nextera XT',
+                            grepl('13N',.$prep) ~ 'UMI direct ligation',
+                            grepl('Cov',.$prep) ~ 'UMI + CATCG')) %>%
     group_by(samplename, prep) %>% 
     nest() %>% 
     mutate(lc = map(data,~Lc(.$NORMALIZED_COVERAGE))) %>% 

@@ -52,12 +52,12 @@ wps_p <- ggplot(ctcf_df) +
     scale_x_continuous(breaks=seq(-1000,1000,200)) +
     theme(axis.text.x = element_text(size=35, angle=50, hjust=1, face='plain',family = 'Arial'))+
     theme(axis.text.y = element_text(size=30,face='plain',family = 'Arial')) +
-#    theme(legend.position = 'none') +
-    theme(legend.key.height = unit(2,'line')) +
-    theme(legend.position = c(0.8,0.3)) +
+    theme(legend.position = 'none') +
+    #theme(legend.key.height = unit(2,'line')) +
+    #theme(legend.position = c(0.8,0.3)) +
     scale_color_manual(values = c('salmon','black'))
 source('~/R/legend_to_color.R')
-wps_p <- ggdraw(coloring_legend_text(wps_p))
+#wps_p <- ggdraw(coloring_legend_text(wps_p))
 wps_p <- ggdraw() +
     draw_plot(wps_p, 0.02,0,0.99,1) +
     draw_plot_label('Scaled WPS', 0, 0.37, angle = 90, size = 35)
@@ -70,7 +70,7 @@ p <- ggdraw() +
     draw_plot(nucleo_p + 
                 theme(strip.background = element_blank()) + 
                 theme(strip.text.x = element_blank()), x= 0.02,y=0.0, width = 0.98, height=0.21)  +
-        draw_plot_label(c('(a)','(b)','(c)'),x = c(0,0,0), y =c(1,0.77,0.24), size=35,family = 'Arial')
+        draw_plot_label(c('a','b','c'),x = c(0,0,0), y =c(1,0.77,0.24), size=35,family = 'Arial')
 
 ggsave(p, filename = figurename,height = 26,width=14)
 message('Plotted:', figurename)

@@ -66,7 +66,7 @@ insert_p_merge <- ggplot(data = insert_df) +
     ylim(0,2.5) +
     scale_color_manual(values = c('salmon','black'))
 source('~/R/legend_to_color.R')
-insert_p_merge <- ggdraw(coloring_legend_text(insert_p_merge))
+#insert_p_merge <- ggdraw(coloring_legend_text(insert_p_merge))
 figurename <- str_c(insert_data_path, '/plasma_insert_profile.pdf')
 ggsave(insert_p_merge, file = figurename, height = 8)
 message('Plotted: ', figurename)

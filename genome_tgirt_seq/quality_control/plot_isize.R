@@ -6,18 +6,18 @@ library(stringr)
 library(cowplot)
 
 
-bampath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/bamFiles/figures'
+bampath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/bamFiles'
 isize_table <- bampath %>%
-	str_c('/insertSize.tsv') %>%
+	str_c('/isizeTable.tsv') %>%
 	read_tsv() %>%
 	group_by(samplename) %>%
 	do(data_frame(
 		isize = .$isize,
-		counts = .$counts/ sum(.$counts) * 100
+		counts = .$count/ sum(.$count) * 100
 	)) %>%
     ungroup() %>%
     dplyr::filter(!grepl('clustered|sim',samplename)) %>%
-    dplyr::filter(grepl('nextera|^K12_kh|^K12_kq', samplename)) %>%
+    dplyr::filter(grepl('nextera|^K12_kh|^K12_kq|UMI', samplename)) %>%
     mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera XT',
                             grepl('pb',.$samplename) ~ 'Pacbio',
                             grepl('sim',.$samplename) ~ 'Covaris Sim',
@@ -25,7 +25,9 @@ isize_table <- bampath %>%
                             grepl('UMI',.$samplename) ~ 'TGIRT-seq 13N direct ligation',
                             grepl('kh|kq',.$samplename) ~ 'TGIRT-seq Covaris',
                             grepl('NEB',.$samplename) ~ 'TGIRT-seq Fragmentase')) %>%
- 	tbl_df 
+    filter(grepl('UMI',.$samplename)) %>%
+    filter(grepl('_umi2id',.$samplename)) %>%
+  	tbl_df 
 
 
 isize_p <- ggplot(data = isize_table, aes(x = isize, y = counts)) +

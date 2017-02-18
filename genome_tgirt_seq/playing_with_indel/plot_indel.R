@@ -73,8 +73,8 @@ indel_p<-ggplot(data = df %>%
 #                   summarize(m = max(normalized_indel)),
 #            aes(x=indel_index, color = prep, y = m)) +
     scale_color_manual(values = colors)+
-    labs(y = 'Average indel per read\nper mononucleotide run', color = ' ')+
-    scale_x_continuous(breaks = seq(0,10),name='Mononucleotide run (nt)') +
+    labs(y = 'Average indel per read\nper homopolymer', color = ' ')+
+    scale_x_continuous(breaks = seq(0,10),name='Homopolymer length (nt)') +
     theme(legend.position = c(0.2,0.8)) +
 #    theme(legend.text = element_text(size = 25, color = colors)) +
     theme(text = element_text(size = 25, face='bold')) +

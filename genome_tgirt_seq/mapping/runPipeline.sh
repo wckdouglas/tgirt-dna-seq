@@ -9,7 +9,7 @@ INDEX=$INDEXPATH/k12_mg1655.fa
 #INDEX=$REF//hg19/Sequence/WholeGenomeFasta/genome.fa
 PYTHON=$(which python)
 ADAPTORS=adaptors.fa
-CORES=1
+CORES=6
 
 for DATAPATH in $DATAPATH1 $DATAPATH2
 do
