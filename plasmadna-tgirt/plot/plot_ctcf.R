@@ -11,7 +11,7 @@ library(zoo)
 loadfonts()
 
 
-#source('/stor/home/cdw2854/tgirt-dna-seq/plasmadna-tgirt/plot/plotDinucleotides.R')
+source('/stor/home/cdw2854/tgirt-dna-seq/plasmadna-tgirt/plot/plotDinucleotides.R')
 source('/stor/home/cdw2854/tgirt-dna-seq/plasmadna-tgirt/plot/plotIsize.R')
 message('Plotted isize')
 source('/stor/home/cdw2854/tgirt-dna-seq/plasmadna-tgirt/plot/plot_wps_intersample.R')
@@ -66,10 +66,10 @@ message('Start plotting')
 p <- ggdraw() + 
     draw_plot(insert_p_merge, x= 0.05,y=0.77, width = 0.95, height=0.22) +
     draw_plot(wps_p, x= 0.02,y=0.23, width = 0.98, height=0.5)  +
-    #draw_plot(dinucleotide_p + 
-    draw_plot(nucleo_p + 
+    draw_plot(dinucleotide_p + 
+    #draw_plot(nucleo_p + 
                 theme(strip.background = element_blank()) + 
-                theme(strip.text.x = element_blank()), x= 0.02,y=0.0, width = 0.98, height=0.21)  +
+                theme(strip.text.x = element_blank()), x= 0.02,y=0.0, width = 0.98, height=0.22)  +
         draw_plot_label(c('a','b','c'),x = c(0,0,0), y =c(1,0.77,0.24), size=35,family = 'Arial')
 
 ggsave(p, filename = figurename,height = 26,width=14)
