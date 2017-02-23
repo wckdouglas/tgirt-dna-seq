@@ -17,9 +17,9 @@ figurename <- str_c(figure_path, '/genome.pdf')
 p <- ggdraw() +
     draw_plot(isize_p + scale_color_manual(values = c('salmon')), 
               0.03,0.5,0.46,0.5)+
-    draw_plot(fix_color(gc_p), 0.52, 0.5,0.48,0.5) +
+    draw_plot(gc_p, 0.52, 0.5,0.49,0.5) +
     draw_plot(wgs_p, 0, 0, 1, 0.5) +
-    draw_plot_label(label = c('(a)','(b)','(c)'), 
+    draw_plot_label(label = c('a','b','c'), 
                 x= c(0, 0, 0.49), y = c(1,0.54, 1),
                 size = 20)     
 

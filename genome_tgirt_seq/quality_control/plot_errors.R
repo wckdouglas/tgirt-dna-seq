@@ -94,7 +94,7 @@ df <- map2_df(path_list,
 
 base_error <- df %>% 
     filter(prep == 'Nextera XT') %>%
-    group_by(prep, data_label) %>%
+    group_by(prep, data_label, var) %>%
     summarize(base_error = mean(fraction)) %>%
     ungroup() %>%
     select(-prep)

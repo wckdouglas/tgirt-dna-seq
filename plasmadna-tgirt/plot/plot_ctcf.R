@@ -47,7 +47,7 @@ wps_p <- ggplot(ctcf_df) +
     geom_line(aes(x=position, y = scale_wps, color=prep), 
               size=1.5, alpha = 0.6) +
     facet_grid(type~., scale='free_y') +
-    labs(y= ' ', x ='Position relative to CTCF binding sites', color = ' ')+
+    labs(y= ' ', x ='Position relative to CTCF binding sites (bp)', color = ' ')+
     theme(text = element_text(size=35, face='bold', family = 'Arial'))+
     scale_x_continuous(breaks=seq(-1000,1000,200)) +
     theme(axis.text.x = element_text(size=35, angle=50, hjust=1, face='plain',family = 'Arial'))+

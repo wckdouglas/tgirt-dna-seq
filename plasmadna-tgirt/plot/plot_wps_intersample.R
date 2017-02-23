@@ -20,7 +20,7 @@ nucleo_p <- ggplot(data = df, aes(x = distance, weights=count/10000)) +
     theme(text = element_text(size=30, family='Arial', face='bold')) +
     theme(axis.text.x = element_text(size=30,face='plain', family='Arial',angle=50, hjust=0.5, vjust=0.5)) +
     theme(axis.text.y = element_text(size=30,face='plain', family='Arial')) +
-    labs(x = 'Difference in distance\nbetween nucleosome centers(bp)\n[ssDNA-seq (ref.2) vs TGIRT-seq]', 
+    labs(x = 'Difference in distance\nbetween nucleosome centers(bp)\n[ssDNA-seq vs TGIRT-seq]', 
          y = 'Peak count') 
 label <- expression(paste('x10'^{4}))
 nucleo_p <- ggdraw(nucleo_p) +

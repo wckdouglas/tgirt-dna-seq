@@ -156,8 +156,8 @@ def main():
     all_files = ' '.join(outfiles)
     command = 'cat %s > %s.bed' %(all_files, outbed)
     os.system(command)
-    command = 'rm %s' %(all_files)
-    os.system(command)
+    #command = 'rm %s' %(all_files)
+    #os.system(command)
     sys.stderr.write('Written %s\n' %outbed)
 
 if __name__ == '__main__':
