@@ -31,12 +31,16 @@ p <- ggplot(data = df, aes(x = distance, weight=normalized_count)) +
 #                   position = 'identity',
 #                   aes(y=..count../sum(..count..)*100,
 #                   fill=prep, color = prep))+
-    labs(x = 'Distance to the nearest nucleosome center (bp)', y='Percentage of peaks', color=' ', fill= ' ') +
+    labs(x = 'Distance to the nearest\nnucleosome center (bp)', y='Percentage of peaks', color=' ', fill= ' ') +
     scale_color_manual(values =c('salmon','black')) +
     scale_fill_manual(values =c('salmon','black')) +
-    theme(text = element_text(size=20, face='bold')) +
+    theme(text = element_text(size=25, face='bold')) +
+    theme(legend.key.height = unit(2,'line')) +
+    theme(axis.text = element_text(size=25, face='bold')) +
     theme(legend.position = c(0.7, 0.5)) +
     xlim(0,450)
+source('~/R/legend_to_color.R')
+p <- ggdraw(coloring_legend_text(p))
 figurename <- str_c(datapath, 'peak_distance.pdf',sep='/') 
-ggsave(p,file = figurename)
+ggsave(p,file = figurename, width=8,height=8)
 message('Plotted: ', figurename)

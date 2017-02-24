@@ -6,6 +6,7 @@ library(dplyr)
 library(cowplot)
 library(purrr)
 library(ineq)
+library(forcats)
 
 read_gc_table <- function(filename, datapath){
 
@@ -25,7 +26,7 @@ project_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/'
 picard_path <- str_c( project_path, '/picard_results')
 figure_path  <- str_c(project_path, '/figures')
 table_names <- list.files(path = picard_path, pattern = 'gc_metrics')
-table_names<- table_names[grepl('^75',table_names)]
+table_names<- table_names[grepl('^75|sim',table_names)]
 df <- table_names %>%
 	map(read_gc_table, picard_path) %>%
 	reduce(rbind) %>%
@@ -91,7 +92,7 @@ index_annotation <- gini_df %>%
         sd_gini=sd(gini)
     ) %>%
     ungroup() %>%
-    mutate(annotation = str_c('Gini: ', signif(mean_gini,3),'±',signif(sd_gini,3))) %>%
+    mutate(annotation = str_c('Gini: ', signif(mean_gini,2),'±',signif(sd_gini,1))) %>%
     select(prep, annotation) %>%
     tbl_df
 
@@ -112,31 +113,58 @@ gc_p <- df %>%
         theme(legend.key.height = unit(2,'line'))
 figurename <- str_c(figure_path, '/gc_plot.pdf')
 source('~/R/legend_to_color.R')
-#gc_p<-ggdraw(coloring_legend_text(gc_p))
+gc_p<-ggdraw(coloring_legend_text(gc_p)) +
+  annotate('text', x=0.9, y = 0.39, label = 'No bias', size = 7)
 ggsave(gc_p, file = figurename , height = 7, width = 9)
 message('Plotted: ', figurename)
 
-rename_sim <- function(x){
-}
 
 supplemental_df <- df %>%
-    filter(grepl('K12_kh|sim',samplename)) %>%
+    filter(grepl('K12_UMI_1|no_bias|13N',samplename)) %>%
     mutate(prep = case_when(grepl('no_bias',.$samplename) ~ 'Simulation: no bias',
                             grepl('sim$',.$samplename) ~'Simulation: Reads 1 and 2 bias',
-                            grepl('sim_template_switch',.$samplename) ~ 'Simulation: Read 1 bias only',
-                            grepl('ligation',.$samplename) ~ 'Simluation: Read 2 bias only')) %>%
+                            grepl('sim_template_switch',.$samplename) ~ 'Simulation: Template switching/Fragmentation bias only',
+                            grepl('ligation',.$samplename) ~ 'Simluation: Ligation bias only')) %>%
     mutate(prep = ifelse(is.na(prep),'Experimental',prep)) %>%
-    mutate(prep = factor(prep, levels = c('Experimental',
-                                           'Simulation: no bias',
-                                           'Simulation: Read 1 bias only',
-                                           'Simluation: Read 2 bias only',
-                                           'Simulation: Reads 1 and 2 bias')))
-supplemental_p <- plot_gc(supplemental_df) + 
-        scale_color_manual(values = c('grey','skyblue1','salmon','bisque4','red')) +
-        theme(legend.position = c(0.3,0.8))
+    mutate(prep = factor(prep))#%>%#, levels = c('Experimental',
+                                  #         'Simulation: no bias',
+                                  #         'Simulation: Read 1 (ligattion) bias only',
+                                  #         'Simluation: Read 2 (template switch/fragmentation) bias only',
+                                  #         'Simulation: Reads 1 and 2 bias')))
+supplement_df <- supplemental_df %>% 
+    filter(prep == 'Experimental') %>% 
+    select(GC,NORMALIZED_COVERAGE) %>% 
+    group_by(GC) %>%
+    summarize(experiment = mean(NORMALIZED_COVERAGE)) %>%
+    inner_join(supplemental_df) %>%
+    tbl_df
+
+rmse_df <- supplement_df %>% 
+#    filter(GC < 25, GC>75) %>% 
+    group_by(prep) %>% 
+    summarize(rmse = mean(sqrt((experiment-NORMALIZED_COVERAGE)^2))) %>%
+    ungroup() %>%
+    mutate(rmse = signif(rmse, 3)) %>%
+    inner_join(supplement_df) %>%
+    mutate(prep = str_c(prep, '\n(RMSE: ',rmse,')')) %>%
+    mutate(prep = ifelse(grepl('Experimental',prep),'Experimental', prep)) %>%
+    mutate(prep = fct_reorder(prep, rmse)) %>%
+    tbl_df
+
+colors <- c('black','red','goldenrod4','limegreen','grey72')
+supplemental_p <- plot_gc(rmse_df) + 
+        scale_color_manual(values = colors) +
+        theme(legend.position = c(0.5,0.9)) +
+        theme(legend.key.height = unit(4,'line')) +
+        theme(legend.text = element_text(size = 23, face='bold', hjust=0.5)) 
+source('~/R/legend_to_color.R')
+supplemental_p <-ggdraw(coloring_legend_text_match(supplemental_p, colors))
 figurename <- str_c(figure_path, '/supplemental_gc_plot.pdf')
 ggsave(supplemental_p, file = figurename , height = 8, width = 10)
 message('Plotted: ', figurename)
+
+
+
 sim_gini <- supplemental_df %>%
     filter(GC>10, GC<75) %>%
     group_by(samplename, prep) %>% 

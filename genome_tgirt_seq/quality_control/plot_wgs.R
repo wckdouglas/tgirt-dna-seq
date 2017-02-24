@@ -52,7 +52,7 @@ df <- table_names %>%
 #    filter(grepl('nextera|UMI|NEB|kh|kq', samplename)) %>%
     filter(grepl('nextera|UMI',samplename))  %>%
     filter(grepl('nextera|umi2',samplename)) %>%
-    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera XT',
+    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera~XT',
                             grepl('pb',.$samplename) ~ 'Pacbio',
                             grepl('sim',.$samplename) ~ 'Covaris Sim',
                             grepl('SRR',.$samplename) ~ 'Covaris SRR',
@@ -104,29 +104,31 @@ plot_df <- inner_join(plot_df, rsqrd) %>%
     mutate(prep = ifelse(grepl('13N', prep),'TGIRT-seq', prep)) %>%
     mutate(clustered = ifelse(grepl('cluster',samplename),' Clustered','')) %>%
     mutate(prep = str_c(prep, clustered)) %>%
-    mutate(prep = str_c(prep, ' (R-sqrd: ',mean_rsqd,'±',sd_rsqd,')')) %>%
+    mutate(prep = str_c(prep, '~(R^{2}:', signif(mean_rsqd,3),'%+-%',signif(sd_rsqd,1),')')) %>%
     tbl_df
+preps <- plot_df$prep %>% unique
 
     
-
+colors <- c('light sky blue','salmon')
 wgs_p <- ggplot() +
-	geom_line(data = plot_df, 
+	geom_line(data = plot_df %>% filter(line_type == 'WGS'), 
 	          aes(x = coverage, y = density * 100, 
-	              color = prep, linetype=line_type,
-	              size = factor(samplename)), alpha = 0.5) + 
+	              color = prep, group=samplename), alpha = 0.5, linetype=1) + 
+  geom_line(data = plot_df %>% filter(line_type != 'WGS'), 
+	          aes(x = coverage, y = density * 100, 
+	              color = prep, group=samplename), alpha = 0.5, linetype=2) +
 	xlim(1,30) +
-    scale_color_manual(values = c('light sky blue','salmon'))+
-    scale_linetype_discrete(guide = guide_legend(ncol = 1))+
+  scale_color_manual(values = colors) +
+  scale_linetype_discrete(guide = guide_legend(ncol = 1))+
 	theme(text = element_text(size = 25, face='bold')) +
 	theme(axis.text = element_text(size = 25, face='bold')) +
-	labs(x ='Level of Coverage', y = '% of Genome', 
-	     color =' ', linetype = ' ') +
-    theme(legend.position = c(0.75,0.5)) +
-    theme(legend.key.height=unit(2,"line")) +
-    scale_size_manual(values = rep(1,100), guide='none')
-#source('~/R/legend_to_color.R')
-#wgs_p <- ggdraw(coloring_legend_text(wgs_p)) 
-ggsave(wgs_p, file = figurename, height=7,width=11)
+	labs(x ='Level of Coverage', y = '% of Genome', color =' ') +
+  theme(legend.position = 'none') +
+  annotate(geom='text',x=10,y=12,label=preps[1],parse=T, 
+           hjust = 0, color = colors[1], size = 8) +
+  annotate(geom='text',x=10,y=11,label=preps[2],parse=T, 
+           hjust = 0, color = colors[2], size = 8)
+ggsave(wgs_p, file = figurename, height=8,width=9)
 message('Plotted: ', figurename)
 
 

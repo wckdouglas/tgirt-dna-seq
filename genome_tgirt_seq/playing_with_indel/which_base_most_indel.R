@@ -44,12 +44,13 @@ df <- indel_tables %>%
     mutate(indel = str_to_title(indel)) %>%
     tbl_df
 
+colors <- c('salmon','deepskyblue3','goldenrod4','darkgreen')
 p<-ggplot(data = df, 
        aes(color = mononucleotide, 
            x = run_length, 
            #shape = method,
            y = indel_rate)) + 
-    geom_jitter(alpha=0.3, size=2) + 
+    geom_jitter(alpha=0.3, size=3) + 
     facet_grid(indel~., scale='free_y')+
     #panel_border()+
     #viridis::scale_color_viridis() +
@@ -57,8 +58,12 @@ p<-ggplot(data = df,
          y = 'Indel per read per homopolymer',
          shape = '') +
     theme(text = element_text(size=25, face='bold')) +
-    theme(legend.key.size = unit(2,'line')) 
-    #scale_color_manual(values=c('red','gold','green','blue'))
+    theme(legend.key.size = unit(2,'line')) +
+    scale_color_manual(values=colors, 
+                       guide= guide_legend(ncol=4)) +
+    theme(legend.position = c(0.5,0.9))
+source('~/R/legend_to_color.R')
+p<-ggdraw(coloring_legend_text_match(p,colors))
     
 figurename <- str_c(datapath, '/base_mononucleotide.pdf')
 ggsave(p, file =  figurename, height = 7, width = 7)

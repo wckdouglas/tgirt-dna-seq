@@ -107,11 +107,11 @@ plot_df <-  df %>%
     inner_join(base_error)  %>%
     mutate(fold = fraction/base_error) %>%
     tbl_df
-
+colors <- c('light sky blue','salmon','green4','orange')
 p <- ggplot(data = plot_df,
             aes(x = prep, y = fold)) +
     #geom_bar(stat='identity', aes(fill = prep, color= prep), alpha=0.7)+
-    geom_jitter(aes(fill = prep, color= prep), alpha=0.7, size = 5)+
+    geom_jitter(aes(fill = prep, color= prep), alpha=0.7, size = 4)+
     #geom_errorbar(aes(ymin = average_error - sd_error, 
     #                  ymax = average_error + sd_error),
     #              width = 0.25) +
@@ -119,7 +119,7 @@ p <- ggplot(data = plot_df,
     theme(strip.text = element_text(size = 25, face = 'bold'))+
     theme(text = element_text(size = 25, face = 'bold'))+
     theme(axis.text.x = element_blank()) +
-    scale_color_manual(values = c('light sky blue','salmon','green4','orange'), guide = guide_legend(ncol=3)) +
+    scale_color_manual(values = colors, guide = guide_legend(ncol=3)) +
     #scale_fill_manual(values = c('light sky blue','salmon','green4','orange'), guide = guide_legend(ncol=3)) +
     theme(axis.ticks.x = element_blank()) +
     theme(axis.text.y = element_text(size = 25, face='bold')) +
@@ -132,10 +132,9 @@ p <- ggplot(data = plot_df,
 label1 <- expression(paste('x10'^{'-5'}))
 label2 <- expression(paste('x10'^{'-3'}))
 source('~/R/legend_to_color.R')
-#fig <- ggdraw(coloring_legend_text(p)) +
-fig <- ggdraw(p) +
+fig <- ggdraw(coloring_legend_text_match(p, colors )) +
 #    draw_label(label1, x = 0.25, y = 0.897, size = 20, fontface ='bold') + #poster
-#    draw_label(label2, x = 0.25, y = 0.45, size = 20, fontface ='bold')  #poster
+#    draw_label(label2, x = 0.25, y = 0.45, size = 20, fontface ='bold')  +#poster
     draw_label(label1, x = 0.14, y = 0.897, size = 20, fontface ='bold') + #paper
     draw_label(label2, x = 0.14, y = 0.45, size = 20, fontface ='bold')  #paper
 figure_name <- str_c(figure_path,'/genome_errors.pdf')

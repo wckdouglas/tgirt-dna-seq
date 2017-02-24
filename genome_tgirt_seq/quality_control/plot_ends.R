@@ -46,7 +46,10 @@ df <- files %>%
     mutate(read_end = as.character(read_end))
 
 colors <- c('light sky blue','salmon','green4','gold2')
-p <- ggplot(data = df, aes(x = actual_positions, 
+p <- ggplot(data = df %>% 
+              filter(grepl('UMI|XT',prep)) %>%
+              mutate(prep = ifelse(grepl('UMI',prep),'TGIRT-seq',prep)), 
+            aes(x = actual_positions, 
                            color = prep, 
                            group=filename, 
                            y = base_fraction)) +
@@ -62,9 +65,36 @@ p <- ggplot(data = df, aes(x = actual_positions,
 #    theme(legend.position = c(0.65,0.45))+
     theme(legend.text = element_text(size = 18, face='bold'))+
     theme(legend.key.size=unit(8,'mm'))
+source('~/R/legend_to_color.R')
+p<-ggdraw(coloring_legend_text(p))
 figurename <- str_c(datapath , '/end_bias_plot.pdf')
 ggsave(p , file = figurename, height = 8, width = 14)
 message('Plotted: ', figurename)
+
+
+colors <- c('light sky blue','salmon','green4','gold2')
+p <- ggplot(data = df,
+            aes(x = actual_positions, 
+                color = prep, 
+                group=filename, 
+                y = base_fraction)) +
+  geom_line(size = 1.3, alpha=0.6) +
+  facet_grid(base~read_end, scale ='free_x') +
+  labs(x = 'Position Relative to Read ends',y='Fraction of Reads',color=' ') +
+  panel_border() +
+  scale_color_manual(values = colors)+
+  theme(strip.text.x = element_text(size = 20, face='bold')) +
+  theme(strip.text.y = element_text(size = 20, face='bold', angle = 0)) +
+  theme(axis.title = element_text(size = 20, face='bold')) +
+  theme(axis.text = element_text(size = 18, face='bold'))  +
+  #    theme(legend.position = c(0.65,0.45))+
+  theme(legend.text = element_text(size = 18, face='bold'))+
+  theme(legend.key.size=unit(8,'mm'))
+figurename <- str_c(datapath , '/end_bias_plot_fragment.pdf')
+p<-ggdraw(coloring_legend_text(p))
+ggsave(p , file = figurename, height = 8, width = 14)
+message('Plotted: ', figurename)
+
 
 cleave_p <- ggplot(data = df, 
                    aes(x = actual_positions, 

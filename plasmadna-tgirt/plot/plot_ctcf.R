@@ -7,7 +7,7 @@ library(tidyr)
 library(cowplot)
 library(FBN)
 library(extrafont)
-library(zoo)
+library(purrr)
 loadfonts()
 
 
@@ -64,13 +64,10 @@ wps_p <- ggdraw() +
 
 message('Start plotting')
 p <- ggdraw() + 
-    draw_plot(insert_p_merge, x= 0.05,y=0.77, width = 0.95, height=0.22) +
-    draw_plot(wps_p, x= 0.02,y=0.23, width = 0.98, height=0.5)  +
-    draw_plot(dinucleotide_p + 
-    #draw_plot(nucleo_p + 
-                theme(strip.background = element_blank()) + 
-                theme(strip.text.x = element_blank()), x= 0.02,y=0.0, width = 0.98, height=0.22)  +
-        draw_plot_label(c('a','b','c'),x = c(0,0,0), y =c(1,0.77,0.24), size=35,family = 'Arial')
+    draw_plot(insert_p_merge, x= 0.03,y=0.77, width = 0.9, height=0.22) +
+    draw_plot(wps_p, x= 0.00,y=0.27, width = 0.98, height=0.45)  +
+    draw_plot(dinucleotide_p, x= 0.00,y=0.0, width = 0.98, height=0.24)  +
+    draw_plot_label(c('a','b','c'),x = c(0,0,0), y =c(1,0.77,0.26), size=50,family = 'Arial')
 
-ggsave(p, filename = figurename,height = 26,width=14)
+ggsave(p, filename = figurename,height = 26,width=20)
 message('Plotted:', figurename)
