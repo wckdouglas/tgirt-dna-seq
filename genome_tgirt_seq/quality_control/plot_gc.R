@@ -154,13 +154,13 @@ rmse_df <- supplement_df %>%
 colors <- c('black','red','goldenrod4','limegreen','grey72')
 supplemental_p <- plot_gc(rmse_df) + 
         scale_color_manual(values = colors) +
-        theme(legend.position = c(0.5,0.9)) +
+        theme(legend.position = c(0.5,0.87)) +
         theme(legend.key.height = unit(4,'line')) +
         theme(legend.text = element_text(size = 23, face='bold', hjust=0.5)) 
 source('~/R/legend_to_color.R')
 supplemental_p <-ggdraw(coloring_legend_text_match(supplemental_p, colors))
 figurename <- str_c(figure_path, '/supplemental_gc_plot.pdf')
-ggsave(supplemental_p, file = figurename , height = 8, width = 10)
+ggsave(supplemental_p, file = figurename , height = 9, width = 10)
 message('Plotted: ', figurename)
 
 
