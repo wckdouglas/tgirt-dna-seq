@@ -44,7 +44,6 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
         #assert len(tri_nucleotide_5) == kmer, "Wrong extraction of 5' kmer: " + tri_nucleotide_5
         if 'N' not in tri_nucleotide_5:
             strands = bernoulli.rvs(p = 0.5, size = fold)
-            strands = np.repeat(0, fold) # for testing
             insert_sizes = insert_dist.rvs(size = fold)
             for strand, insert_size in zip(strands, insert_sizes):
                 if strand == 1:
@@ -89,7 +88,7 @@ def get_prob(base_df, side, pos, nuc, end):
     end_5_sim_3 = (side == '3' and end == "5'")
     no_bias_sim = (side=='no')
     if  end_3_sim_5 or end_5_sim_3 or no_bias_sim:
-        pos = 20 - pos + 1
+        pos = 20 - pos
     else:
         pos = pos + 1
 
@@ -156,7 +155,7 @@ def main():
                                   base_profile_table, outprefix, fold, str(seq_id), seq_count)
     iterable = enumerate(zip(starts,ends))
     outfiles = p.map(per_site_simulation, iterable)
-    #outfiles = map(per_site_simulation, iterable)
+    outfiles = map(per_site_simulation, iterable)
     p.close()
     p.join()
     all_files = ' '.join(outfiles)
