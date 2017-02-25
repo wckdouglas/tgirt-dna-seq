@@ -7,7 +7,7 @@ import os
 import string
 import sys
 if len(sys.argv) != 2:
-    sys.exit('usage: python %s <ref_fasta>' %sys.argv[0])
+    sys.exit('usage: python %s <read_length>' %sys.argv[0])
 
 complement = string.maketrans('ACTGNactgn','TGACNTGACN')
 
@@ -15,17 +15,17 @@ def reverse_complement(seq):
     return seq.translate(complement)[::-1]
 
 
-reference = Fasta(sys.argv[1])
+read_length = int(sys.argv[1])
 
 ' Input must be tab deliminated: name   seq'
 
 for line in sys.stdin:
-    name, sequence = line.split('\t').rstrip()
+    name, sequence = line.rstrip().split('\t')
     length = len(sequence)
-    if length > 150:
-        read1 = sequence[:150]
-        read2 = reverse_complement(sequence[-150:])
-        qual = 'I' * 150
+    if length > read_length:
+        read1 = sequence[:read_length]
+        read2 = reverse_complement(sequence[-read_length:])
+        qual = 'I' * read_length
     else:
         read1 = sequence
         read2 = reverse_complement(sequence)

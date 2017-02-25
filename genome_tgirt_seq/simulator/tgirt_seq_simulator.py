@@ -4,7 +4,7 @@ from scipy.stats import rv_discrete, bernoulli
 from scipy import random
 import numpy as np
 from pyfaidx import Fasta
-from itertools import product, izip
+from itertools import product, izip, cycle
 from functools import partial
 import string
 import pandas as pd
@@ -13,7 +13,6 @@ import argparse
 from multiprocessing import Pool, Manager
 from collections import defaultdict
 import os
-
 
 def generate_line(chrom, start, end, seq_count, insert_size, strand):
     return '{chrom}\t{start_site}\t{end_site}\tSeq_{chrom}_{seq_count}\t{isize}\t{strand}'\
@@ -44,50 +43,55 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
         tri_nucleotide_5 = str(sequence[position: position+ kmer])
         #assert len(tri_nucleotide_5) == kmer, "Wrong extraction of 5' kmer: " + tri_nucleotide_5
         if 'N' not in tri_nucleotide_5:
-            reverse_tri_nucleotide_5  = reverse_complement(tri_nucleotide_5)
             strands = bernoulli.rvs(p = 0.5, size = fold)
+            strands = np.repeat(0, fold) # for testing
             insert_sizes = insert_dist.rvs(size = fold)
             for strand, insert_size in zip(strands, insert_sizes):
                 if strand == 1:
-                    out = base_dist["5'"][tri_nucleotide_5].rvs()
+                    out = base_dist["5'"][tri_nucleotide_5].next()
                     if out == 1:
                         start_site = start_chrom + position - 1  #is for adjusting the 0-base python?
                         end_site = int(start_site + insert_size)
                         if end_site < chrom_len - kmer:
-                            tri_nucleotide_3 = str(fasta.get_seq(chrom, end_site - kmer + 1, end_site))
+                            tri_nucleotide_3 = str(fasta.get_seq(chrom, end_site - kmer + 1, end_site))[::-1]
                             #assert len(tri_nucleotide_3) == kmer, "Wrong extraction of + strand 3' kmer: " + tri_nucleotide_3
-                            if 'N' not in tri_nucleotide_3 and base_dist["3'"][tri_nucleotide_3].rvs() == 1:
+                            #if 'N' not in tri_nucleotide_3 and base_dist["3'"][tri_nucleotide_3].rvs() == 1:
+                            if 'N' not in tri_nucleotide_3 and base_dist["3'"][tri_nucleotide_3].next() == 1:
                                 line = generate_line(chrom, start_site, end_site, seq_count, insert_size, '+')
                                 seq_count.value += 1
                                 outfile.write(line + '\n')
                 else:
-                    out = base_dist["5'"][reverse_tri_nucleotide_5].rvs()
+                    reverse_tri_nucleotide_5  = reverse_complement(tri_nucleotide_5)
+                    out = base_dist["5'"][reverse_tri_nucleotide_5].next()
                     if out == 1:
                         end_site = start_chrom + position + 2 #reversed This is the start when the read is reversed
                         start_site = int(end_site - insert_size) #this is the end site
                         if start_site > 0:
-                            tri_nucleotide_3 = reverse_complement(str(fasta.get_seq(chrom, start_site, start_site + kmer -1)))
+                            tri_nucleotide_3 = str(fasta.get_seq(chrom, start_site, start_site + kmer - 1))
+                            tri_nucleotide_3 = tri_nucleotide_3.translate(complement)
                             #assert len(tri_nucleotide_3) == kmer, "Wrong extraction of - strand 3' kmer: " + tri_nucleotide_3
-                            if 'N' not in tri_nucleotide_3 and base_dist["3'"][tri_nucleotide_3].rvs() == 1:
-                                line = generate_line(chrom, start_site, end_site, seq_count, insert_size, '-')
+                            if 'N' not in tri_nucleotide_3 and base_dist["3'"][tri_nucleotide_3].next() == 1:
+                                line = generate_line(chrom, start_site - 1, end_site, seq_count, insert_size, '-')
                                 seq_count.value += 1
                                 outfile.write(line + '\n')
         if position % 1000000 == 0 and position != 0:
             print 'Parsed %i positions' %(position)
-        if seq_count.value % 100000 == 0:
+        if seq_count.value % 100000 == 0 and seq_count.value > 0:
             print 'Output %i reads' %(seq_count.value)
     outfile.close()
     return outfile_name
 
 def get_prob(base_df, side, pos, nuc, end):
-    if side == '3':
+    '''
+    Get probability from table
+    '''
+    end_3_sim_5 = (side == '5' and end == "3'")
+    end_5_sim_3 = (side == '3' and end == "5'")
+    no_bias_sim = (side=='no')
+    if  end_3_sim_5 or end_5_sim_3 or no_bias_sim:
         pos = 20 - pos + 1
-    elif side == '5':
-        pos = pos
-    elif side == 'both':
-        pos = pos if end == "5'" else 20 - pos + 1
-    elif side == 'no':
-        pos = pos if end == "3'" else 20 - pos + 1
+    else:
+        pos = pos + 1
 
     end_is_right = (base_df.end == end)
     pos_is_right = (base_df.pos == pos)
@@ -95,12 +99,14 @@ def get_prob(base_df, side, pos, nuc, end):
     d = base_df[end_is_right & nucleotide_is_right & pos_is_right]
     return float(d.base_fraction)
 
+
 def profile_to_distribution(insert_profile_table, base_profile_table, side, k):
     insert_df = pd.read_csv(insert_profile_table)\
         .assign(px = lambda d: np.true_divide(d['count'].values,d['count'].values.sum()))
     insert_dist = rv_discrete(name='custm', values=(insert_df.isize, insert_df.px))
 
-    base_df = pd.read_csv(base_profile_table)
+    base_df = pd.read_csv(base_profile_table) \
+        .assign(pos = lambda d: np.where(d.end == "3'", 20-d.pos + 1, d.pos))
 
     base_dist = defaultdict(lambda: defaultdict(float))
 
@@ -108,8 +114,8 @@ def profile_to_distribution(insert_profile_table, base_profile_table, side, k):
     for kmer in  product('ACTG',repeat=k):
         kmer = ''.join(kmer)
         for end in ["5'","3'"]:
-            base_fraction = [extract_prob(pos+1, nuc, end) for pos, nuc in enumerate(kmer)]
-            base_dist[end][kmer] = bernoulli(p = np.prod(base_fraction))
+            base_fraction = [extract_prob(pos, nuc, end) for pos, nuc in enumerate(kmer)]
+            base_dist[end][kmer] = cycle(bernoulli(p = np.prod(base_fraction)).rvs(10000))
 
     return insert_dist, base_dist
 
@@ -133,7 +139,7 @@ def main():
     base_profile_table = args.base
     ref_fasta = args.refFasta
     fold = args.fold
-    threads = args.threads
+    threads = int(args.threads) + 1
     outbed = args.outbed
     outprefix = outbed .split('.')[0]
     side = args.side
@@ -156,8 +162,8 @@ def main():
     all_files = ' '.join(outfiles)
     command = 'cat %s > %s.bed' %(all_files, outbed)
     os.system(command)
-    #command = 'rm %s' %(all_files)
-    #os.system(command)
+    command = 'rm %s' %(all_files)
+    os.system(command)
     sys.stderr.write('Written %s\n' %outbed)
 
 if __name__ == '__main__':
