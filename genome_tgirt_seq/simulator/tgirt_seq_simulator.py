@@ -88,7 +88,7 @@ def get_prob(base_df, side, pos, nuc, end):
     end_5_sim_3 = (side == '3' and end == "5'")
     no_bias_sim = (side=='no')
     if  end_3_sim_5 or end_5_sim_3 or no_bias_sim:
-        pos = 20 - pos
+        pos = 10 - pos
     else:
         pos = pos + 1
 
@@ -155,14 +155,12 @@ def main():
                                   base_profile_table, outprefix, fold, str(seq_id), seq_count)
     iterable = enumerate(zip(starts,ends))
     outfiles = p.map(per_site_simulation, iterable)
-    outfiles = map(per_site_simulation, iterable)
     p.close()
     p.join()
-    all_files = ' '.join(outfiles)
-    command = 'cat %s > %s.bed' %(all_files, outbed)
-    os.system(command)
-    command = 'rm %s' %(all_files)
-    os.system(command)
+    with open(outbed + '.bed','w') as out:
+        for f in outfiles:
+            [out.write(line) for line in open(f,'r')]
+    map(os.remove, outfiles)
     sys.stderr.write('Written %s\n' %outbed)
 
 if __name__ == '__main__':

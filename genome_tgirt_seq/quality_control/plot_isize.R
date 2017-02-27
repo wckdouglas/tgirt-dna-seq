@@ -39,5 +39,9 @@ isize_p <- ggplot(data = isize_table, aes(x = isize, y = counts)) +
     theme(text = element_text(size = 25, face='bold')) +
     theme(axis.text = element_text(size = 25, face='bold')) +
     xlim(0,600)
+figurepath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/figures'
+figurename <- str_c(figurepath, '/k12_isize.pdf')
+ggsave(isize_p, file = figurename)
+message('Plotted: ', figurename)
     
     

@@ -66,9 +66,9 @@ p <- ggplot(data = df %>%
     theme(legend.text = element_text(size = 18, face='bold'))+
     theme(legend.key.size=unit(8,'mm'))
 source('~/R/legend_to_color.R')
-p<-ggdraw(coloring_legend_text(p))
+end_p<-ggdraw(coloring_legend_text(p))
 figurename <- str_c(datapath , '/end_bias_plot.pdf')
-ggsave(p , file = figurename, height = 8, width = 14)
+ggsave(end_p , file = figurename, height = 8, width = 14)
 message('Plotted: ', figurename)
 
 
@@ -90,7 +90,7 @@ p <- ggplot(data = df,
   #    theme(legend.position = c(0.65,0.45))+
   theme(legend.text = element_text(size = 18, face='bold'))+
   theme(legend.key.size=unit(8,'mm'))
-figurename <- str_c(datapath , '/end_bias_plot_fragment.pdf')
+figurename <- str_c(datapath , '/end_bias_plot_fragmentation.pdf')
 p<-ggdraw(coloring_legend_text(p))
 ggsave(p , file = figurename, height = 8, width = 14)
 message('Plotted: ', figurename)

@@ -10,7 +10,7 @@ library(forcats)
 
 read_gc_table <- function(filename, datapath){
 
-    samplename = str_split(filename,'\\.')[[1]][1]
+    samplename = str_replace(filename,'.gc_metrics','')
     df <- datapath %>%
 		str_c(filename, sep='/') %>%
 		read_tsv(skip = 6) %>%
@@ -41,8 +41,7 @@ df <- table_names %>%
 
 windows_df <- df %>% 
 	filter(samplename == unique(.$samplename)[1]) %>%
-	mutate(rol_window = normalize_windows * 10) %>%
-	mutate(roll_mean_window = zoo::rollmean(rol_window, k = 10,fill=0, align='center'))
+	mutate(rol_window = normalize_windows)
 
 gini_df <- df %>% 
     filter(GC>=12, GC<=80) %>%
@@ -75,7 +74,7 @@ plot_gc <-function(df){
     p <- ggplot(data = df, aes(x = GC, y = NORMALIZED_COVERAGE)) +
         geom_line(size = 1.3, aes(color = prep, group = samplename), alpha=0.7) +
         geom_hline(yintercept = 1, linetype = 2, alpha = 0.9) +
-        geom_bar(data = windows_df, aes(x = GC, y = rol_window), 
+        geom_bar(data = windows_df, aes(x = GC, y = rol_window*10), 
              stat='identity', fill='springgreen1', alpha = 1)  +
         theme(text = element_text(size = 25, face='bold')) +
         theme(axis.text = element_text(size = 25, face='bold')) +
@@ -120,10 +119,11 @@ message('Plotted: ', figurename)
 
 
 supplemental_df <- df %>%
-    filter(grepl('K12_UMI_1|no_bias|13N',samplename)) %>%
+    filter(grepl('K12_UMI_1|no_bias|13N|fragmentase_K12_sim_template_switch',samplename)) %>%
     mutate(prep = case_when(grepl('no_bias',.$samplename) ~ 'Simulation: no bias',
-                            grepl('sim$',.$samplename) ~'Simulation: Reads 1 and 2 bias',
-                            grepl('sim_template_switch',.$samplename) ~ 'Simulation: Template switching/Fragmentation bias only',
+                            grepl('sim.[0-9]$',.$samplename) ~'Simulation: Reads 1 and 2 bias',
+                            grepl('^fragmentase',.$samplename) ~ 'Simulation: Template switching/Fragmentase bias only',
+                            grepl('sim_template_switch',.$samplename) ~ 'Simulation: Template switching/Covaris bias only',
                             grepl('ligation',.$samplename) ~ 'Simluation: Ligation bias only')) %>%
     mutate(prep = ifelse(is.na(prep),'Experimental',prep)) %>%
     mutate(prep = factor(prep))#%>%#, levels = c('Experimental',
@@ -137,10 +137,11 @@ supplement_df <- supplemental_df %>%
     group_by(GC) %>%
     summarize(experiment = mean(NORMALIZED_COVERAGE)) %>%
     inner_join(supplemental_df) %>%
+    filter(grepl('UMI|.1$',samplename)) %>%
     tbl_df
 
 rmse_df <- supplement_df %>% 
-#    filter(GC < 25, GC>75) %>% 
+    filter(GC < 80, GC>12) %>% 
     group_by(prep) %>% 
     summarize(rmse = mean(sqrt((experiment-NORMALIZED_COVERAGE)^2))) %>%
     ungroup() %>%
@@ -151,16 +152,16 @@ rmse_df <- supplement_df %>%
     mutate(prep = fct_reorder(prep, rmse)) %>%
     tbl_df
 
-colors <- c('black','red','goldenrod4','limegreen','grey72')
+colors <- c('black','red','goldenrod4','springgreen4','navyblue','grey72')
 supplemental_p <- plot_gc(rmse_df) + 
         scale_color_manual(values = colors) +
-        theme(legend.position = c(0.5,0.87)) +
+        theme(legend.position = c(0.4,0.75)) +
         theme(legend.key.height = unit(4,'line')) +
         theme(legend.text = element_text(size = 23, face='bold', hjust=0.5)) 
 source('~/R/legend_to_color.R')
 supplemental_p <-ggdraw(coloring_legend_text_match(supplemental_p, colors))
 figurename <- str_c(figure_path, '/supplemental_gc_plot.pdf')
-ggsave(supplemental_p, file = figurename , height = 9, width = 10)
+ggsave(supplemental_p, file = figurename , height = 9, width = 13)
 message('Plotted: ', figurename)
 
 
@@ -208,7 +209,13 @@ lonrenz_curve <- ggplot(data = lonrenz_df, aes(y= l,x = p, group=samplename, col
     geom_line(alpha=0.5) + 
     geom_abline(intercept = 0, slope = 1)+
     scale_x_continuous(breaks = seq(0,1,0.25), labels = seq(0,1,0.25) * (80-12) + 12)+
+    theme(text = element_text(size = 25, face='bold')) +
+    theme(axis.text = element_text(size = 25, face='bold')) +
+    theme(legend.key.height =unit(2,'line')) +
+    theme(legend.position = 'bottom')+
+    scale_color_discrete(guide = guide_legend(ncol = 1))+
     labs(x = '% of GC', y = 'Cumulative coverage', color = ' ')#, title = 'Lonrenze Curve')
+lonrenz_curve <- ggdraw(coloring_legend_text(lonrenz_curve))
 figurename <- str_c(figure_path, '/gc_lonrez_curve.pdf')
 ggsave(lonrenz_curve, file = figurename , height = 7, width = 7)
 message('Plotted: ', figurename)
