@@ -32,26 +32,25 @@ def make_str(x):
     return ['%.1f' %(f * 100) for f in x]
 
 def merge_columns(x,y):
-    return x.apply(str) + ' (' + make_str(y) + '%)' 
+    return x.apply(int).apply(str) + '\n(' + make_str(y) + '%)' 
 
 def get_sample_id(x):
-    sample_id = ''
+    sample_id = 0
     if 'Nextera' in x['prep']:
         sample_id = x['samplename'].split('_')[0]
     elif 'UMI' in x['samplename']:
         sample_id = x['samplename'].split('_')[2]
-    return sample_id
+    return int(sample_id)
 
 def main():
     map_read = map_df()
     raw_read = raw_df()
     df = map_read.merge(raw_read,how='inner') \
         .assign(prep = lambda d: map(lambda x: 'Nextera-XT' if 'nextera' in x else 'TGIRT-seq', d.samplename)) \
-        .sort_values('prep') \
         .assign(umi_rate = lambda d: np.true_divide(d.umi, d.raw)) \
         .assign(trimmed_rate = lambda d: np.true_divide(d['trimmed reads']/2, d.umi)) \
         .assign(mapping_rate = lambda d: np.true_divide(d.mapped, d['trimmed reads'])) \
-            .assign(concordant_rate = lambda d: np.true_divide(d['proper pair'], d['mapped'])) \
+        .assign(concordant_rate = lambda d: np.true_divide(d['proper pair'], d['mapped'])) \
         .assign(duplicate_rate = lambda d: np.true_divide(d['duplicates'], d['mapped'])) \
         .assign(umi = lambda d: merge_columns(d.umi, d.umi_rate)) \
         .assign(trimmed = lambda d: merge_columns(d['trimmed reads'], d.trimmed_rate)) \
@@ -59,9 +58,12 @@ def main():
         .assign(pair = lambda d: merge_columns(d['proper pair'], d.concordant_rate)) \
         .assign(duplicates = lambda d: merge_columns(d['duplicates'], d.duplicate_rate)) \
         .assign(sample_id = lambda d: [get_sample_id(r) for i, r in d.iterrows()]) \
-        .pipe(lambda d: d[['sample_id','prep','raw','umi','trimmed','mapped','pair','duplicates']]) 
+        .pipe(lambda d: d[['prep','sample_id','raw','umi','trimmed','mapped','pair','duplicates']])  \
+        .sort_values(['prep','sample_id']) 
+    df.columns = ['Method','Sample ID','Raw reads', 'UMI > Q20', 'Trimmed reads', 
+                  'Mapped reads','Concordant pair','Duplication reads']
     tablename = '/stor/work/Lambowitz/cdw2854/ecoli_genome/figures/map_summary.csv'
-    df.to_csv(tablename, index=False)
+    df.transpose().to_csv(tablename,header=False)
     print 'Written %s' %(tablename)
 
 if __name__ == '__main__':

@@ -53,6 +53,11 @@ gini_df <- df %>%
     ungroup() %>%
     tbl_df
 
+tg = gini_df %>% filter(prep == 'TGIRT-seq 13N') %>% .$gini
+xt = gini_df %>% filter(prep == 'Nextera XT') %>% .$gini
+tt = t.test(tg, xt)
+
+
 gini_p <- ggplot(data=gini_df, aes(x = prep, y=gini, color=prep)) +
     geom_point(size = 4) +
     #geom_violin(size = 2) +
@@ -95,7 +100,7 @@ index_annotation <- gini_df %>%
     select(prep, annotation) %>%
     tbl_df
 
-gc_p <- df %>% 
+gc_df <- df %>% 
 #    filter(grepl('nextera|^K12_kh|^K12_kq', samplename)) %>%
 #    filter(grepl('nextera|clustered',samplename)) %>%
     filter(grepl('nextera|_[EF]_|K12_kh|pb|K12_UMI',samplename)) %>%
@@ -104,8 +109,8 @@ gc_p <- df %>%
     filter(grepl('UMI|nextera',samplename)) %>% #added for poster
     inner_join(index_annotation) %>% # added for poster
     mutate(prep = str_c(prep, '(', annotation, ')')) %>% #added for poster
-    mutate(prep = str_replace_all(prep,'13N','')) %>% #added for poster
-    plot_gc() +
+    mutate(prep = str_replace_all(prep,'13N','')) #added for poster
+gc_p <- plot_gc(gc_df) +
         scale_color_manual(values = c('light sky blue','salmon'))+
 #        theme(legend.position =  c(0.3,0.7))+ #poster
         theme(legend.position =  c(0.55,0.9))+ #paper
@@ -116,6 +121,19 @@ gc_p<-ggdraw(coloring_legend_text(gc_p)) +
   annotate('text', x=0.9, y = 0.39, label = 'No bias', size = 7)
 ggsave(gc_p, file = figurename , height = 7, width = 9)
 message('Plotted: ', figurename)
+
+
+linearity <- gc_df %>% 
+    filter(GC <= 75, GC>=12) %>% 
+    group_by(samplename,prep) %>% 
+    nest() %>% 
+    mutate(model = map(data, ~lm(NORMALIZED_COVERAGE~GC,data=.))) %>% 
+    mutate(summary = map(model,broom::glance)) %>% 
+    unnest(summary) %>% 
+    group_by(prep) %>%
+    summarize(r_mean = mean(r.squared),
+              r_sd = sd(r.squared)) %>%
+    tbl_df
 
 
 supplemental_df <- df %>%

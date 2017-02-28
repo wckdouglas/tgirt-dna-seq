@@ -39,16 +39,23 @@ df <- tablenames %>%
     mutate(prep = ifelse(sim_type=='No bias', 'No bias', prep)) %>%
     tbl_df
 
+gg_color_hue <- function(n) {
+    hues = seq(15, 375, length = n + 1)
+    hcl(h = hues, l = 65, c = 100)[1:n]
+}
+
+colors <- gg_color_hue(5) 
 source('~/R/legend_to_color.R')
-p <- ggplot(data=df, aes(x=isize,y=percentage*100, color = sim_type, group_filename)) +
+p <- ggplot(data=df, aes(x=isize,y=percentage*100, color = sim_type, group=filename)) +
     geom_line() +
     facet_grid(prep~.) +
     theme(text = element_text(face='bold', size=25)) +
     theme(axis.text = element_text(face='bold', size=25)) +
     panel_border() +
     theme(legend.key.height = unit(2,'line')) +
+    scale_color_manual(values = colors) + 
     labs(color = ' ', x= 'Fragment size', y='Percentage of fragments') 
-p <- ggdraw(coloring_legend_text(p))
+p <- ggdraw(coloring_legend_text_match(p, colors))
 figure_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/figures'
 figurename <- str_c(figure_path, '/sim_frag_size.pdf')
 ggsave(p, file=figurename, height = 7, width = 10)
