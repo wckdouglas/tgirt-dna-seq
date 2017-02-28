@@ -54,9 +54,10 @@ p <- ggplot(data = df %>%
     facet_grid(prep+sim_type~read_end, scale='free_x')+
     labs(x = 'Position Relative to Read ends',y='Fraction of Reads',color=' ') +
     theme(text = element_text(face='bold', size=15)) +
-    panel_border()
+    panel_border() +
+    theme(legend.position = 'bottom')
 figurename <- str_c(datapath,'/sim_frag_ends.pdf')
 source('~/R/legend_to_color.R')
-p <- coloring_legend_text(p)
+p <- ggdraw(coloring_legend_text(p))
 ggsave(p, file=figurename, height = 13, width = 7)
 message('Plotted: ', figurename)
