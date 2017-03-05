@@ -111,7 +111,7 @@ gc_df <- df %>%
     mutate(prep = str_c(prep, '(', annotation, ')')) %>% #added for poster
     mutate(prep = str_replace_all(prep,'13N','')) #added for poster
 gc_p <- plot_gc(gc_df) +
-        scale_color_manual(values = c('light sky blue','salmon'))+
+        scale_color_manual(values = c('salmon','black'))+
 #        theme(legend.position =  c(0.3,0.7))+ #poster
         theme(legend.position =  c(0.55,0.9))+ #paper
         theme(legend.key.height = unit(2,'line'))
@@ -161,7 +161,7 @@ supplement_df <- supplemental_df %>%
 rmse_df <- supplement_df %>% 
     filter(GC < 80, GC>12) %>% 
     group_by(prep) %>% 
-    summarize(rmse = mean(sqrt((experiment-NORMALIZED_COVERAGE)^2))) %>%
+    summarize(rmse = (mean((experiment-NORMALIZED_COVERAGE)^2))) %>%
     ungroup() %>%
     mutate(rmse = signif(rmse, 3)) %>%
     inner_join(supplement_df) %>%
@@ -229,8 +229,9 @@ lonrenz_curve <- ggplot(data = lonrenz_df, aes(y= l,x = p, group=samplename, col
     scale_x_continuous(breaks = seq(0,1,0.25), labels = seq(0,1,0.25) * (80-12) + 12)+
     theme(text = element_text(size = 25, face='bold')) +
     theme(axis.text = element_text(size = 25, face='bold')) +
+    theme(legend.text = element_text(face='bold', size = 25))  +
     theme(legend.key.height =unit(2,'line')) +
-    theme(legend.position = 'bottom')+
+    theme(legend.position = c(0.3,0.8))+
     scale_color_discrete(guide = guide_legend(ncol = 1))+
     labs(x = '% of GC', y = 'Cumulative coverage', color = ' ')#, title = 'Lonrenze Curve')
 lonrenz_curve <- ggdraw(coloring_legend_text(lonrenz_curve))

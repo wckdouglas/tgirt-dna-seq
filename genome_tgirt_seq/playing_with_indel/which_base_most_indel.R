@@ -45,7 +45,7 @@ df <- indel_tables %>%
     tbl_df
 
 colors <- c('salmon','deepskyblue3','goldenrod4','darkgreen')
-p<-ggplot(data = df, 
+base_indel_p<-ggplot(data = df, 
        aes(color = mononucleotide, 
            x = run_length, 
            #shape = method,
@@ -58,12 +58,15 @@ p<-ggplot(data = df,
          y = 'Indel per read per homopolymer',
          shape = '') +
     theme(text = element_text(size=25, face='bold')) +
+    theme(strip.text = element_text(size = 27, face = 'bold'))+
+    theme(axis.text = element_text(size = 25, face = 'bold'))+
     theme(legend.key.size = unit(2,'line')) +
     scale_color_manual(values=colors, 
                        guide= guide_legend(ncol=4)) +
-    theme(legend.position = c(0.5,0.9))
+    theme(legend.position = c(0.5,0.9)) +
+    scale_x_continuous(breaks = 4:9, labels=4:9)
 source('~/R/legend_to_color.R')
-p<-ggdraw(coloring_legend_text_match(p,colors))
+base_indel_p<-ggdraw(coloring_legend_text_match(base_indel_p,colors))
     
 figurename <- str_c(datapath, '/base_mononucleotide.pdf')
 ggsave(p, file =  figurename, height = 7, width = 7)

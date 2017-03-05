@@ -107,8 +107,8 @@ plot_df <-  df %>%
     inner_join(base_error)  %>%
     mutate(fold = fraction/base_error) %>%
     tbl_df
-colors <- c('light sky blue','salmon','green4','orange')
-p <- ggplot(data = plot_df,
+colors <- c('salmon','black','green4','orange')
+error_p <- ggplot(data = plot_df,
             aes(x = prep, y = fold)) +
     #geom_bar(stat='identity', aes(fill = prep, color= prep), alpha=0.7)+
     geom_jitter(aes(fill = prep, color= prep), alpha=0.7, size = 4)+
@@ -132,12 +132,12 @@ p <- ggplot(data = plot_df,
 label1 <- expression(paste('x10'^{'-5'}))
 label2 <- expression(paste('x10'^{'-3'}))
 source('~/R/legend_to_color.R')
-fig <- ggdraw(coloring_legend_text_match(p, colors )) +
+error_fig <- ggdraw(coloring_legend_text_match(error_p, colors )) +
 #    draw_label(label1, x = 0.25, y = 0.897, size = 20, fontface ='bold') + #poster
 #    draw_label(label2, x = 0.25, y = 0.45, size = 20, fontface ='bold')  +#poster
     draw_label(label1, x = 0.14, y = 0.897, size = 20, fontface ='bold') + #paper
     draw_label(label2, x = 0.14, y = 0.45, size = 20, fontface ='bold')  #paper
 figure_name <- str_c(figure_path,'/genome_errors.pdf')
 #ggsave(fig, file = figure_name, height = 7.6, width = 6) #poster
-ggsave(fig, file = figure_name, height = 7.6, width = 12)
+ggsave(error_fig, file = figure_name, height = 7.6, width = 12)
 message('Plotted: ',figure_name)

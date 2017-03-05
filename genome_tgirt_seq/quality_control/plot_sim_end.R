@@ -47,17 +47,41 @@ df <- files %>%
     tbl_df
 
 
-p <- ggplot(data = df %>% 
+sim_end_p <- ggplot(data = df %>% 
                   filter(grepl('E_NEB_S6_umi2id|UMI_1_S9_umi2id|.1.MarkDuplicate',filename)))+
     geom_line(aes(x=actual_positions, y = base_fraction, color=base)) +
     geom_vline(aes(xintercept = actual_positions), linetype=2, alpha=0.3, color = 'grey') +    
     facet_grid(prep+sim_type~read_end, scale='free_x')+
     labs(x = 'Position Relative to Read ends',y='Fraction of Reads',color=' ') +
-    theme(text = element_text(face='bold', size=15)) +
+    theme(text = element_text(face='bold', size=25)) +
+    theme(strip.text.y = element_text(face='bold', size=15)) +
     panel_border() +
     theme(legend.position = 'bottom')
 figurename <- str_c(datapath,'/sim_frag_ends.pdf')
 source('~/R/legend_to_color.R')
-p <- ggdraw(coloring_legend_text(p))
+sim_end_p <- ggdraw(coloring_legend_text(sim_end_p))
 ggsave(p, file=figurename, height = 13, width = 7)
 message('Plotted: ', figurename)
+
+ddf <- df %>% 
+    filter(grepl('E_NEB_S6_umi2id|UMI_1_S9_umi2id|.2.MarkDuplicate',filename)) %>%
+    filter(grepl('sim.2|umi2id', filename)) %>% 
+    mutate(sim_type = ifelse(grepl('both',sim_type),'Simulation','Experimental')) %>%
+    select(sim_type, base_fraction, positions, read_end,base, prep) %>%
+    group_by(sim_type, positions, read_end, prep) %>%
+#    summarize(bit = -sum(base_fraction * log2(base_fraction))) %>%
+#    spread(sim_type, bit) %>%
+    spread(sim_type, base_fraction) %>%
+    mutate(residual =  -(Experimental - Simulation) )
+
+dp <- ggplot(data = ddf, aes(x = positions, y = residual, color = base)) +
+    geom_line() +
+    geom_hline(yintercept = 0, color = 'grey', alpha=0.7, linetype='dashed')+
+    facet_grid(prep~read_end, scale='free_x') +
+    labs(y = 'Residual\n(Simulation - Experimental)', x='Position relative to read ends (nt)', color = ' ') +
+    panel_border() +
+    theme(axis.text = element_text(size = 25, face= 'bold')) +
+    theme(axis.title = element_text(size = 25, face= 'bold')) +
+    theme(strip.text = element_text(size = 25, face= 'bold'))
+    
+

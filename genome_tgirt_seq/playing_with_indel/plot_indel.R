@@ -58,7 +58,7 @@ d <- df %>%
 form <- y ~ poly(x,2)
 #form <- y ~ poly(x,1)
 source('~/R/legend_to_color.R')
-colors <- c('lightskyblue','salmon','green','orange')
+colors <- c('salmon','black','green','orange')
 indel_p<-ggplot(data = df %>%
                     filter(grepl('13N|Nextera',prep)) %>%
                     mutate(prep = ifelse(grepl('13N', prep), 'TGIRT-seq',prep)),

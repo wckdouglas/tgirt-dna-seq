@@ -13,7 +13,6 @@ import argparse
 from multiprocessing import Pool, Manager
 from collections import defaultdict
 import os
-from sortedcontainers import SortedDict
 
 def generate_line(chrom, start, end, seq_count, insert_size, strand):
     return '{chrom}\t{start_site}\t{end_site}\tSeq_{chrom}_{seq_count}\t{isize}\t{strand}'\
@@ -29,9 +28,8 @@ def reverse_complement(sequence):
 def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
                     outprefix, fold, chrom, seq_count, iterable):
     iternum, (start_chrom, end_chrom) = iterable
-    kmer = 8
     out_count = 0
-    insert_dist, base_dist = profile_to_distribution(insert_profile_table, base_profile_table, side, kmer)
+    insert_dist, base_dist, kmer = profile_to_distribution(insert_profile_table, base_profile_table, side)
     #plot_dist(base_dist, outprefix)
     random.seed(iternum)
     fasta = Fasta(ref_fasta)
@@ -100,26 +98,45 @@ def get_prob(base_df, side, pos, nuc, end):
     return float(d.base_fraction)
 
 
-def profile_to_distribution(insert_profile_table, base_profile_table, side, k):
-    pre_generate_p = 50000
+def profile_to_distribution(insert_profile_table, base_profile_table, side):
+    pre_generate_p = 10000
     insert_df = pd.read_csv(insert_profile_table)\
         .assign(px = lambda d: np.true_divide(d['count'].values,d['count'].values.sum()))
     insert_dist = rv_discrete(name='custm', values=(insert_df.isize, insert_df.px))
 
-    base_df = pd.read_csv(base_profile_table) \
-        .assign(pos = lambda d: np.where(d.end == "3'", 20-d.pos + 1, d.pos))
+    base_df = pd.read_csv(base_profile_table) 
 
-    #base_dist = defaultdict(lambda: SortedDict)
     base_dist = defaultdict(lambda: defaultdict(float))
+    max_p = base_dist['kmer_fraction'].max()
+    scaling_factor = 10**(abs(int(np.log10(max_p)))-1)
+    k = list(set(map(len,base_df.kmer)))[0]
+    for i, row in base_df.iterrows():
+        end = row['end']
+        kmer = row['kmer']
+        p = row['kmer_fraction']
+        base_dist[end][kmer] = cycle(bernoulli(p = p*scaling_factor).rvs(pre_generate_p))
 
-    extract_prob = partial(get_prob, base_df, side)
-    for kmer in  product('ACTG',repeat=k):
-        kmer = ''.join(kmer)
-        for end in ["5'","3'"]:
-            base_fraction = [extract_prob(pos, nuc, end) for pos, nuc in enumerate(kmer)]
-            base_dist[end][kmer] = cycle(bernoulli(p = np.prod(base_fraction)*1000).rvs(pre_generate_p))
+    kmers = product('ACTG',repeat=k)
+    kmer_count = 4**k
+    prob = np.true_divide(1, kmer_count)
+    if side == '3':
+        for kmer in kmers:
+            base_dist["5'"][kmer] = prob * scaling_factor
+            base_dist["3'"][kmer] = base_dist["3'"].get(kmer, 0)
+    elif side == '5':
+        for kmer in kmers:
+            base_dist["3'"][kmer] = prob * scaling_factor
+            base_dist["5'"][kmer] = base_dist["5'"].get(kmer, 0)
+    elif side == 'no':
+        for kmer in kmers:
+            base_dist["3'"][kmer] = prob * scaling_factor
+            base_dist["5'"][kmer] = prob * scaling_factor
+    elif side == 'no':
+        for kmer in kmers:
+            base_dist["3'"][kmer] = base_dist["3'"].get(kmer, 0)
+            base_dist["5'"][kmer] = base_dist["5'"].get(kmer, 0)
 
-    return insert_dist, base_dist
+    return insert_dist, base_dist, k
 
 
 def parse_opt():

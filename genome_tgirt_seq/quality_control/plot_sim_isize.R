@@ -46,7 +46,7 @@ gg_color_hue <- function(n) {
 
 colors <- gg_color_hue(5) 
 source('~/R/legend_to_color.R')
-p <- ggplot(data=df, aes(x=isize,y=percentage*100, color = sim_type, group=filename)) +
+sim_size_p <- ggplot(data=df, aes(x=isize,y=percentage*100, color = sim_type, group=filename)) +
     geom_line() +
     facet_grid(prep~.) +
     theme(text = element_text(face='bold', size=25)) +
@@ -55,10 +55,10 @@ p <- ggplot(data=df, aes(x=isize,y=percentage*100, color = sim_type, group=filen
     theme(legend.key.height = unit(2,'line')) +
     scale_color_manual(values = colors) + 
     labs(color = ' ', x= 'Fragment size', y='Percentage of fragments') 
-p <- ggdraw(coloring_legend_text_match(p, colors))
+sim_size_p <- ggdraw(coloring_legend_text_match(sim_size_p, colors))
 figure_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/figures'
 figurename <- str_c(figure_path, '/sim_frag_size.pdf')
-ggsave(p, file=figurename, height = 7, width = 10)
+ggsave(sim_size_p, file=figurename, height = 7, width = 10)
 message('Plotted: ', figurename)
 
     

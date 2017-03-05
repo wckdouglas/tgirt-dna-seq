@@ -46,7 +46,7 @@ df <- files %>%
     mutate(read_end = as.character(read_end))
 
 colors <- c('light sky blue','salmon','green4','gold2')
-p <- ggplot(data = df %>% 
+end_p <- ggplot(data = df %>% 
               filter(grepl('UMI|XT',prep)) %>%
               mutate(prep = ifelse(grepl('UMI',prep),'TGIRT-seq',prep)), 
             aes(x = actual_positions, 
@@ -57,23 +57,23 @@ p <- ggplot(data = df %>%
     facet_grid(base~read_end, scale ='free_x') +
     labs(x = 'Position Relative to Read ends',y='Fraction of Reads',color=' ') +
     panel_border() +
-    scale_color_manual(values = colors)+
-    theme(strip.text.x = element_text(size = 20, face='bold')) +
-    theme(strip.text.y = element_text(size = 20, face='bold', angle = 0)) +
-    theme(axis.title = element_text(size = 20, face='bold')) +
+    scale_color_manual(values = c('salmon','black'))+
+    theme(strip.text.x = element_text(size = 25, face='bold')) +
+    theme(strip.text.y = element_text(size = 25, face='bold', angle = 0)) +
+    theme(axis.title = element_text(size = 25, face='bold')) +
     theme(axis.text = element_text(size = 18, face='bold'))  +
-#    theme(legend.position = c(0.65,0.45))+
+    theme(legend.position = c(0.65,0.45))+
     theme(legend.text = element_text(size = 18, face='bold'))+
     theme(legend.key.size=unit(8,'mm'))
 source('~/R/legend_to_color.R')
-end_p<-ggdraw(coloring_legend_text(p))
+end_p<-ggdraw(coloring_legend_text(end_p))
 figurename <- str_c(datapath , '/end_bias_plot.pdf')
 ggsave(end_p , file = figurename, height = 8, width = 14)
 message('Plotted: ', figurename)
 
 
 colors <- c('light sky blue','salmon','green4','gold2')
-p <- ggplot(data = df,
+prep_end_p <- ggplot(data = df,
             aes(x = actual_positions, 
                 color = prep, 
                 group=filename, 
@@ -83,15 +83,15 @@ p <- ggplot(data = df,
   labs(x = 'Position Relative to Read ends',y='Fraction of Reads',color=' ') +
   panel_border() +
   scale_color_manual(values = colors)+
-  theme(strip.text.x = element_text(size = 20, face='bold')) +
-  theme(strip.text.y = element_text(size = 20, face='bold', angle = 0)) +
-  theme(axis.title = element_text(size = 20, face='bold')) +
-  theme(axis.text = element_text(size = 18, face='bold'))  +
+  theme(strip.text.x = element_text(size = 25, face='bold')) +
+  theme(strip.text.y = element_text(size = 25, face='bold', angle = 0)) +
+  theme(axis.title = element_text(size = 25, face='bold')) +
+  theme(axis.text = element_text(size = 25, face='bold'))  +
   #    theme(legend.position = c(0.65,0.45))+
-  theme(legend.text = element_text(size = 18, face='bold'))+
+  theme(legend.text = element_text(size = 25, face='bold'))+
   theme(legend.key.size=unit(8,'mm'))
 figurename <- str_c(datapath , '/end_bias_plot_fragmentation.pdf')
-p<-ggdraw(coloring_legend_text(p))
+prep_end_p<-ggdraw(coloring_legend_text(prep_end_p))
 ggsave(p , file = figurename, height = 8, width = 14)
 message('Plotted: ', figurename)
 
@@ -127,12 +127,12 @@ en_p <- ggplot(data = bit_df, aes(x = actual_positions, y = entropy,
     labs(x = 'Relative position to fragment ends',y='Entropy (Information)',color=' ') +
     panel_border() +
     scale_color_manual(values = colors) +
-    theme(strip.text.x = element_text(size = 20, face='bold')) +
-    theme(strip.text.y = element_text(size = 20, face='bold', angle = 0)) +
-    theme(axis.title = element_text(size = 20, face='bold')) +
-    theme(axis.text = element_text(size = 18, face='bold'))  +
+    theme(strip.text.x = element_text(size = 25, face='bold')) +
+    theme(strip.text.y = element_text(size = 25, face='bold', angle = 0)) +
+    theme(axis.title = element_text(size = 25, face='bold')) +
+    theme(axis.text = element_text(size = 25, face='bold'))  +
     theme(legend.position = c(0.65,0.45))+
-    theme(legend.text = element_text(size = 18, face='bold'))+
+#    theme(legend.text = element_text(size = 125, face='bold'))+
     theme(legend.key.size=unit(8,'mm'))+
     ylim(0,2)
 figurename <- str_c(datapath, '/ends_entropy.pdf')

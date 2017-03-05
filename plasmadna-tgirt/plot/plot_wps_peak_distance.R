@@ -6,6 +6,7 @@ library(cowplot)
 library(stringr)
 library(tibble)
 
+
 datapath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/figures'
 df <- datapath %>%
     str_c('peakDistance.tsv',sep='/') %>%
@@ -24,7 +25,7 @@ df <- datapath %>%
     ))  %>%
     tbl_df()
 
-p <- ggplot(data = df, aes(x = distance, weight=normalized_count)) +
+dist_p <- ggplot(data = df, aes(x = distance, weight=normalized_count)) +
     geom_density(size=1.4,alpha=0.3, aes(color = prep, fill=prep,
                                          y=..count..))+
 #    geom_histogram(binwidth=3, alpha=0.3, 
@@ -40,7 +41,7 @@ p <- ggplot(data = df, aes(x = distance, weight=normalized_count)) +
     theme(legend.position = c(0.7, 0.5)) +
     xlim(0,450)
 source('~/R/legend_to_color.R')
-p <- ggdraw(coloring_legend_text(p))
+dist_p <- ggdraw(coloring_legend_text(dist_p))
 figurename <- str_c(datapath, 'peak_distance.pdf',sep='/') 
-ggsave(p,file = figurename, width=8,height=8)
+ggsave(dist_p,file = figurename, width=8,height=8)
 message('Plotted: ', figurename)
