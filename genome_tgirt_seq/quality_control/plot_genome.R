@@ -16,14 +16,13 @@ source('./plot_isize.R') #isize_p
 source('./plot_bits.R') #small_en_p
 
 # main fig plot
-ps <- list(wgs_p, gc_p, end_p, error_fig, indel_p, base_indel_p)
-ps <- map(ggdraw, ps)
+ps <- list(wgs_p, gc_p, error_fig, indel_p)
 p <- plot_grid(plotlist = ps, 
                ncol=2, 
                labels = letters[1:length(ps)], label_size = 35) 
 
 figurename <- str_c(figure_path, '/genome.pdf')
-ggsave(p, file = figurename, width = 22, height = 23)
+ggsave(p, file = figurename, width = 18, height = 18)
 message('Plotted:', figurename)
 
 
@@ -44,15 +43,30 @@ message('plotted: ', figurename)
 
 # supplementary genome
 p <- ggdraw() +
-    draw_plot(isize_p, 0,0,0.333,0.5) +
-    draw_plot(prep_end_p, 0.333,0.5,0.667,0.5) +
-    draw_plot(small_en_p, 0.333, 0, 0.333,0.5) +
-    draw_plot(lonrenz_curve, 0.666,0,0.337,0.5) +
-    draw_plot_label(letters[1:5], 
-                    x = c(0, 0, 0.333, 0.333, 0.666), 
-                    y = c(1, 0.5, 1, 0.5, 0.5),
-                    size = 35)
+    draw_plot(isize_p,0.5,0,0.5,1) +
+    draw_plot_label(letters[1:2], 
+                    x = c(0, 0.5), 
+                    y = c(1, 1), size = 35)
 figurepath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome//figures'
-figurename <- str_c(figurepath, '/genome_supplemental.pdf')
+figurename <- str_c(figurepath, '/genome_supplemental_1.pdf')
+ggsave(p, file = figurename, width = 15, height = 7)
+message('plotted: ', figurename)
+
+
+# ligation supplement
+ps <- list(small_en_p,
+            lonrenz_curve,
+            base_indel_p)
+p <- plot_grid(plotlist = ps, ncol = 3,
+               labels =letters[2:4], 
+               label_size = 35)
+p<-ggdraw()+
+    draw_plot(prep_end_p, 0, 0.5, 1, 0.5) +
+    draw_plot(p, 0, 0, 1, 0.5) +
+    draw_plot_label(letters[1],0,1, size =35) 
+figurepath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome//figures'
+figurename <- str_c(figurepath, '/genome_supplemental_2.pdf')
 ggsave(p, file = figurename, width = 28, height = 15)
 message('plotted: ', figurename)
+
+    

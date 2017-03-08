@@ -12,7 +12,7 @@ if len(sys.argv) != 3:
 
 prefix = sys.argv[1]
 k = int(sys.argv[2])
-if k < 1 or k > 10:
+if k < 1 or k > 20:
     sys.exit('usage: python %s <outputprefix> <k>' %sys.argv[0])
 
 def count_to_fraction(d):

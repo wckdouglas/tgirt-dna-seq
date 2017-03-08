@@ -28,8 +28,11 @@ def reverse_complement(sequence):
 def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
                     outprefix, fold, chrom, seq_count, iterable):
     iternum, (start_chrom, end_chrom) = iterable
+    kmer_5 = 3
+    kmer_3 = 12
+    max_kmer = max(kmer_5, kmer_3)
     out_count = 0
-    insert_dist, base_dist, kmer = profile_to_distribution(insert_profile_table, base_profile_table, side)
+    insert_dist, base_dist = profile_to_distribution(insert_profile_table, base_profile_table, side, kmer_5, kmer_3)
     #plot_dist(base_dist, outprefix)
     random.seed(iternum)
     fasta = Fasta(ref_fasta)
@@ -38,8 +41,8 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
     sequence = fasta.get_seq(chrom, int(start_chrom), int(end_chrom))
     outfile_name = outprefix + '.' + str(iternum) + '.bed'
     outfile = open(outfile_name, 'w')
-    for position in xrange(len(sequence) - kmer):
-        k_nucleotide_5 = str(sequence[position: position+ kmer])
+    for position in xrange(len(sequence) - max_kmer):
+        k_nucleotide_5 = str(sequence[position: position+ kmer_5])
         #assert len(k_nucleotide_5) == kmer, "Wrong extraction of 5' kmer: " + k_nucleotide_5
         if 'N' not in k_nucleotide_5:
             strands = bernoulli.rvs(p = 0.5, size = fold)
@@ -50,8 +53,8 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
                     if out == 1:
                         start_site = start_chrom + position - 1  #is for adjusting the 0-base python?
                         end_site = int(start_site + insert_size)
-                        if end_site < chrom_len - kmer:
-                            k_nucleotide_3 = str(fasta.get_seq(chrom, end_site - kmer + 1, end_site))
+                        if end_site < (chrom_len - max_kmer):
+                            k_nucleotide_3 = str(fasta.get_seq(chrom, end_site - kmer_3 + 1, end_site))
                             #assert len(k_nucleotide_3) == kmer, "Wrong extraction of + strand 3' kmer: " + k_nucleotide_3
                             if 'N' not in k_nucleotide_3 and base_dist["3'"][k_nucleotide_3].next() == 1:
                                 line = generate_line(chrom, start_site, end_site, seq_count, insert_size, '+')
@@ -64,7 +67,7 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
                         end_site = start_chrom + position + 2 #reversed This is the start when the read is reversed
                         start_site = int(end_site - insert_size) #this is the end site
                         if start_site > 0:
-                            k_nucleotide_3 = str(fasta.get_seq(chrom, start_site, start_site + kmer - 1))
+                            k_nucleotide_3 = str(fasta.get_seq(chrom, start_site, start_site + kmer_3 - 1))
                             k_nucleotide_3 = reverse_complement(k_nucleotide_3)
                             #assert len(k_nucleotide_3) == kmer, "Wrong extraction of - strand 3' kmer: " + k_nucleotide_3
                             if 'N' not in k_nucleotide_3 and base_dist["3'"][k_nucleotide_3].next() == 1:
@@ -96,55 +99,76 @@ def get_prob(base_df, side, pos, nuc, end):
     d = base_df[end_is_right & nucleotide_is_right & pos_is_right]
     return float(d.base_fraction)
 
+def define_scaling_factor(float_p):
+    '''
+    upscale all probability but limiting the highest prob < 1
+    to save iteration for simulation
+    '''
+    return 10**(abs(int(np.log10(float_p))))
 
-def profile_to_distribution(insert_profile_table, base_profile_table, side):
+def extract_kmer(kmer_5, kmer_3, end, kmer):
+    '''
+    Trim kmer
+    '''
+    return kmer[:kmer_5] if end == "5'" else kmer[:kmer_3]
+
+
+def prob_generator(kmer_length):
+    kmers = product('ACTG',repeat=kmer_length)
+    return kmers
+
+
+
+def profile_to_distribution(insert_profile_table, base_profile_table, side, kmer_5, kmer_3):
     n = 1000
+
+    # make insert distribution
     insert_df = pd.read_csv(insert_profile_table)\
         .assign(px = lambda d: np.true_divide(d['count'].values,d['count'].values.sum()))
     insert_dist = rv_discrete(name='custm', values=(insert_df.isize, insert_df.px))
 
-    base_df = pd.read_csv(base_profile_table)
-    max_p = base_df['kmer_fraction'].max()
-    scaling_factor = 10**(abs(int(np.log10(max_p))))
-    base_df['kmer_fraction'] = base_df['kmer_fraction'] * scaling_factor
+    # make kmer according to 5' or 3'
+    get_kmer = partial(extract_kmer, kmer_5, kmer_3)
+    base_df = pd.read_csv(base_profile_table) \
+        .assign(kmer = lambda d: map(get_kmer, d['end'], d['kmer'])) \
+        .groupby(['end','kmer'], as_index=False ) \
+        .agg({'kmer_fraction':np.sum})
 
+    fwd_max_p = base_df[base_df.end=="5'"]['kmer_fraction'].max()
+    rvs_max_p = base_df[base_df.end=="3'"]['kmer_fraction'].max()
+    fwd_scaling_factor = define_scaling_factor(fwd_max_p)
+    rvs_scaling_factor = define_scaling_factor(rvs_max_p)
+
+    # scale up kmers and make distribution
     base_dist = defaultdict(lambda: defaultdict(float))
     for i, row in base_df.iterrows():
         end = row['end']
         kmer = row['kmer']
-        p = row['kmer_fraction']
+        scaling_factor = fwd_scaling_factor if end == "5'" else rvs_scaling_factor
+        p = row['kmer_fraction'] * scaling_factor
         base_dist[end][kmer] = cycle(bernoulli(p = p).rvs(n))
 
-    k = list(set(map(len,base_df.kmer)))[0]
-    kmers = product('ACTG',repeat=k)
-    kmer_count = 4**k
-    prob = np.true_divide(1, kmer_count) * scaling_factor
-    prob_generator = cycle(bernoulli(p=prob).rvs(n))
+    # store distribution in hash table
+    kmers_3 = prob_generator(kmer_3)
+    kmers_5 = prob_generator(kmer_5)
     zero_generator = cycle([0])
-    if side == '3':
-        for kmer in kmers:
-            kmer = ''.join(kmer)
-            base_dist["5'"][kmer] = prob_generator
-            base_dist["3'"][kmer] = base_dist["3'"].get(kmer, zero_generator)
-    elif side == '5':
-        for kmer in kmers:
-            kmer = ''.join(kmer)
-            base_dist["3'"][kmer] = prob_generator
-            base_dist["5'"][kmer] = base_dist["5'"].get(kmer, zero_generator)
-    elif side == 'no':
-        for kmer in kmers:
-            kmer = ''.join(kmer)
-            base_dist["3'"][kmer] = prob_generator
-            base_dist["5'"][kmer] = prob_generator
-    elif side == 'both':
-        for kmer in kmers:
-            kmer = ''.join(kmer)
-            base_dist["5'"][kmer] = base_dist["5'"].get(kmer, zero_generator)
-            base_dist["3'"][kmer] = base_dist["3'"].get(kmer, zero_generator)
+    uniform_generator = cycle([1])
+    for _kmer in kmers_5:
+        _kmer = ''.join(_kmer)
+        if side == '3' or side == 'no':
+            base_dist["5'"][_kmer] = uniform_generator
+        elif side == '5' or side == 'both':
+            base_dist["5'"][_kmer] = base_dist["5'"].get(_kmer, zero_generator)
+
+    for _kmer in kmers_3:
+        _kmer = ''.join(_kmer)
+        if side == '3' or side == 'both':
+            base_dist["3'"][_kmer] = base_dist["3'"].get(_kmer, zero_generator)
+        elif side == '5' or side == 'no':
+            base_dist["3'"][_kmer] = uniform_generator
 
     print 'Constructed distribution'
-    return insert_dist, base_dist, k
-
+    return insert_dist, base_dist
 
 def parse_opt():
     parser = argparse.ArgumentParser(description='Randomly select region as simulated tgirt-seq reads')

@@ -81,8 +81,8 @@ plot_gc <-function(df){
         geom_hline(yintercept = 1, linetype = 2, alpha = 0.9) +
         geom_bar(data = windows_df, aes(x = GC, y = rol_window*10), 
              stat='identity', fill='springgreen1', alpha = 1)  +
-        theme(text = element_text(size = 25, face='bold')) +
-        theme(axis.text = element_text(size = 25, face='bold')) +
+        theme(text = element_text(size = 20)) +
+        theme(axis.text = element_text(size = 20)) +
         scale_linetype_manual(guide='none',values = rep(1,8)) +
         labs(x = 'GC %', y = 'Normalized coverage', color = ' ')+
         ylim(0,4)
@@ -137,11 +137,12 @@ linearity <- gc_df %>%
 
 
 supplemental_df <- df %>%
-    filter(grepl('K12_UMI_1|no_bias|13N|fragmentase_K12_sim_template_switch',samplename)) %>%
+    filter(grepl('K12_UMI_1|no_bias|13N',samplename)) %>%
+    filter(grepl('[0-9]$', samplename)) %>%
     mutate(prep = case_when(grepl('no_bias',.$samplename) ~ 'Simulation: no bias',
                             grepl('sim.[0-9]$',.$samplename) ~'Simulation: Reads 1 and 2 bias',
                             grepl('^fragmentase',.$samplename) ~ 'Simulation: Template switching/Fragmentase bias only',
-                            grepl('sim_template_switch',.$samplename) ~ 'Simulation: Template switching/Covaris bias only',
+                            grepl('sim_template_switch',.$samplename) ~ 'Simulation: Template switching',#/Covaris bias only',
                             grepl('ligation',.$samplename) ~ 'Simluation: Ligation bias only')) %>%
     mutate(prep = ifelse(is.na(prep),'Experimental',prep)) %>%
     mutate(prep = factor(prep))#%>%#, levels = c('Experimental',
@@ -155,13 +156,13 @@ supplement_df <- supplemental_df %>%
     group_by(GC) %>%
     summarize(experiment = mean(NORMALIZED_COVERAGE)) %>%
     inner_join(supplemental_df) %>%
-    filter(grepl('UMI|.1$',samplename)) %>%
+    filter(grepl('UMI|.2$',samplename)) %>%
     tbl_df
 
 rmse_df <- supplement_df %>% 
-    filter(GC < 80, GC>12) %>% 
+#    filter(GC < 80, GC>12) %>% 
     group_by(prep) %>% 
-    summarize(rmse = (mean((experiment-NORMALIZED_COVERAGE)^2))) %>%
+    summarize(rmse = sqrt(mean((experiment-NORMALIZED_COVERAGE)^2))) %>%
     ungroup() %>%
     mutate(rmse = signif(rmse, 3)) %>%
     inner_join(supplement_df) %>%

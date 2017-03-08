@@ -21,18 +21,22 @@ def main():
     Fragment ends!!! not read ends for 3'!!
     '''
     positions = 20
+    discard = 0
     end_nuc_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
     len_dict = defaultdict(int)
     for sequence in sys.stdin:
         sequence = sequence.rstrip().upper()
         isize = len(sequence)
-        len_dict[str(isize)] += 1
-        end_5 = sequence[:positions]
-        end_3 = sequence[-positions:]
-        for i in xrange(positions):
-            end_nuc_dict["5'"][i][end_5[i]] += 1
-            end_nuc_dict["3'"][i][end_3[i]] += 1
-    
+        if isize > positions:
+            len_dict[str(isize)] += 1
+            end_5 = sequence[:positions]
+            end_3 = sequence[-positions:]
+            for i in xrange(positions):
+                end_nuc_dict["5'"][i][end_5[i]] += 1
+                end_nuc_dict["3'"][i][end_3[i]] += 1
+        else:
+            discard += 1
+    print 'Discated %i fragments' %(discard) 
     dfs = []
     for end, nucleotide_dict in end_nuc_dict.iteritems():
         for position, position_dict in nucleotide_dict.iteritems():

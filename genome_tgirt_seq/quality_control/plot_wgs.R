@@ -120,16 +120,16 @@ wgs_p <- ggplot() +
 	xlim(1,30) +
     scale_color_manual(values = colors) +
     scale_linetype_discrete(guide = guide_legend(ncol = 1))+
-    theme(text = element_text(size = 25, face='bold')) +
-	theme(axis.text = element_text(size = 25, face='bold')) +
-	labs(x ='Level of Coverage', y = '% of Genome', color =' ') +
+    theme(text = element_text(size = 20)) +
+	theme(axis.text = element_text(size = 20)) +
+	labs(x ='Level of Coverage', y = '% Genome', color =' ') +
     theme(legend.position = 'none') +
     annotate(geom='text',x=10,y=12,label=preps[1],parse=T, 
            hjust = 0, color = colors[1], size = 8) +
     annotate(geom='text',x=10,y=11,label=preps[2],parse=T, 
            hjust = 0, color = colors[2], size = 8) +
-    geom_segment(aes(x = 18, xend = 20, y = 8, yend = 8), linetype=1,size = 2) +
-    geom_segment(aes(x = 18, xend = 20, y = 7, yend = 7), linetype=2,size = 2) +
+    geom_segment(aes(x = 18, xend = 20, y = 8, yend = 8), linetype=1,size = 1) +
+    geom_segment(aes(x = 18, xend = 20, y = 7, yend = 7), linetype=2,size = 1) +
     annotate(geom='text', x = 21, y = 8, label = 'Experimental', size = 8, hjust =0) +
     annotate(geom='text', x = 21, y = 7, label = 'Theoretical (Poisson)', size = 8, hjust=0)
 ggsave(wgs_p, file = figurename, height=8,width=9)

@@ -9,7 +9,7 @@ GENOME=$REF/Ecoli/k12_mg1655.fa
 #BAM_FILE=$BED_PATH
 #GENOME=$REF/hg19/Sequence/WholeGenomeFasta/genome.fa
 
-for BED in $BED_PATH/*sim*bed
+for BED in `ls $BED_PATH/13N*sim*bed | grep -v '[0-9].bed'`
 do
 	for i in `seq 1 5`
 	do

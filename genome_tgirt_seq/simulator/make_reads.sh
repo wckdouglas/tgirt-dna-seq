@@ -1,7 +1,7 @@
 for SIDE in 3 5 both no
 do
-	FOLD=1000000
-	for PROFILE_PREFIX in fragmentase 13N
+	FOLD=1000
+	for PROFILE_PREFIX in 13N_kmer
 	do
 		if [[ $SIDE == both ]]
 		then
@@ -27,7 +27,7 @@ do
 			-i ./profiles/${PROFILE_PREFIX}_len_profile.csv \
 			-b ./profiles/${PROFILE_PREFIX}_base_profile.csv \
 			-o $WORK/cdw2854/ecoli_genome/simulation/${PROFILE_PREFIX}_${SAMPLENAME} \
-			-t 24 \
+			-t 5 \
 			-s $SIDE
 	done
 done

@@ -116,13 +116,13 @@ error_p <- ggplot(data = plot_df,
     #                  ymax = average_error + sd_error),
     #              width = 0.25) +
     labs(x = '', y = 'Error rate relative to Nextera-XT (fold)', fill= ' ', color = ' ') +
-    theme(strip.text = element_text(size = 25, face = 'bold'))+
-    theme(text = element_text(size = 25, face = 'bold'))+
+    theme(strip.text = element_text(size = 20))+
+    theme(text = element_text(size = 20))+
     theme(axis.text.x = element_blank()) +
     scale_color_manual(values = colors, guide = guide_legend(ncol=3)) +
     #scale_fill_manual(values = c('light sky blue','salmon','green4','orange'), guide = guide_legend(ncol=3)) +
     theme(axis.ticks.x = element_blank()) +
-    theme(axis.text.y = element_text(size = 25, face='bold')) +
+    theme(axis.text.y = element_text(size = 20)) +
     theme(legend.key.size = unit(9, 'mm')) +
     theme(legend.position = c(0.5, -0.01)) + #poster
     #theme(legend.position = 'bottom') + #paper

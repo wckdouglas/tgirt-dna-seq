@@ -35,7 +35,7 @@ df <- files %>%
                         grepl('ligation', .$filename) ~ "5' end only",
                         grepl('template', .$filename) ~ "3' end only",
                         grepl('no_bias',.$filename) ~'No bias',
-                        grepl('sim',.$filename) ~ 'both ends',
+                        grepl('sim',.$filename) ~ 'Both ends',
                         grepl('^K12',.$filename) ~'Experimental'
                         )) %>%
     filter(!is.na(prep)) %>%
@@ -47,8 +47,10 @@ df <- files %>%
     tbl_df
 
 
+
 sim_end_p <- ggplot(data = df %>% 
-                  filter(grepl('E_NEB_S6_umi2id|UMI_1_S9_umi2id|.1.MarkDuplicate',filename)))+
+                filter(!grepl('Fragmentase',prep)) %>%
+                filter(grepl('E_NEB_S6_umi2id|UMI_1_S9_umi2id|.1.MarkDuplicate',filename)))+
     geom_line(aes(x=actual_positions, y = base_fraction, color=base)) +
     geom_vline(aes(xintercept = actual_positions), linetype=2, alpha=0.3, color = 'grey') +    
     facet_grid(prep+sim_type~read_end, scale='free_x')+
@@ -66,7 +68,7 @@ message('Plotted: ', figurename)
 ddf <- df %>% 
     filter(grepl('E_NEB_S6_umi2id|UMI_1_S9_umi2id|.2.MarkDuplicate',filename)) %>%
     filter(grepl('sim.2|umi2id', filename)) %>% 
-    mutate(sim_type = ifelse(grepl('both',sim_type),'Simulation','Experimental')) %>%
+    mutate(sim_type = ifelse(grepl('Both',sim_type),'Simulation','Experimental')) %>%
     select(sim_type, base_fraction, positions, read_end,base, prep) %>%
     group_by(sim_type, positions, read_end, prep) %>%
 #    summarize(bit = -sum(base_fraction * log2(base_fraction))) %>%

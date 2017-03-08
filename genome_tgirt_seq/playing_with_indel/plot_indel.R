@@ -77,8 +77,8 @@ indel_p<-ggplot(data = df %>%
     scale_x_continuous(breaks = seq(0,10),name='Homopolymer length (nt)') +
     theme(legend.position = c(0.2,0.8)) +
 #    theme(legend.text = element_text(size = 25, color = colors)) +
-    theme(text = element_text(size = 25, face='bold')) +
-    theme(axis.text = element_text(size = 25, face='bold')) +
+    theme(text = element_text(size = 20)) +
+    theme(axis.text = element_text(size = 20)) +
     theme(legend.key.height = unit(2,'line')) 
 indel_p <- ggdraw(coloring_legend_text(indel_p)) 
 figure_name <- str_c(indel_table_path,'/indel_per_repeat.pdf')
