@@ -53,16 +53,17 @@ sim_end_p <- ggplot(data = df %>%
                 filter(grepl('E_NEB_S6_umi2id|UMI_1_S9_umi2id|.1.MarkDuplicate',filename)))+
     geom_line(aes(x=actual_positions, y = base_fraction, color=base)) +
     geom_vline(aes(xintercept = actual_positions), linetype=2, alpha=0.3, color = 'grey') +    
-    facet_grid(prep+sim_type~read_end, scale='free_x')+
+    facet_grid(sim_type~read_end, scale='free_x')+
     labs(x = 'Position Relative to Read ends',y='Fraction of Reads',color=' ') +
-    theme(text = element_text(face='bold', size=25)) +
+    theme(text = element_text(size=30,face='plain',family = 'Arial')) +
+    theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
     theme(strip.text.y = element_text(face='bold', size=15)) +
     panel_border() +
     theme(legend.position = 'bottom')
 figurename <- str_c(datapath,'/sim_frag_ends.pdf')
 source('~/R/legend_to_color.R')
 sim_end_p <- ggdraw(coloring_legend_text(sim_end_p))
-ggsave(p, file=figurename, height = 13, width = 7)
+ggsave(sim_end_p, file=figurename, height = 13, width = 7)
 message('Plotted: ', figurename)
 
 ddf <- df %>% 

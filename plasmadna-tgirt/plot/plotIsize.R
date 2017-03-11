@@ -52,7 +52,7 @@ insert_p_merge <- ggplot(data = insert_df) +
     geom_line(size = 1.5, alpha=0.8,aes(x=isize, y=count*100, color = samplename)) +
     theme(axis.text.y = element_text(size=35,face='plain',family = 'Arial')) +
     theme(axis.text.x = element_text(angle=50,hjust=1,size=30, face='plain',family = 'Arial')) +
-    theme(text = element_text(size=35, face='bold',family = 'Arial'))+
+    theme(text = element_text(size=35, family = 'Arial'))+
     labs(x='Fragment length (nt)',y='Percent reads', color = ' ')+
     theme(legend.key.size = unit(11,'mm')) +
     theme(legend.position = c(0.8,0.9)) +

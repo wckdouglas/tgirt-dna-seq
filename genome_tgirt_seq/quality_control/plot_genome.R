@@ -2,6 +2,11 @@
 
 library(stringr)
 library(cowplot)
+library(extrafont)
+library(purrr)
+library(dplyr)
+library(tidyr)
+loadfonts()
 
 setwd('~/tgirt-dna-seq/genome_tgirt_seq/quality_control/')
 source('plot_gc.R') #gc_p, #supplemental_p ,lonrenz_curve
@@ -18,11 +23,13 @@ source('./plot_bits.R') #small_en_p
 # main fig plot
 ps <- list(wgs_p, gc_p, error_fig, indel_p)
 p <- plot_grid(plotlist = ps, 
-               ncol=2, 
-               labels = letters[1:length(ps)], label_size = 35) 
+               ncol=2) +
+    draw_plot_label(labels = letters[1:length(ps)], 
+                    c(0,1,0.5,0.5), c(1,1,0.5,0.5), 
+                    label_size = 40, family='Arial') 
 
 figurename <- str_c(figure_path, '/genome.pdf')
-ggsave(p, file = figurename, width = 18, height = 18)
+ggsave(p, file = figurename, width = 22, height = 18)
 message('Plotted:', figurename)
 
 

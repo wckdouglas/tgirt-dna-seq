@@ -16,10 +16,10 @@ df <- datapath %>%
 xlim=720
 nucleo_p <- ggplot(data = df, aes(x = distance, weights=count/10000)) +
     geom_histogram(fill='salmon', color = 'salmon',binwidth = 6) +
-    scale_x_continuous(breaks = seq(-xlim,xlim,80),limits=c(-xlim,xlim)) +
-    theme(text = element_text(size=25, family='Arial', face='bold')) +
-    theme(axis.text.x = element_text(size=25,face='plain', family='Arial',angle=50, hjust=0.5, vjust=0.5)) +
-    theme(axis.text.y = element_text(size=25,face='plain', family='Arial')) +
+    scale_x_continuous(breaks = seq(-xlim,xlim,120),limits=c(-xlim,xlim)) +
+    theme(text = element_text(size=30, family='Arial', face='plain')) +
+    theme(axis.text.x = element_text(size=30,face='plain', family='Arial',angle=50, hjust=0.5, vjust=0.5)) +
+    theme(axis.text.y = element_text(size=30,face='plain', family='Arial')) +
     labs(x = 'Difference in distance\nbetween nucleosome centers(bp)\n[ssDNA-seq vs TGIRT-seq]', 
          y = 'Peak count') 
 label <- expression(paste('x10'^{4}))
@@ -30,9 +30,11 @@ ggsave(nucleo_p, file=figurename, width = 11,height = 10)
 message('Plotted: ', figurename)
 
 
-df %>% 
-    mutate(filtered = ifelse(distance < 240 & distance > -240, 'in','out'))  %>% 
-    mutate(filtered = ifelse(distance ==0,'0', filtered))%>%
+distance_probability <-df %>% 
+    mutate(filtered = case_when(
+                        abs(.$distance) <= 50 ~ 'one nucleosome',
+                        abs(.$distance) > 50 & abs(.$distance <= 240) ~ 'two nucleosome',
+                        abs(.$distance) > 240 ~ 'far away'))  %>% 
     group_by(filtered) %>%
     summarize(total = sum(count)) %>%
     ungroup() %>%

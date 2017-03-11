@@ -80,10 +80,10 @@ small_en_p <- ggplot(data = df %>% filter(read_end=='Read 1'),
     facet_zoom(x = adjusted_position < 5)  +
     theme(legend.key.height = unit(2,'line')) +
     labs(x = 'Positions', y = 'Entropy (bits)', color = ' ')  +
-    theme(text = element_text(face='bold', size = 25)) +
+    theme(text = element_text(family='Arial', size = 30)) +
     theme(legend.position = c(0.3,0.15)) +
-    theme(axis.text = element_text(face='bold', size = 25)) 
-    theme(legend.text = element_text(face='bold', size = 25)) 
+    theme(axis.text = element_text(family ='Arial', size = 30)) 
+    theme(legend.text = element_text(family ='Arial', size = 30)) 
 source('~/R/legend_to_color.R')
 small_en_p <- ggdraw(coloring_legend_text(small_en_p))
 ggsave(small_en_p, file = combined_fig_name, 

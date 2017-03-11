@@ -55,11 +55,11 @@ base_indel_p<-ggplot(data = df,
     #panel_border()+
     #viridis::scale_color_viridis() +
     labs(color = ' ', x = 'Homopolymer length (nt)',
-         y = 'Indel per read per homopolymer',
+         y = 'Indel rate',
          shape = '') +
-    theme(text = element_text(size=25, face='bold')) +
-    theme(strip.text = element_text(size = 27, face = 'bold'))+
-    theme(axis.text = element_text(size = 25, face = 'bold'))+
+    theme(text = element_text(size=30,  family = 'Arial')) +
+    theme(strip.text = element_text(size = 30,  family = 'Arial'))+
+    theme(axis.text = element_text(size = 30, family = 'Arial'))+
     theme(legend.key.size = unit(2,'line')) +
     scale_color_manual(values=colors, 
                        guide= guide_legend(ncol=4)) +

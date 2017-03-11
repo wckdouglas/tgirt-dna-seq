@@ -35,9 +35,9 @@ dist_p <- ggplot(data = df, aes(x = distance, weight=normalized_count)) +
     labs(x = 'Distance to the nearest\nnucleosome center (bp)', y='Percentage of peaks', color=' ', fill= ' ') +
     scale_color_manual(values =c('salmon','black')) +
     scale_fill_manual(values =c('salmon','black')) +
-    theme(text = element_text(size=25, face='bold')) +
+    theme(text = element_text(size=30, face='plain', family = 'Arial')) +
     theme(legend.key.height = unit(2,'line')) +
-    theme(axis.text = element_text(size=25, face='bold')) +
+    theme(axis.text = element_text(size=30, face='plain', family = 'Arial')) +
     theme(legend.position = c(0.7, 0.5)) +
     xlim(0,450)
 source('~/R/legend_to_color.R')

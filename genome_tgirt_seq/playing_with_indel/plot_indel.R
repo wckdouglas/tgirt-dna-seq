@@ -54,14 +54,15 @@ d <- df %>%
     mutate(normalized_indel = log2(normalized_indel)) %>%
     mutate(indel_index = indel_index) %>%
     tbl_df
-
+    
 form <- y ~ poly(x,2)
 #form <- y ~ poly(x,1)
 source('~/R/legend_to_color.R')
 colors <- c('salmon','black','green','orange')
 indel_p<-ggplot(data = df %>%
                     filter(grepl('13N|Nextera',prep)) %>%
-                    mutate(prep = ifelse(grepl('13N', prep), 'TGIRT-seq',prep)),
+                    mutate(prep = ifelse(grepl('13N', prep), 'TGIRT-seq',prep)) %>%
+                    filter(grepl('umi2|nex', samplename)),
                 aes(x = indel_index, y = normalized_indel, color = prep))+
     geom_smooth(se = F,method = 'loess') +
 #    geom_smooth(se = F,formula=form, method='lm') +
@@ -73,12 +74,12 @@ indel_p<-ggplot(data = df %>%
 #                   summarize(m = max(normalized_indel)),
 #            aes(x=indel_index, color = prep, y = m)) +
     scale_color_manual(values = colors)+
-    labs(y = 'Average indel per read\nper homopolymer', color = ' ')+
+    labs(y = 'Indel rate', color = ' ')+
     scale_x_continuous(breaks = seq(0,10),name='Homopolymer length (nt)') +
     theme(legend.position = c(0.2,0.8)) +
 #    theme(legend.text = element_text(size = 25, color = colors)) +
-    theme(text = element_text(size = 20)) +
-    theme(axis.text = element_text(size = 20)) +
+    theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
+    theme(text = element_text(size=30,face='plain',family = 'Arial')) +
     theme(legend.key.height = unit(2,'line')) 
 indel_p <- ggdraw(coloring_legend_text(indel_p)) 
 figure_name <- str_c(indel_table_path,'/indel_per_repeat.pdf')

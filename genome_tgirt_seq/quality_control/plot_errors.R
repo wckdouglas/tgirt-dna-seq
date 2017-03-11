@@ -6,6 +6,8 @@ library(cowplot)
 library(dplyr)
 library(stringr)
 library(tidyr)
+library(extrafont)
+loadfonts()
 
 rename_enzyme <- function(x){
     if (grepl('kh',x)){
@@ -101,7 +103,7 @@ base_error <- df %>%
     tbl_df
 
 plot_df <-  df %>% 
-    mutate(prep = case_when(grepl('error',.$prep) ~ 'TGRIT-seq (Error-corrected )',
+    mutate(prep = case_when(grepl('error',.$prep) ~ 'TGRIT-seq (Error-corrected)',
                             grepl('13N',.$prep) ~ 'TGIRT-seq',
                             grepl('Nextera',.$prep) ~ 'Nextera XT')) %>%
     inner_join(base_error)  %>%
@@ -115,16 +117,17 @@ error_p <- ggplot(data = plot_df,
     #geom_errorbar(aes(ymin = average_error - sd_error, 
     #                  ymax = average_error + sd_error),
     #              width = 0.25) +
-    labs(x = '', y = 'Error rate relative to Nextera-XT (fold)', fill= ' ', color = ' ') +
-    theme(strip.text = element_text(size = 20))+
-    theme(text = element_text(size = 20))+
+    labs(x = '', y = 'Error rate\nrelative to Nextera-XT (fold)', fill= ' ', color = ' ') +
+    theme(text = element_text(size=30,face='plain',family = 'Arial')) +
+    theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
+    theme(strip.text = element_text(size = 20, family='Arial'))+
     theme(axis.text.x = element_blank()) +
-    scale_color_manual(values = colors, guide = guide_legend(ncol=3)) +
+    scale_color_manual(values = colors, guide = guide_legend(ncol=3, keywidth = 2.5)) +
     #scale_fill_manual(values = c('light sky blue','salmon','green4','orange'), guide = guide_legend(ncol=3)) +
     theme(axis.ticks.x = element_blank()) +
-    theme(axis.text.y = element_text(size = 20)) +
-    theme(legend.key.size = unit(9, 'mm')) +
-    theme(legend.position = c(0.5, -0.01)) + #poster
+    theme(axis.text.y = element_text(size = 30)) +
+    #theme(legend.key.size = unit(9, 'mm')) +
+    theme(legend.position = c(0.5, -0.03)) + #poster
     #theme(legend.position = 'bottom') + #paper
     panel_border() +
     theme(panel.border = element_rect(colour = "black", fill=NA, size=1))+ 
@@ -132,11 +135,11 @@ error_p <- ggplot(data = plot_df,
 label1 <- expression(paste('x10'^{'-5'}))
 label2 <- expression(paste('x10'^{'-3'}))
 source('~/R/legend_to_color.R')
-error_fig <- ggdraw(coloring_legend_text_match(error_p, colors )) +
+error_fig <- ggdraw(coloring_legend_text_match(error_p, colors )) #+
 #    draw_label(label1, x = 0.25, y = 0.897, size = 20, fontface ='bold') + #poster
 #    draw_label(label2, x = 0.25, y = 0.45, size = 20, fontface ='bold')  +#poster
-    draw_label(label1, x = 0.14, y = 0.897, size = 20, fontface ='bold') + #paper
-    draw_label(label2, x = 0.14, y = 0.45, size = 20, fontface ='bold')  #paper
+#    draw_label(label1, x = 0.19, y = 0.897, size = 20, fontface ='bold') + #paper
+#    draw_label(label2, x = 0.19, y = 0.45, size = 20, fontface ='bold')  #paper
 figure_name <- str_c(figure_path,'/genome_errors.pdf')
 #ggsave(fig, file = figure_name, height = 7.6, width = 6) #poster
 ggsave(error_fig, file = figure_name, height = 7.6, width = 12)

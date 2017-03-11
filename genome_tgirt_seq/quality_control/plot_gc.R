@@ -2,11 +2,14 @@
 
 library(stringr)
 library(readr)
+library(tidyr)
 library(dplyr)
 library(cowplot)
 library(purrr)
 library(ineq)
 library(forcats)
+library(extrafont)
+loadfonts()
 
 read_gc_table <- function(filename, datapath){
 
@@ -81,11 +84,12 @@ plot_gc <-function(df){
         geom_hline(yintercept = 1, linetype = 2, alpha = 0.9) +
         geom_bar(data = windows_df, aes(x = GC, y = rol_window*10), 
              stat='identity', fill='springgreen1', alpha = 1)  +
-        theme(text = element_text(size = 20)) +
-        theme(axis.text = element_text(size = 20)) +
+        theme(text = element_text(size=30,face='plain',family = 'Arial')) +
+        theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
         scale_linetype_manual(guide='none',values = rep(1,8)) +
-        labs(x = 'GC %', y = 'Normalized coverage', color = ' ')+
-        ylim(0,4)
+        labs(x = '% GC', y = 'Normalized coverage', color = ' ')+
+        ylim(0,4)+
+        scale_y_continuous(sec.axis = sec_axis(trans = ~.*10, name = '% of 100-bp sliding windows'))
     return(p)
 }
 
@@ -113,12 +117,13 @@ gc_df <- df %>%
 gc_p <- plot_gc(gc_df) +
         scale_color_manual(values = c('salmon','black'))+
 #        theme(legend.position =  c(0.3,0.7))+ #poster
-        theme(legend.position =  c(0.55,0.9))+ #paper
+        theme(legend.position =  c(0.4,0.9))+ #paper
         theme(legend.key.height = unit(2,'line'))
 figurename <- str_c(figure_path, '/gc_plot.pdf')
 source('~/R/legend_to_color.R')
 gc_p<-ggdraw(coloring_legend_text(gc_p)) +
-  annotate('text', x=0.9, y = 0.39, label = 'No bias', size = 7)
+  annotate('text', x=0.8, y = 0.39, 
+           label = 'No bias', size = 7)
 ggsave(gc_p, file = figurename , height = 7, width = 9)
 message('Plotted: ', figurename)
 
@@ -176,7 +181,7 @@ supplemental_p <- plot_gc(rmse_df) +
         scale_color_manual(values = colors) +
         theme(legend.position = c(0.4,0.75)) +
         theme(legend.key.height = unit(4,'line')) +
-        theme(legend.text = element_text(size = 23, face='bold', hjust=0.5)) 
+        theme(legend.text = element_text(size = 23, hjust=0.5)) 
 source('~/R/legend_to_color.R')
 supplemental_p <-ggdraw(coloring_legend_text_match(supplemental_p, colors))
 figurename <- str_c(figure_path, '/supplemental_gc_plot.pdf')
@@ -218,19 +223,38 @@ lonrenz_df <-df %>%
     mutate(prep = case_when(grepl('Nextera',.$prep) ~ 'Nextera XT',
                             grepl('13N',.$prep) ~ 'UMI direct ligation',
                             grepl('Cov',.$prep) ~ 'UMI + CATCG')) %>%
-    group_by(samplename, prep) %>% 
+    tbl_df
+lonrenz_df_annotation <- lonrenz_df %>%
+    group_by(samplename, prep)  %>%
+    summarize(gini=ineq(NORMALIZED_COVERAGE,type='Gini'))  %>%
+    ungroup() %>%
+    group_by(prep) %>% 
+    summarize(
+        mean_gini = mean(gini), 
+        sd_gini=sd(gini)
+    ) %>%
+    ungroup() %>%
+    mutate(annotation = str_c('Gini: ', signif(mean_gini,2),'±',signif(sd_gini,1))) %>%
+    select(prep, annotation) %>%
+    tbl_df 
+lonrenz_df <- lonrenz_df %>% 
+    group_by(samplename, prep) %>%
     nest() %>% 
     mutate(lc = map(data,~Lc(.$NORMALIZED_COVERAGE))) %>% 
     mutate(l = map(lc, function(x) x$L)) %>% 
     mutate(p = map(lc, function(x) x$p)) %>% 
-    unnest(l,p)
+    unnest(l,p) %>%
+    inner_join(lonrenz_df_annotation) %>%
+    mutate(prep = str_c(prep, '(', annotation, ')')) %>% #added for poster
+    tbl_df
+    
 lonrenz_curve <- ggplot(data = lonrenz_df, aes(y= l,x = p, group=samplename, color=prep)) + 
     geom_line(alpha=0.5) + 
     geom_abline(intercept = 0, slope = 1)+
     scale_x_continuous(breaks = seq(0,1,0.25), labels = seq(0,1,0.25) * (80-12) + 12)+
-    theme(text = element_text(size = 25, face='bold')) +
-    theme(axis.text = element_text(size = 25, face='bold')) +
-    theme(legend.text = element_text(face='bold', size = 25))  +
+    theme(text = element_text(size=30,face='plain',family = 'Arial')) +
+    theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
+    theme(legend.text = element_text(size = 20))  +
     theme(legend.key.height =unit(2,'line')) +
     theme(legend.position = c(0.3,0.8))+
     scale_color_discrete(guide = guide_legend(ncol = 1))+

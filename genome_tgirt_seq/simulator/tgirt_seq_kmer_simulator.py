@@ -10,9 +10,10 @@ import string
 import pandas as pd
 import sys
 import argparse
-from multiprocessing import Pool, Manager
+from multiprocessing import  Manager, Pool, Lock
 from collections import defaultdict
 import os
+
 
 def generate_line(chrom, start, end, seq_count, insert_size, strand):
     return '{chrom}\t{start_site}\t{end_site}\tSeq_{chrom}_{seq_count}\t{isize}\t{strand}'\
@@ -25,14 +26,14 @@ def reverse_complement(sequence):
     return sequence.translate(complement)[::-1]
 
 
-def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
+def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table, kmer_5, kmer_3,
                     outprefix, fold, chrom, seq_count, iterable):
     iternum, (start_chrom, end_chrom) = iterable
-    kmer_5 = 3
-    kmer_3 = 12
     max_kmer = max(kmer_5, kmer_3)
     out_count = 0
-    insert_dist, base_dist = profile_to_distribution(insert_profile_table, base_profile_table, side, kmer_5, kmer_3)
+    insert_dist = len_profile(insert_profile_table)
+    base_dist = base_profile(base_profile_table, side, kmer_5, kmer_3)
+    print 'Constructed base distribution'
     #plot_dist(base_dist, outprefix)
     random.seed(iternum)
     fasta = Fasta(ref_fasta)
@@ -81,24 +82,6 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
     outfile.close()
     return outfile_name
 
-def get_prob(base_df, side, pos, nuc, end):
-    '''
-    Get probability from table
-    '''
-    end_3_sim_5 = (side == '5' and end == "3'")
-    end_5_sim_3 = (side == '3' and end == "5'")
-    no_bias_sim = (side=='no')
-    if  end_3_sim_5 or end_5_sim_3 or no_bias_sim:
-        pos = 10 - pos
-    else:
-        pos = pos + 1
-
-    end_is_right = (base_df.end == end)
-    pos_is_right = (base_df.pos == pos)
-    nucleotide_is_right = (base_df.base == nuc)
-    d = base_df[end_is_right & nucleotide_is_right & pos_is_right]
-    return float(d.base_fraction)
-
 def define_scaling_factor(float_p):
     '''
     upscale all probability but limiting the highest prob < 1
@@ -114,19 +97,15 @@ def extract_kmer(kmer_5, kmer_3, end, kmer):
 
 
 def prob_generator(kmer_length):
+    '''
+    making possible kmer
+    '''
     kmers = product('ACTG',repeat=kmer_length)
     return kmers
 
 
-
-def profile_to_distribution(insert_profile_table, base_profile_table, side, kmer_5, kmer_3):
+def base_profile(base_profile_table, side, kmer_5, kmer_3):
     n = 1000
-
-    # make insert distribution
-    insert_df = pd.read_csv(insert_profile_table)\
-        .assign(px = lambda d: np.true_divide(d['count'].values,d['count'].values.sum()))
-    insert_dist = rv_discrete(name='custm', values=(insert_df.isize, insert_df.px))
-
     # make kmer according to 5' or 3'
     get_kmer = partial(extract_kmer, kmer_5, kmer_3)
     base_df = pd.read_csv(base_profile_table) \
@@ -167,8 +146,17 @@ def profile_to_distribution(insert_profile_table, base_profile_table, side, kmer
         elif side == '5' or side == 'no':
             base_dist["3'"][_kmer] = uniform_generator
 
-    print 'Constructed distribution'
-    return insert_dist, base_dist
+    return base_dist
+
+
+def len_profile(insert_profile_table):
+
+    # make insert distribution
+    insert_df = pd.read_csv(insert_profile_table)\
+        .assign(px = lambda d: np.true_divide(d['count'].values,d['count'].values.sum()))
+    insert_dist = rv_discrete(name='custm', values=(insert_df.isize, insert_df.px))
+    return insert_dist
+
 
 def parse_opt():
     parser = argparse.ArgumentParser(description='Randomly select region as simulated tgirt-seq reads')
@@ -193,6 +181,7 @@ def main():
     outbed = args.outbed
     outprefix = outbed .split('.')[0]
     side = args.side
+    kmer_5, kmer_3 = 3, 12
 
     fasta = Fasta(ref_fasta)
     seq_id = fasta.keys()[0]
@@ -202,8 +191,10 @@ def main():
     ends = starts[1:]
     p = Pool(threads)
     seq_count = Manager().Value('i',0)
+#    base_dist = base_profile(base_profile_table, side, kmer_5, kmer_3)
+#    print 'Constructed base distribution'
     per_site_simulation = partial(extract_interval, side, ref_fasta, insert_profile_table,
-                                  base_profile_table, outprefix, fold, str(seq_id), seq_count)
+                                  base_profile_table, kmer_5, kmer_3, outprefix, fold, str(seq_id), seq_count)
     iterable = enumerate(zip(starts,ends))
     outfiles = p.map(per_site_simulation, iterable)
     #outfiles = map(per_site_simulation, iterable)

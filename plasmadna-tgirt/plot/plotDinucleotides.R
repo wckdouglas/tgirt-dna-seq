@@ -31,8 +31,8 @@ dinucleotide_p <- ggplot(data = df, aes(x = position, y = adjusted_signal, color
 	    facet_grid(.~name) +
 	    theme(axis.text.x = element_text(size=35,angle = 45, hjust= 1,face='plain',family = 'Arial')) +
 	    theme(axis.text.y = element_text(size=35, face='plain',family = 'Arial')) +
-	    theme(text = element_text(size = 35, face='bold',family = 'Arial')) +
-        theme(legend.text = element_text(size = 25, face='plain',family = 'Arial')) + 
+	    theme(text = element_text(size = 35, family = 'Arial')) +
+        theme(legend.text = element_text(size = 25, family = 'Arial')) + 
         theme(legend.key = element_rect(size = 25)) + 
 	    scale_x_continuous(breaks= seq(min(df$position)-1,max(df$position),20)) +
         scale_color_manual(values = c('gold4','blue')) +

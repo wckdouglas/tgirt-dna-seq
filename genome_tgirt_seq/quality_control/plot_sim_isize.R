@@ -37,6 +37,7 @@ df <- tablenames %>%
     )) %>%
     filter(!is.na(prep)) %>%
     mutate(prep = ifelse(sim_type=='No bias', 'No bias', prep)) %>%
+    filter(prep != 'Fragmentase') %>%
     tbl_df
 
 gg_color_hue <- function(n) {
@@ -49,8 +50,8 @@ source('~/R/legend_to_color.R')
 sim_size_p <- ggplot(data=df, aes(x=isize,y=percentage*100, color = sim_type, group=filename)) +
     geom_line() +
     facet_grid(prep~.) +
-    theme(text = element_text(face='bold', size=25)) +
-    theme(axis.text = element_text(face='bold', size=25)) +
+    theme(text = element_text(size=30,face='plain',family = 'Arial')) +
+    theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
     panel_border() +
     theme(legend.key.height = unit(2,'line')) +
     scale_color_manual(values = colors) + 
