@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DATAPATH=$DATA/JA16613
-CLIPPED_PATH=$DATAPATH/clipped
+DATAPATH=$SCRATCH/plasmaDNA/rawData
+CLIPPED_PATH=$DATAPATH/umi2id
 mkdir -p $CLIPPED_PATH
 
 for FQ1 in $DATAPATH/*R1_001.fastq.gz
