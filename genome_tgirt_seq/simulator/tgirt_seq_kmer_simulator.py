@@ -10,10 +10,10 @@ import string
 import pandas as pd
 import sys
 import argparse
-from multiprocessing import Pool, Manager
+from multiprocessing import  Manager, Pool, Lock
 from collections import defaultdict
 import os
-from sortedcontainers import SortedDict
+
 
 def generate_line(chrom, start, end, seq_count, insert_size, strand):
     return '{chrom}\t{start_site}\t{end_site}\tSeq_{chrom}_{seq_count}\t{isize}\t{strand}'\
@@ -26,12 +26,14 @@ def reverse_complement(sequence):
     return sequence.translate(complement)[::-1]
 
 
-def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
+def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table, kmer_5, kmer_3,
                     outprefix, fold, chrom, seq_count, iterable):
     iternum, (start_chrom, end_chrom) = iterable
-    kmer = 8
+    max_kmer = max(kmer_5, kmer_3)
     out_count = 0
-    insert_dist, base_dist = profile_to_distribution(insert_profile_table, base_profile_table, side, kmer)
+    insert_dist = len_profile(insert_profile_table)
+    base_dist = base_profile(base_profile_table, side, kmer_5, kmer_3)
+    print 'Constructed base distribution'
     #plot_dist(base_dist, outprefix)
     random.seed(iternum)
     fasta = Fasta(ref_fasta)
@@ -40,37 +42,36 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
     sequence = fasta.get_seq(chrom, int(start_chrom), int(end_chrom))
     outfile_name = outprefix + '.' + str(iternum) + '.bed'
     outfile = open(outfile_name, 'w')
-    for position in xrange(len(sequence) - kmer):
-        tri_nucleotide_5 = str(sequence[position: position+ kmer])
-        #assert len(tri_nucleotide_5) == kmer, "Wrong extraction of 5' kmer: " + tri_nucleotide_5
-        if 'N' not in tri_nucleotide_5:
+    for position in xrange(len(sequence) - max_kmer):
+        k_nucleotide_5 = str(sequence[position: position+ kmer_5])
+        #assert len(k_nucleotide_5) == kmer, "Wrong extraction of 5' kmer: " + k_nucleotide_5
+        if 'N' not in k_nucleotide_5:
             strands = bernoulli.rvs(p = 0.5, size = fold)
             insert_sizes = insert_dist.rvs(size = fold)
             for strand, insert_size in zip(strands, insert_sizes):
                 if strand == 1:
-                    out = base_dist["5'"][tri_nucleotide_5].next()
+                    out = base_dist["5'"][k_nucleotide_5].next()
                     if out == 1:
                         start_site = start_chrom + position - 1  #is for adjusting the 0-base python?
                         end_site = int(start_site + insert_size)
-                        if end_site < chrom_len - kmer:
-                            tri_nucleotide_3 = str(fasta.get_seq(chrom, end_site - kmer + 1, end_site))[::-1]
-                            #assert len(tri_nucleotide_3) == kmer, "Wrong extraction of + strand 3' kmer: " + tri_nucleotide_3
-                            #if 'N' not in tri_nucleotide_3 and base_dist["3'"][tri_nucleotide_3].rvs() == 1:
-                            if 'N' not in tri_nucleotide_3 and base_dist["3'"][tri_nucleotide_3].next() == 1:
+                        if end_site < (chrom_len - max_kmer):
+                            k_nucleotide_3 = str(fasta.get_seq(chrom, end_site - kmer_3 + 1, end_site))
+                            #assert len(k_nucleotide_3) == kmer, "Wrong extraction of + strand 3' kmer: " + k_nucleotide_3
+                            if 'N' not in k_nucleotide_3 and base_dist["3'"][k_nucleotide_3].next() == 1:
                                 line = generate_line(chrom, start_site, end_site, seq_count, insert_size, '+')
                                 seq_count.value += 1
                                 outfile.write(line + '\n')
                 else:
-                    reverse_tri_nucleotide_5  = reverse_complement(tri_nucleotide_5)
-                    out = base_dist["5'"][reverse_tri_nucleotide_5].next()
+                    reverse_k_nucleotide_5  = reverse_complement(k_nucleotide_5)
+                    out = base_dist["5'"][reverse_k_nucleotide_5].next()
                     if out == 1:
                         end_site = start_chrom + position + 2 #reversed This is the start when the read is reversed
                         start_site = int(end_site - insert_size) #this is the end site
                         if start_site > 0:
-                            tri_nucleotide_3 = str(fasta.get_seq(chrom, start_site, start_site + kmer - 1))
-                            tri_nucleotide_3 = tri_nucleotide_3.translate(complement)
-                            #assert len(tri_nucleotide_3) == kmer, "Wrong extraction of - strand 3' kmer: " + tri_nucleotide_3
-                            if 'N' not in tri_nucleotide_3 and base_dist["3'"][tri_nucleotide_3].next() == 1:
+                            k_nucleotide_3 = str(fasta.get_seq(chrom, start_site, start_site + kmer_3 - 1))
+                            k_nucleotide_3 = reverse_complement(k_nucleotide_3)
+                            #assert len(k_nucleotide_3) == kmer, "Wrong extraction of - strand 3' kmer: " + k_nucleotide_3
+                            if 'N' not in k_nucleotide_3 and base_dist["3'"][k_nucleotide_3].next() == 1:
                                 line = generate_line(chrom, start_site - 1, end_site, seq_count, insert_size, '-')
                                 seq_count.value += 1
                                 outfile.write(line + '\n')
@@ -81,45 +82,80 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table,
     outfile.close()
     return outfile_name
 
-def get_prob(base_df, side, pos, nuc, end):
+def define_scaling_factor(float_p):
     '''
-    Get probability from table
+    upscale all probability but limiting the highest prob < 1
+    to save iteration for simulation
     '''
-    end_3_sim_5 = (side == '5' and end == "3'")
-    end_5_sim_3 = (side == '3' and end == "5'")
-    no_bias_sim = (side=='no')
-    if  end_3_sim_5 or end_5_sim_3 or no_bias_sim:
-        pos = 10 - pos
-    else:
-        pos = pos + 1
+    return 10**(abs(int(np.log10(float_p))))
 
-    end_is_right = (base_df.end == end)
-    pos_is_right = (base_df.pos == pos)
-    nucleotide_is_right = (base_df.base == nuc)
-    d = base_df[end_is_right & nucleotide_is_right & pos_is_right]
-    return float(d.base_fraction)
+def extract_kmer(kmer_5, kmer_3, end, kmer):
+    '''
+    Trim kmer
+    '''
+    return kmer[:kmer_5] if end == "5'" else kmer[:kmer_3]
 
 
-def profile_to_distribution(insert_profile_table, base_profile_table, side, k):
-    pre_generate_p = 50000
+def prob_generator(kmer_length):
+    '''
+    making possible kmer
+    '''
+    kmers = product('ACTG',repeat=kmer_length)
+    return kmers
+
+
+def base_profile(base_profile_table, side, kmer_5, kmer_3):
+    n = 1000
+    # make kmer according to 5' or 3'
+    get_kmer = partial(extract_kmer, kmer_5, kmer_3)
+    base_df = pd.read_csv(base_profile_table) \
+        .assign(kmer = lambda d: map(get_kmer, d['end'], d['kmer'])) \
+        .groupby(['end','kmer'], as_index=False ) \
+        .agg({'kmer_fraction':np.sum})
+
+    fwd_max_p = base_df[base_df.end=="5'"]['kmer_fraction'].max()
+    rvs_max_p = base_df[base_df.end=="3'"]['kmer_fraction'].max()
+    fwd_scaling_factor = define_scaling_factor(fwd_max_p)
+    rvs_scaling_factor = define_scaling_factor(rvs_max_p)
+
+    # scale up kmers and make distribution
+    base_dist = defaultdict(lambda: defaultdict(float))
+    for i, row in base_df.iterrows():
+        end = row['end']
+        kmer = row['kmer']
+        scaling_factor = fwd_scaling_factor if end == "5'" else rvs_scaling_factor
+        p = row['kmer_fraction'] * scaling_factor
+        base_dist[end][kmer] = cycle(bernoulli(p = p).rvs(n))
+
+    # store distribution in hash table
+    kmers_3 = prob_generator(kmer_3)
+    kmers_5 = prob_generator(kmer_5)
+    zero_generator = cycle([0])
+    uniform_generator = cycle([1])
+    for _kmer in kmers_5:
+        _kmer = ''.join(_kmer)
+        if side == '3' or side == 'no':
+            base_dist["5'"][_kmer] = uniform_generator
+        elif side == '5' or side == 'both':
+            base_dist["5'"][_kmer] = base_dist["5'"].get(_kmer, zero_generator)
+
+    for _kmer in kmers_3:
+        _kmer = ''.join(_kmer)
+        if side == '3' or side == 'both':
+            base_dist["3'"][_kmer] = base_dist["3'"].get(_kmer, zero_generator)
+        elif side == '5' or side == 'no':
+            base_dist["3'"][_kmer] = uniform_generator
+
+    return base_dist
+
+
+def len_profile(insert_profile_table):
+
+    # make insert distribution
     insert_df = pd.read_csv(insert_profile_table)\
         .assign(px = lambda d: np.true_divide(d['count'].values,d['count'].values.sum()))
     insert_dist = rv_discrete(name='custm', values=(insert_df.isize, insert_df.px))
-
-    base_df = pd.read_csv(base_profile_table) \
-        .assign(pos = lambda d: np.where(d.end == "3'", 20-d.pos + 1, d.pos))
-
-    #base_dist = defaultdict(lambda: SortedDict)
-    base_dist = defaultdict(lambda: defaultdict(float))
-
-    extract_prob = partial(get_prob, base_df, side)
-    for kmer in  product('ACTG',repeat=k):
-        kmer = ''.join(kmer)
-        for end in ["5'","3'"]:
-            base_fraction = [extract_prob(pos, nuc, end) for pos, nuc in enumerate(kmer)]
-            base_dist[end][kmer] = cycle(bernoulli(p = np.prod(base_fraction)*1000).rvs(pre_generate_p))
-
-    return insert_dist, base_dist
+    return insert_dist
 
 
 def parse_opt():
@@ -145,6 +181,7 @@ def main():
     outbed = args.outbed
     outprefix = outbed .split('.')[0]
     side = args.side
+    kmer_5, kmer_3 = 3, 12
 
     fasta = Fasta(ref_fasta)
     seq_id = fasta.keys()[0]
@@ -154,10 +191,13 @@ def main():
     ends = starts[1:]
     p = Pool(threads)
     seq_count = Manager().Value('i',0)
+#    base_dist = base_profile(base_profile_table, side, kmer_5, kmer_3)
+#    print 'Constructed base distribution'
     per_site_simulation = partial(extract_interval, side, ref_fasta, insert_profile_table,
-                                  base_profile_table, outprefix, fold, str(seq_id), seq_count)
+                                  base_profile_table, kmer_5, kmer_3, outprefix, fold, str(seq_id), seq_count)
     iterable = enumerate(zip(starts,ends))
     outfiles = p.map(per_site_simulation, iterable)
+    #outfiles = map(per_site_simulation, iterable)
     p.close()
     p.join()
     with open(outbed + '.bed','w') as out:

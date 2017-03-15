@@ -6,6 +6,8 @@ library(dplyr)
 library(ggplot2)
 library(cowplot)
 library(purrr)
+library(extrafont)
+loadfonts()
 
 
 make_prep <- function(x){
@@ -28,24 +30,28 @@ df <- files %>%
     map(read_files) %>%
     reduce(rbind) %>%
     filter(!grepl('subsampled|sim|Ecoli|q5|phus|SRR',filename)) %>%
-    filter(grepl('nextera|NEB|kq|kh|UMI',filename)) %>%
+    filter(grepl('nextera|kq|kh|UMI|NEB',filename)) %>%
     filter(grepl('MarkDuplicate',filename)) %>%
     filter(grepl('nextera|clustered|umi2id',filename)) %>%
     mutate(prep = case_when(grepl('nextera',.$filename) ~ 'Nextera XT',
                             grepl('pb',.$filename) ~ 'Pacbio',
                             grepl('sim',.$filename) ~ 'Covaris Sim',
                             grepl('SRR',.$filename) ~ 'Covaris SRR',
-                            grepl('UMI',.$filename) ~ 'TGIRT-seq 13N direct ligation',
+                            grepl('UMI',.$filename) ~ 'TGIRT-seq Covaris (UMI direct ligation)',
+                            grepl('kh|kq',.$filename) ~ 'TGIRT-seq Covaris',
                             grepl('NEB',.$filename) ~ 'TGIRT-seq Fragmentase')) %>%
-    mutate(prep = ifelse(is.na(prep),'TGIRT-seq Covaris',prep))  %>%
+    mutate(prep = ifelse(is.na(prep),'UMI + CATCG',prep))  %>%
     mutate(read_end = ifelse(read_end == "5'", 'Read 1', 'Read 2')) %>%
     mutate(read_end = factor(read_end, levels=c("Read 1","Read 2"))) %>%
     mutate(actual_positions = ifelse(read_end == "Read 2", positions-20, positions)) %>%
     mutate(bit = -log2(base_fraction)) %>%
     mutate(read_end = as.character(read_end))
 
-colors <- c('light sky blue','salmon','green','yellow')
-p <- ggplot(data = df, aes(x = actual_positions, 
+colors <- c('light sky blue','salmon','green4','gold2')
+end_p <- ggplot(data = df %>% 
+              filter(grepl('UMI|XT',prep)) %>%
+              mutate(prep = ifelse(grepl('UMI',prep),'TGIRT-seq',prep)), 
+            aes(x = actual_positions, 
                            color = prep, 
                            group=filename, 
                            y = base_fraction)) +
@@ -53,17 +59,44 @@ p <- ggplot(data = df, aes(x = actual_positions,
     facet_grid(base~read_end, scale ='free_x') +
     labs(x = 'Position Relative to Read ends',y='Fraction of Reads',color=' ') +
     panel_border() +
-    scale_color_manual(values = colors)+
-    theme(strip.text.x = element_text(size = 20, face='bold')) +
-    theme(strip.text.y = element_text(size = 20, face='bold', angle = 0)) +
-    theme(axis.title = element_text(size = 20, face='bold')) +
-    theme(axis.text = element_text(size = 18, face='bold'))  +
+    scale_color_manual(values = c('salmon','black'))+
+    theme(strip.text.x = element_text(size = 25, face='plain')) +
+    theme(strip.text.y = element_text(size = 25, face='plain', angle = 0)) +
+    theme(axis.title = element_text(size = 25, face='plain')) +
+    theme(axis.text = element_text(size = 18, face='plain'))  +
     theme(legend.position = c(0.65,0.45))+
-    theme(legend.text = element_text(size = 18, face='bold'))+
+    theme(legend.text = element_text(size = 18, face='plain'))+
     theme(legend.key.size=unit(8,'mm'))
+source('~/R/legend_to_color.R')
+end_p<-ggdraw(coloring_legend_text(end_p))
 figurename <- str_c(datapath , '/end_bias_plot.pdf')
-ggsave(p , file = figurename, height = 8, width = 8)
+ggsave(end_p , file = figurename, height = 8, width = 14)
 message('Plotted: ', figurename)
+
+
+colors <- c('light sky blue','salmon','green4','gold2')
+prep_end_p <- ggplot(data = df,
+            aes(x = actual_positions, 
+                color = prep, 
+                group=filename, 
+                y = base_fraction)) +
+  geom_line(size = 1.3, alpha=0.6) +
+  facet_grid(base~read_end, scale ='free_x') +
+  labs(x = 'Position relative to read ends',y='Fraction of reads',color=' ') +
+  panel_border() +
+  scale_color_manual(values = colors)+
+  theme(strip.text.x = element_text(size = 30, face='plain', family='Arial')) +
+  theme(strip.text.y = element_text(size = 30, face='plain', angle = 0,, family='Arial')) +
+  theme(axis.title = element_text(size = 30, face='plain', family='Arial')) +
+  theme(axis.text = element_text(size = 25, face='plain', family='Arial'))  +
+  #    theme(legend.position = c(0.65,0.45))+
+  theme(legend.text = element_text(size = 25, face='plain', family='Arial'))+
+  theme(legend.key.size=unit(8,'mm'))
+figurename <- str_c(datapath , '/end_bias_plot_fragmentation.pdf')
+prep_end_p<-ggdraw(coloring_legend_text(prep_end_p))
+ggsave(p , file = figurename, height = 8, width = 14)
+message('Plotted: ', figurename)
+
 
 cleave_p <- ggplot(data = df, 
                    aes(x = actual_positions, 
@@ -72,15 +105,15 @@ cleave_p <- ggplot(data = df,
     geom_line(alpha=0.8, size = 1.3, aes(color=base))+  
     facet_grid(prep~.)+
     scale_color_manual(values =  RColorBrewer::brewer.pal(9,'Pastel1'))+
-    theme(strip.text.x = element_text(size = 20, face='bold')) +
-    theme(axis.title = element_text(size = 20, face='bold')) +
-    theme(axis.text = element_text(size = 18, face='bold'))  +
-    theme(legend.text = element_text(size = 18, face='bold'))+
+    theme(strip.text.x = element_text(size = 20)) +
+    theme(axis.title = element_text(size = 20)) +
+    theme(axis.text = element_text(size = 18))  +
+    theme(legend.text = element_text(size = 18))+
     theme(legend.key.size=unit(8,'mm')) +
     labs(x = 'Position relative to fragment ends', 
          y = 'Fraction of Base', color = ' ')
 figurename <- str_c(datapath, '/cleavage_pattern.pdf')
-ggsave(p, file=figurename, height=10,width=10)
+ggsave(cleave_p, file=figurename, height=10,width=10)
 message('Plotted: ', figurename)
 
 bit_df <- df %>%
@@ -96,14 +129,15 @@ en_p <- ggplot(data = bit_df, aes(x = actual_positions, y = entropy,
     labs(x = 'Relative position to fragment ends',y='Entropy (Information)',color=' ') +
     panel_border() +
     scale_color_manual(values = colors) +
-    theme(strip.text.x = element_text(size = 20, face='bold')) +
-    theme(strip.text.y = element_text(size = 20, face='bold', angle = 0)) +
-    theme(axis.title = element_text(size = 20, face='bold')) +
-    theme(axis.text = element_text(size = 18, face='bold'))  +
+    theme(strip.text.x = element_text(size = 25)) +
+    theme(strip.text.y = element_text(size = 25, angle = 0)) +
+    theme(axis.title = element_text(size = 25)) +
+    theme(axis.text = element_text(size = 25))  +
     theme(legend.position = c(0.65,0.45))+
-    theme(legend.text = element_text(size = 18, face='bold'))+
+#    theme(legend.text = element_text(size = 125, face='plain'))+
     theme(legend.key.size=unit(8,'mm'))+
     ylim(0,2)
 figurename <- str_c(datapath, '/ends_entropy.pdf')
-ggsave(p, file=figurename, height=10,width=10)
+ggsave(en_p, file=figurename, height=10,width=10)
 message('Plotted: ', figurename)
+

@@ -1,8 +1,10 @@
 #!/usr/bin/env Rscript
 
+library(stringr)
 library(readr)
 library(purrr)
 library(dplyr)
+library(tidyr)
 library(ggplot2)
 library(ggpmisc)
 library(cowplot)
@@ -30,11 +32,15 @@ df <- list.files(path = indel_table_path, pattern = '.tsv', full.names = T) %>%
     map_df(read_indel_table) %>%
     inner_join(indel_index_df)%>% 
     select(grep('samplename|num_D|num_I|index',names(.))) %>%
-    filter(!grepl('MiSeq|Ecoli|phus|q5',samplename)) %>%
-    mutate(prep = case_when(grepl('nextera', .$samplename)~'Nextera XT',
-                            grepl('clustered', .$samplename)~'Clustered TGIRT-seq',
-                            grepl('NEB', .$samplename)~'TGIRT-Fragmentase',
-                            grepl('K12', .$samplename)~'TGIRT-Covaris')) %>%
+    filter(grepl('^75|umi2',samplename)) %>%
+    filter(grepl('nextera|UMI|kh|kq|NEB',samplename)) %>%
+    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera XT',
+                            grepl('pb',.$samplename) ~ 'Pacbio',
+                            grepl('sim',.$samplename) ~ 'Covaris Sim',
+                            grepl('SRR',.$samplename) ~ 'Covaris SRR',
+                            grepl('UMI',.$samplename) ~ 'TGIRT-seq 13N direct ligation',
+                            grepl('kh|kq',.$samplename) ~ 'TGIRT-seq Covaris',
+                            grepl('NEB',.$samplename) ~ 'TGIRT-seq Fragmentase')) %>%
     filter(!grepl('clustered',samplename)) %>%
     mutate(indel_index = negative_index + positive_index ) %>%
     mutate(number_of_indel = num_D + num_I) %>%
@@ -48,22 +54,36 @@ d <- df %>%
     mutate(normalized_indel = log2(normalized_indel)) %>%
     mutate(indel_index = indel_index) %>%
     tbl_df
-
+    
 form <- y ~ poly(x,2)
 #form <- y ~ poly(x,1)
-p<-ggplot(data = df, aes(x = indel_index, y = normalized_indel, color = prep))+
-#    geom_smooth(se = F,method = 'loess') +
-    geom_smooth(se = F,formula=form, method='lm') +
+source('~/R/legend_to_color.R')
+colors <- c('salmon','black','green','orange')
+indel_p<-ggplot(data = df %>%
+                    filter(grepl('13N|Nextera',prep)) %>%
+                    mutate(prep = ifelse(grepl('13N', prep), 'TGIRT-seq',prep)) %>%
+                    filter(grepl('umi2|nex', samplename)),
+                aes(x = indel_index, y = normalized_indel, color = prep))+
+    geom_smooth(se = F,method = 'loess') +
+#    geom_smooth(se = F,formula=form, method='lm') +
     geom_point() +
-    scale_color_manual(values = c('lightskyblue','salmon','green'))+
-    labs(y = 'Average indel per read\nper mononucleotide run', color = ' ')+
-    scale_x_continuous(breaks = seq(0,10),name='Run Length (nt)') +
+#    geom_line( data= df %>% 
+#                   filter(grepl('13N|Nextera',prep)) %>%
+#                   mutate(prep = ifelse(grepl('13N', prep), 'TGIRT-seq',prep)) %>%
+#                   group_by(prep, indel_index) %>% 
+#                   summarize(m = max(normalized_indel)),
+#            aes(x=indel_index, color = prep, y = m)) +
+    scale_color_manual(values = colors)+
+    labs(y = 'Indel rate', color = ' ')+
+    scale_x_continuous(breaks = seq(0,10),name='Homopolymer length (nt)') +
     theme(legend.position = c(0.2,0.8)) +
-    theme(text = element_text(size = 25, face='bold')) +
-    theme(axis.text = element_text(size = 25, face='bold')) +
-    theme(legend.key.height = unit(2,'line'))
+#    theme(legend.text = element_text(size = 25, color = colors)) +
+    theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
+    theme(text = element_text(size=30,face='plain',family = 'Arial')) +
+    theme(legend.key.height = unit(2,'line')) 
+indel_p <- ggdraw(coloring_legend_text(indel_p)) 
 figure_name <- str_c(indel_table_path,'/indel_per_repeat.pdf')
-ggsave(p, file = figure_name, width = 7, height = 7)
+ggsave(indel_p, file = figure_name, width = 7, height = 7)
 message('Plotted: ', figure_name)
 
 

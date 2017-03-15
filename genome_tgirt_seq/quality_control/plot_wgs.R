@@ -7,7 +7,8 @@ library(purrr)
 library(dplyr)
 library(broom)
 library(tidyr)
-
+library(extrafont)
+loadfonts()
 
 rename_enzyme <- function(x){
     if (x == 'kh'){
@@ -24,7 +25,7 @@ rename_enzyme <- function(x){
 }
 
 read_wgs_table <- function(filename, datapath){
-    samplename <- str_split(filename,'\\.')[[1]][1]
+    samplename <- str_replace_all(filename,'.subsampled.wgs_metrics','')
     df <- datapath %>%
 		str_c(filename, sep='/') %>%
 		read_tsv(skip = 10) %>%
@@ -41,18 +42,25 @@ project_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/'
 picard_path <- str_c( project_path, '/picard_results')
 figure_path <- str_c( project_path, '/figures')
 figurename <- str_c( figure_path, '/wgs_plot.pdf')
-table_names <- list.files(path = picard_path , pattern = '.wgs.metrics')
+table_names <- list.files(path = picard_path , pattern = '.subsampled.wgs.metrics')
     
 df <- table_names %>%
 	map(read_wgs_table, picard_path) %>%
     reduce(rbind) %>%
     mutate(line_type = 'WGS') %>%
 #    select(-subsampled) %>%
-    dplyr::filter(grepl('nextera|^K12_kh|^K12_kq', samplename)) %>%
-    dplyr::filter(grepl('nextera|umi2id', samplename)) %>%
-    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera XT',
-                            grepl('NEB',.$samplename) ~ 'TGIRT-seq Fragmentase',
-                            grepl('kh|kq',.$samplename) ~ 'TGIRT-seq Covaris'))%>%
+    filter(grepl('^75|UMI', samplename)) %>%
+#    filter(grepl('nextera|UMI|NEB|kh|kq', samplename)) %>%
+    filter(grepl('nextera|UMI',samplename))  %>%
+    filter(grepl('nextera|umi2',samplename)) %>%
+    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera~XT',
+                            grepl('pb',.$samplename) ~ 'Pacbio',
+                            grepl('sim',.$samplename) ~ 'Covaris Sim',
+                            grepl('SRR',.$samplename) ~ 'Covaris SRR',
+                            grepl('UMI',.$samplename) ~ 'TGIRT-seq 13N direct ligation',
+                            grepl('kh|kq',.$samplename) ~ 'TGIRT-seq Covaris',
+                            grepl('NEB',.$samplename) ~ 'TGIRT-seq Fragmentase')) %>%
+    filter(!is.na(prep)) %>%
     tbl_df
 
 base_df <- df %>%
@@ -84,8 +92,7 @@ rsqrd_df <- plot_df %>%
               rmsd = sqrt(sum((wgs-model)^2)/length(wgs))
     ) %>%
     ungroup() %>%
-    mutate(rsqrd = 1 - sum_res/ sum_var) %>%
-    filter(grepl('nextera|umi',samplename)) 
+    mutate(rsqrd = 1 - sum_res/ sum_var) 
 
 rsqrd <- rsqrd_df %>%
     group_by(prep) %>%
@@ -94,22 +101,39 @@ rsqrd <- rsqrd_df %>%
     tbl_df
 
 plot_df <- inner_join(plot_df, rsqrd) %>%
-    mutate(prep = str_c(prep, ' (R-sqrd: ',mean_rsqd,'±',sd_rsqd,')'))
+    filter(!grepl('clust', prep)) %>%
+    mutate(prep = ifelse(grepl('13N', prep),'TGIRT-seq', prep)) %>%
+    mutate(clustered = ifelse(grepl('cluster',samplename),' Clustered','')) %>%
+    mutate(prep = str_c(prep, clustered)) %>%
+    mutate(prep = str_c(prep, '~(R^{2}:', signif(mean_rsqd,3),'%+-%',signif(sd_rsqd,1),')')) %>%
+    tbl_df
+preps <- plot_df$prep %>% unique
+
     
+colors <- c('salmon','black')
 wgs_p <- ggplot() +
-	geom_line(data = plot_df, aes(x = coverage, y = density * 100, 
-	                   color = prep, size = samplename, linetype=line_type)) + 
-	xlim(1,50) +
-    scale_color_manual(values = c('light sky blue','salmon'))+
-    scale_size_manual(guide = 'none', values = rep(1.2, length(unique(plot_df$samplename))))+
+	geom_line(data = plot_df %>% filter(line_type == 'WGS'), 
+	          aes(x = coverage, y = density * 100, 
+	              color = prep, group=samplename), alpha = 0.5, linetype=1) + 
+    geom_line(data = plot_df %>% filter(line_type != 'WGS'), 
+	          aes(x = coverage, y = density * 100, 
+	              color = prep, group=samplename), alpha = 0.5, linetype=2) +
+	xlim(1,30) +
+    scale_color_manual(values = colors) +
     scale_linetype_discrete(guide = guide_legend(ncol = 1))+
-	theme(text = element_text(size = 25, face='bold')) +
-	theme(axis.text = element_text(size = 25, face='bold')) +
-	labs(x ='Level of Coverage', y = '% of Genome', 
-	     color =' ', linetype = ' ') +
-    theme(legend.position = c(0.7,0.5)) +
-    theme(legend.key.height=unit(2,"line"))
-ggsave(wgs_p, file = figurename, height=7,width=10)
+    theme(text = element_text(size=30,face='plain',family = 'Arial')) +
+	theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
+	labs(x ='Level of Coverage', y = '% Genome', color =' ') +
+    theme(legend.position = 'none') +
+    annotate(geom='text',x=10,y=12,label=preps[1],parse=T, 
+           hjust = 0, color = colors[1], size = 8) +
+    annotate(geom='text',x=10,y=11,label=preps[2],parse=T, 
+           hjust = 0, color = colors[2], size = 8) +
+    geom_segment(aes(x = 14, xend = 16, y = 8, yend = 8), linetype=1,size = 1) +
+    geom_segment(aes(x = 14, xend = 16, y = 7, yend = 7), linetype=2,size = 1) +
+    annotate(geom='text', x = 17, y = 8, label = 'Experimental', size = 8, hjust =0, family='Arial') +
+    annotate(geom='text', x = 17, y = 7, label = 'Theoretical (Poisson)', size = 8, hjust=0, family='Arial')
+ggsave(wgs_p, file = figurename, height=8,width=9)
 message('Plotted: ', figurename)
 
 

@@ -52,7 +52,7 @@ insert_p_merge <- ggplot(data = insert_df) +
     geom_line(size = 1.5, alpha=0.8,aes(x=isize, y=count*100, color = samplename)) +
     theme(axis.text.y = element_text(size=35,face='plain',family = 'Arial')) +
     theme(axis.text.x = element_text(angle=50,hjust=1,size=30, face='plain',family = 'Arial')) +
-    theme(text = element_text(size=35, face='bold',family = 'Arial'))+
+    theme(text = element_text(size=35, family = 'Arial'))+
     labs(x='Fragment length (nt)',y='Percent reads', color = ' ')+
     theme(legend.key.size = unit(11,'mm')) +
     theme(legend.position = c(0.8,0.9)) +
@@ -65,6 +65,8 @@ insert_p_merge <- ggplot(data = insert_df) +
     annotate(geom='text', x = 234, y = 2.5, label = '167 nt', size = 12, fontface='bold') +
     ylim(0,2.5) +
     scale_color_manual(values = c('salmon','black'))
+source('~/R/legend_to_color.R')
+insert_p_merge <- ggdraw(coloring_legend_text(insert_p_merge))
 figurename <- str_c(insert_data_path, '/plasma_insert_profile.pdf')
 ggsave(insert_p_merge, file = figurename, height = 8)
 message('Plotted: ', figurename)

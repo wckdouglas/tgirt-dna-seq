@@ -11,22 +11,31 @@ loadfonts()
 datapath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/figures'
 df <- datapath %>%
     str_c('predictedNucleosomeDistance.tsv',sep='/') %>%
-    read_tsv() %>%
-    group_by(distance) %>%
-    summarize(count = n()) %>%
-    ungroup()
+    read_tsv()
 
 xlim=720
 nucleo_p <- ggplot(data = df, aes(x = distance, weights=count/10000)) +
     geom_histogram(fill='salmon', color = 'salmon',binwidth = 6) +
-    scale_x_continuous(breaks = seq(-xlim,xlim,80),limits=c(-xlim,xlim)) +
-    theme(text = element_text(size=30, family='Arial', face='bold')) +
+    scale_x_continuous(breaks = seq(-xlim,xlim,120),limits=c(-xlim,xlim)) +
+    theme(text = element_text(size=30, family='Arial', face='plain')) +
     theme(axis.text.x = element_text(size=30,face='plain', family='Arial',angle=50, hjust=0.5, vjust=0.5)) +
     theme(axis.text.y = element_text(size=30,face='plain', family='Arial')) +
-    labs(x = 'Distance to the nearest nucleosome Center (bp)\n[ssDNA-seq (ref.2) & TGIRT-seq]', y = 'Peak Count') 
-label <- expression(paste('x10'^{'5'}))
+    labs(x = 'Difference in distance\nbetween nucleosome centers(bp)\n[ssDNA-seq vs TGIRT-seq]', 
+         y = 'Peak count') 
+label <- expression(paste('x10'^{4}))
 nucleo_p <- ggdraw(nucleo_p) +
-    draw_label(label, x = 0.15, y = 0.95, size = 25, fontface ='bold')
+    draw_label(label, x = 0.25, y = 0.98, size = 25, fontface ='bold')
 figurename <- str_c(datapath, '/predictedNucleosomeDistance.pdf')
 ggsave(nucleo_p, file=figurename, width = 11,height = 10)
 message('Plotted: ', figurename)
+
+
+distance_probability <-df %>% 
+    mutate(filtered = case_when(
+                        abs(.$distance) <= 50 ~ 'one nucleosome',
+                        abs(.$distance) > 50 & abs(.$distance <= 240) ~ 'two nucleosome',
+                        abs(.$distance) > 240 ~ 'far away'))  %>% 
+    group_by(filtered) %>%
+    summarize(total = sum(count)) %>%
+    ungroup() %>%
+    mutate(fraction = total/sum(total))

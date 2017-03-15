@@ -50,8 +50,8 @@ def weighted_smooth(w):
 
 def daniell_smoother(arr):
     arr = pd.Series(arr)\
-        .rolling(window = 5)\
-        .apply(weighted_smooth(np.array([1,1,1,1,0.5])))
+        .rolling(window = 3)\
+        .apply(weighted_smooth(np.array([1,1,0.5])))
     return np.array(arr)
 
 def daniell_spectrum(signal):
