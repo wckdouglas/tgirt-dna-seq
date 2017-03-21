@@ -63,12 +63,15 @@ wps_p <- ggdraw() +
 
 message('Start plotting')
 p <- ggdraw() + 
-    draw_plot(insert_p_merge, 0.33,0.4,0.33,0.56) +
-    draw_plot(wps_p, 0.66,0.4,0.33,0.58)  +
-    draw_plot(dinucleotide_p, 0, 0, 1, 0.4)  +
-    draw_plot_label(letters[1:4],x = c(0,0.33,0.66,0), y =c(1,1,1,0.45), size=50,family = 'Arial') 
+    draw_plot(insert_p_merge, 0.02,0.4,0.48,0.58) +
+    draw_plot(wps_p, 0.5,0.4,0.48,0.58)  +
+    draw_plot(dinucleotide_p, 0, 0, 1, 0.38)  +
+    draw_plot_label(letters[1:3],
+                    x = c(0,0.5,0), 
+                    y =c(1,1,0.4), 
+                    size=50,family = 'Arial') 
 
 figure_path <- str_c(project_path,'/figures')
 figurename <- str_c(figure_path,'/wps_distribution_merged.pdf')
-ggsave(p, filename = figurename,height = 16,width=35)
+ggsave(p, filename = figurename,height = 16,width=25)
 message('Plotted:', figurename)

@@ -25,7 +25,8 @@ df <- filenames %>%
     filter(position > -120) %>%
     filter(position < 120) %>%
     filter(grepl('long',lenType)) %>%
-    mutate(dinucleotide_type = str_replace_all(dinucleotide_type,"\\|",'/'))
+    mutate(dinucleotide_type = str_replace_all(dinucleotide_type,"\\|",'/')) %>%
+    mutate(name = factor(name, levels = c('TGIRT-seq','ssDNA-seq')))
 dinucleotide_p <- ggplot(data = df, aes(x = position, y = adjusted_signal, color = dinucleotide_type)) +
 	    geom_line(size=1.2) +
 	    facet_grid(.~name) +

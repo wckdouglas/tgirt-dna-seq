@@ -32,9 +32,9 @@ table_names <- list.files(path = picard_path, pattern = 'gc_metrics')
 table_names<- table_names[grepl('^75|sim',table_names)]
 df <- table_names %>%
 	map(read_gc_table, picard_path) %>%
-	reduce(rbind) %>%
+	purrr::reduce(rbind) %>%
     filter(!grepl('Ecoli',samplename)) %>%
-    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera XT',
+    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera-XT',
                             grepl('pb',.$samplename) ~ 'Pacbio',
                             grepl('sim',.$samplename) ~ 'Covaris Sim',
                             grepl('UMI',.$samplename) ~ 'TGIRT-seq 13N',
@@ -57,7 +57,7 @@ gini_df <- df %>%
     tbl_df
 
 tg = gini_df %>% filter(prep == 'TGIRT-seq 13N') %>% .$gini
-xt = gini_df %>% filter(prep == 'Nextera XT') %>% .$gini
+xt = gini_df %>% filter(prep == 'Nextera-XT') %>% .$gini
 tt = t.test(tg, xt)
 
 
@@ -86,6 +86,7 @@ plot_gc <-function(df){
              stat='identity', fill='springgreen1', alpha = 1)  +
         theme(text = element_text(size=30,face='plain',family = 'Arial')) +
         theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
+        theme(legend.text = element_text(size=25,face='plain',family = 'Arial')) +
         scale_linetype_manual(guide='none',values = rep(1,8)) +
         labs(x = '% GC', y = 'Normalized coverage', color = ' ')+
         ylim(0,4)+
@@ -112,17 +113,19 @@ gc_df <- df %>%
     filter(!grepl('SRR1536433',samplename)) %>%
     filter(grepl('UMI|nextera',samplename)) %>% #added for poster
     inner_join(index_annotation) %>% # added for poster
-    mutate(prep = str_c(prep, '(', annotation, ')')) %>% #added for poster
-    mutate(prep = str_replace_all(prep,'13N','')) #added for poster
+ #   mutate(prep = str_c(prep, '(', annotation, ')')) %>% #added for poster
+    mutate(prep = str_replace_all(prep,'13N','')) %>% #added for poster
+    mutate(prep = factor(prep, levels = rev(unique(prep)))) 
+colors <- c('black','salmon')
 gc_p <- plot_gc(gc_df) +
-        scale_color_manual(values = c('salmon','black'))+
+        scale_color_manual(values = colors)+
 #        theme(legend.position =  c(0.3,0.7))+ #poster
-        theme(legend.position =  c(0.4,0.9))+ #paper
+        theme(legend.position =  c(0.4,0.6))+ #paper
         theme(legend.key.height = unit(2,'line'))
 figurename <- str_c(figure_path, '/gc_plot.pdf')
 source('~/R/legend_to_color.R')
-gc_p<-ggdraw(coloring_legend_text(gc_p)) +
-  annotate('text', x=0.8, y = 0.39, 
+gc_p<-ggdraw(coloring_legend_text_match(gc_p,colors)) +
+  annotate('text', x=0.2, y = 0.39, 
            label = 'No bias', size = 7)
 ggsave(gc_p, file = figurename , height = 7, width = 9)
 message('Plotted: ', figurename)
@@ -142,30 +145,28 @@ linearity <- gc_df %>%
 
 
 supplemental_df <- df %>%
-    filter(grepl('K12_UMI_1|no_bias|13N',samplename)) %>%
+    filter(grepl('K12_UMI_[123]|no_bias|13N',samplename)) %>%
     filter(grepl('[0-9]$', samplename)) %>%
-    mutate(prep = case_when(grepl('no_bias',.$samplename) ~ 'Simulation: no bias',
+    filter(grepl('13N_K12_sim_template_switch|75bp_K12_UMI_1|13N_K12_sim|13N_K12_sim_ligation_only|no_bias',samplename)) %>%
+    mutate(prep = case_when(grepl('no_bias',.$samplename) ~ 'Simulation: No bias',
                             grepl('sim.[0-9]$',.$samplename) ~'Simulation: Reads 1 and 2 bias',
                             grepl('^fragmentase',.$samplename) ~ 'Simulation: Template switching/Fragmentase bias only',
                             grepl('sim_template_switch',.$samplename) ~ 'Simulation: Template switching',#/Covaris bias only',
-                            grepl('ligation',.$samplename) ~ 'Simluation: Ligation bias only')) %>%
+                            grepl('ligation',.$samplename) ~ 'Simulation: Ligation bias only')) %>%
     mutate(prep = ifelse(is.na(prep),'Experimental',prep)) %>%
-    mutate(prep = factor(prep))#%>%#, levels = c('Experimental',
-                                  #         'Simulation: no bias',
-                                  #         'Simulation: Read 1 (ligattion) bias only',
-                                  #         'Simluation: Read 2 (template switch/fragmentation) bias only',
-                                  #         'Simulation: Reads 1 and 2 bias')))
+    mutate(prep = str_replace(prep,'Simulation: ',''))
+
 supplement_df <- supplemental_df %>% 
     filter(prep == 'Experimental') %>% 
     select(GC,NORMALIZED_COVERAGE) %>% 
     group_by(GC) %>%
-    summarize(experiment = mean(NORMALIZED_COVERAGE)) %>%
+    summarize(experiment = median(NORMALIZED_COVERAGE)) %>%
     inner_join(supplemental_df) %>%
-    filter(grepl('UMI|.2$',samplename)) %>%
+#    filter(grepl('UMI|.2$',samplename)) %>%
     tbl_df
 
 rmse_df <- supplement_df %>% 
-#    filter(GC < 80, GC>12) %>% 
+    filter(GC <= 80, GC>=12) %>% 
     group_by(prep) %>% 
     summarize(rmse = sqrt(mean((experiment-NORMALIZED_COVERAGE)^2))) %>%
     ungroup() %>%
@@ -220,9 +221,11 @@ lonrenz_df <-df %>%
     filter(!grepl('clustered', samplename)) %>%
     filter(!grepl('SRR1536433',samplename)) %>%
     filter(grepl('nextera|UMI|K12_[kh]',samplename)) %>%
-    mutate(prep = case_when(grepl('Nextera',.$prep) ~ 'Nextera XT',
+    mutate(prep = case_when(grepl('Nextera',.$prep) ~ 'Nextera-XT',
                             grepl('13N',.$prep) ~ 'UMI direct ligation',
                             grepl('Cov',.$prep) ~ 'UMI + CATCG')) %>%
+    filter(!grepl('CATCG',prep)) %>%
+    mutate(prep = ifelse(grepl('UMI',prep),'TGIRT-seq', prep)) %>%
     tbl_df
 lonrenz_df_annotation <- lonrenz_df %>%
     group_by(samplename, prep)  %>%
@@ -246,20 +249,22 @@ lonrenz_df <- lonrenz_df %>%
     unnest(l,p) %>%
     inner_join(lonrenz_df_annotation) %>%
     mutate(prep = str_c(prep, '(', annotation, ')')) %>% #added for poster
+    mutate(prep = factor(prep, levels = rev(unique(prep))))  %>%
     tbl_df
     
+colors <- c('black','salmon')
 lonrenz_curve <- ggplot(data = lonrenz_df, aes(y= l,x = p, group=samplename, color=prep)) + 
-    geom_line(alpha=0.5) + 
-    geom_abline(intercept = 0, slope = 1)+
+    geom_line(alpha=0.5, size = 1.3) + 
+    geom_abline(intercept = 0, slope = 1, linetype=2)+
     scale_x_continuous(breaks = seq(0,1,0.25), labels = seq(0,1,0.25) * (80-12) + 12)+
     theme(text = element_text(size=30,face='plain',family = 'Arial')) +
     theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
-    theme(legend.text = element_text(size = 20))  +
+    theme(legend.text = element_text(size = 25))  +
     theme(legend.key.height =unit(2,'line')) +
-    theme(legend.position = c(0.3,0.8))+
-    scale_color_discrete(guide = guide_legend(ncol = 1))+
-    labs(x = '% of GC', y = 'Cumulative coverage', color = ' ')#, title = 'Lonrenze Curve')
-lonrenz_curve <- ggdraw(coloring_legend_text(lonrenz_curve))
+    theme(legend.position = c(0.4,0.8))+
+    scale_color_manual(values = colors, guide = guide_legend(ncol = 1))+
+    labs(x = '% GC', y = 'Cumulative coverage', color = ' ')#, title = 'Lonrenze Curve')
+lonrenz_curve <- ggdraw(coloring_legend_text_match(lonrenz_curve, colors))
 figurename <- str_c(figure_path, '/gc_lonrez_curve.pdf')
 ggsave(lonrenz_curve, file = figurename , height = 7, width = 7)
 message('Plotted: ', figurename)

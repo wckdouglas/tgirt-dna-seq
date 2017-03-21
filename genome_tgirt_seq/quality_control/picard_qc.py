@@ -112,7 +112,7 @@ def main():
         if not os.path.isdir(path):
             os.makedirs(path)
 
-    bam_files = glob.glob(bam_path + '/*sim*.bam')
+    bam_files = glob.glob(bam_path + '/*_family.bam')
     bam_files = filter(lambda x: 'pb' not in x, bam_files)
     picard_func = partial(pipeline, result_path, figures_path, ref)
     p = Pool(20)
