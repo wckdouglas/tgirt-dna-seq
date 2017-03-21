@@ -39,18 +39,19 @@ read_df <- function(table_file){
 
 indel_base_df <- table_files%>%
     map_df(read_df)  %>%
-    group_by(indel,run_length, mononucleotide, patterns) %>%
+    group_by(indel,run_length, mononucleotide, patterns,samplename) %>%
     summarize(
         coverage = sum(coverage),
         freq = sum(freq)
     ) %>%
     ungroup() %>%
+    filter(indel!='deletions') %>%
     mutate(rate = freq/coverage) %>%
     tbl_df
 
 
 insert_p<-ggplot(data = indel_base_df, aes(x = run_length, y = rate,
-                         color = mononucleotide, label = patterns)) +
+                         color = patterns, label = patterns)) +
     geom_text() +
     facet_grid(indel~mononucleotide, scale='free_y') +
     panel_border() +
@@ -61,11 +62,14 @@ insert_p<-ggplot(data = indel_base_df, aes(x = run_length, y = rate,
     theme(strip.text = element_text(size = 30,  family = 'Arial'))+
     theme(axis.text = element_text(size = 30, family = 'Arial'))+
     theme(legend.key.size = unit(2,'line')) +
-    scale_color_manual(values=colors, 
-                       guide= guide_legend(ncol=2)) +
-    theme(legend.position = c(0.2,0.9)) +
-    theme(legend.position = 'none') +
+#    scale_color_manual(values=colors, 
+#                       guide= guide_legend(ncol=2)) +
+#    theme(legend.position = c(0.2,0.9)) +
+#    theme(legend.position = 'none') +
     scale_x_continuous(breaks = 4:9, labels=4:9)
 
 p <- plot_grid(base_indel_p, insert_p, ncol=1)
+figurename <- str_c(datapath, '/insertion_bases.pdf')
+ggsave(p, file =  figurename, height = 10, width = 20)
+message('plotted: ', figurename)
 

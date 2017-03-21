@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 import numpy as np
@@ -15,6 +16,7 @@ from operator import itemgetter
 from mononucleotide_base import make_index, get_strand, cigar_to_seq
 from multiprocessing import Pool
 from dmisc.sam_action import MDToSeq
+from numba import jit
 
 complementary = string.maketrans('ACTG','TGAC')
 def reverse_complement(kmer):
@@ -30,10 +32,11 @@ def keep_indel(map_position,cigar_seq, seq, start, end):
     seq = seq[usable]
     return ''.join(cigar), ''.join(seq)
 
+@jit()
 def extract_indel(sub_cigar, sub_seq, mononucleotide):
     deletions = ''
     insertions = ''
-    for c, b in izip(sub_cigar, sub_seq):
+    for c, b in zip(sub_cigar, sub_seq):
         if c == 'D':
             deletions += mononucleotide
         elif c == 'I':
@@ -41,6 +44,7 @@ def extract_indel(sub_cigar, sub_seq, mononucleotide):
     return insertions, deletions
 
 
+@jit()
 def calibrate_seq(cigar_seq, sequence, md_seq, ref_positions):
     """
     making cigar seq and seq as same length
@@ -51,10 +55,10 @@ def calibrate_seq(cigar_seq, sequence, md_seq, ref_positions):
     new_cigar = ''
     new_md = ''
 
-    acceptable_cigar = list('M')
     seq = iter(sequence)
     pos = iter(ref_positions)
     md = iter(md_seq)
+    current_position = 0
     for cigar in cigar_seq:
         if cigar == 'S':
             seq.next()

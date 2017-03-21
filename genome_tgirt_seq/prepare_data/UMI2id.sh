@@ -2,8 +2,8 @@
 
 PROJECT_PATH=$WORK/cdw2854/ecoli_genome/rawData/k12
 FASTQ_PATH=${PROJECT_PATH}
-OUTPATH=${FASTQ_PATH}/umi2id
-PROGRAM_PATH=${HOME}/TGIRT_UMI
+OUTPATH=${FASTQ_PATH}/umi2id_30
+PROGRAM_PATH=${HOME}/TGIRT_UMI/preproces_fastq
 PYTHON=$(which python)
 mkdir -p ${OUTPATH}
 
@@ -15,7 +15,7 @@ do
 			--fastq1=${FQ1} \
 			--fastq2=${FQ2} \
 			--idxBase=13 \
-			--barcodeCutOff=20 \
+			--barcodeCutOff=30 \
 			--mismatch=2 \
 			--outputprefix=- \
 		\| ${PYTHON} ${PROGRAM_PATH}/deinterleave_fastq.py \
