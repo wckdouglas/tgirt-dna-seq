@@ -83,12 +83,12 @@ def running_mononuclotide_regions(line, bam, out):
     output_line = ''
     pos_aln_count, neg_aln_count = 0, 0
     for aln in bam.fetch(seq_id, start, end):
-        if aln.is_reverse:
+        strand = get_strand(aln)
+        if strand == '-':
             neg_aln_count += 1
         else:
             pos_aln_count += 1
         if not aln.is_unmapped and re.search('I|D', aln.cigarstring):
-            strand = get_strand(aln)
             cigar_seq = cigar_to_seq(aln.cigarstring)
             cigar_seq, sequence, ref_positions = calibrate_seq(cigar_seq, aln.query_sequence, aln.get_reference_positions())
             cigar = keep_indel(ref_positions, cigar_seq, start, end)

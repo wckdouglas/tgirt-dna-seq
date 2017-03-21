@@ -24,7 +24,7 @@ def reverse_complement(kmer):
 def keep_indel(map_position,cigar_seq, seq, start, end):
     cigar_seq = np.array(list(cigar_seq))
     map_position = np.array(map_position)
-    usable = (map_position >= start) & (map_position <= end)
+    usable = (map_position >= start-1) & (map_position <= end +1)
     cigar = cigar_seq[usable]
     seq = np.array(list(seq))
     seq = seq[usable]
@@ -82,6 +82,11 @@ def calibrate_seq(cigar_seq, sequence, md_seq, ref_positions):
 
 
 def running_mononuclotide_regions(inline, bam, out):
+    '''
+    For each bedline (representing each homopolymer runs region)
+    count how many reads mapped to fwd strand and rvs strand
+    for each alignment with insertion or deletions, extract the indel bases
+    '''
     fields = inline.strip().split('\t')
     seq_id, start, end, run_length, mononucleotide  = fields[0], long(fields[1]), long(fields[2]), fields[4], fields[-1]
     mono_indel_count = defaultdict(lambda: defaultdict(list))
@@ -90,8 +95,12 @@ def running_mononuclotide_regions(inline, bam, out):
     strands = ['+','-']
     indel_types = ['deletions','insertions']
     for aln in bam.fetch(seq_id, start, end):
+        strand = get_strand(aln)
+        if strand == '-':
+            neg_aln_count += 1
+        else:
+            pos_aln_count += 1
         if not aln.is_unmapped and re.search('I|D', aln.cigarstring):
-            strand = get_strand(aln)
             cigar_seq = cigar_to_seq(aln.cigarstring)
             md_seq = MDToSeq(aln.get_tag('MD'))
             cigar_seq, sequence, ref_positions, md_seq = calibrate_seq(cigar_seq, aln.query_sequence, md_seq, aln.get_reference_positions())
@@ -107,11 +116,14 @@ def running_mononuclotide_regions(inline, bam, out):
                 mono_indel_count[strand]['insertions'].append(insertions)
     outlines = ''
     for strand in strands:
+        coverage = pos_aln_count if strand == '+' else neg_aln_count
+        ref_base = mononucleotide if strand == '+' else mononucleotide.translate(complementary)
         for indel_type in indel_types:
             indel_pattern = ','.join(mono_indel_count[strand][indel_type])
             indel_pattern = indel_pattern.strip(',')
-            if indel_pattern != '':
-                outline = '\t'.join([run_length, mononucleotide,strand, indel_type, indel_pattern])
+            if coverage > 0:
+                coverage = str(coverage)
+                outline = '\t'.join([run_length, ref_base,strand, coverage, indel_type, indel_pattern])
                 outlines +=  outline + '\n'
     return outlines
 
@@ -119,7 +131,7 @@ def analyze_bam_files(out_path, indel_table, bam_file):
     samplename = os.path.basename(bam_file).replace('.bam','')
     out_file = out_path + '/' + samplename + '.tsv'
     print 'Analyzing %s' %out_file
-    header = 'run_length\tmononucleotide\tstrand\tindel\tpatterns'
+    header = 'run_length\tmononucleotide\tstrand\tcoverage\tindel\tpatterns'
     make_index(bam_file)
     with pysam.Samfile(bam_file, 'rb') as bam, \
             open(indel_table, 'r') as indel_file, \

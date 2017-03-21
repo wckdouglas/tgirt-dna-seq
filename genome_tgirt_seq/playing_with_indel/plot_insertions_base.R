@@ -10,35 +10,62 @@ library(purrr)
 datapath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/base_insertion_table'
 table_files <- list.files(path = datapath, pattern = '.tsv', full.names = T)
 
-paste_and_split <- function(d){
-    x <- d[[1]]
-    x <- str_c(x,collapse=',')
-    res <- str_split(x,',')[[1]]
-    return(res)
+paste_and_split <- function(x){
+    patterns <- x$patterns
+    patterns <- ifelse(!is.na(patterns),patterns,'NA')
+    patterns <- str_c(patterns,collapse=',')
+    patterns <- str_split(patterns,',')[[1]]
+    coverage <- sum(x$coverage)
+    data.frame(patterns = patterns) %>%
+    mutate(coverage = coverage) %>%
+    group_by(patterns, coverage) %>%
+    summarize(freq = n()) %>%
+    ungroup() %>%
+    return()
 }
 
 read_df <- function(table_file){
     read_tsv(table_file) %>% 
-    filter(patterns != ',') %>% 
-    mutate(mononucleotide = ifelse(strand == '-',chartr('ACTG','TGAC',mononucleotide),mononucleotide))  %>%
     select(-strand) %>%
     group_by(run_length, mononucleotide, indel) %>%
     nest() %>%
     mutate(pattern = map(data, paste_and_split)) %>%
     unnest(pattern) %>%
-    filter(pattern!='') %>%
+    ungroup() %>%
+    filter(patterns != 'NA', patterns != '') %>%
     mutate(samplename = basename(str_replace(table_file,'.tsv',''))) %>%
     return()
 }
 
-df <- table_files%>%
+indel_base_df <- table_files%>%
     map_df(read_df)  %>%
-    group_by(pattern,indel,mononucleotide, run_length) %>%
-    summarize(freq = n()) 
+    group_by(indel,run_length, mononucleotide, patterns) %>%
+    summarize(
+        coverage = sum(coverage),
+        freq = sum(freq)
+    ) %>%
+    ungroup() %>%
+    mutate(rate = freq/coverage) %>%
+    tbl_df
 
 
-p<-ggplot(data = df, aes(x = run_length, y = freq, color = mononucleotide, label = pattern)) +
+insert_p<-ggplot(data = indel_base_df, aes(x = run_length, y = rate,
+                         color = mononucleotide, label = patterns)) +
     geom_text() +
-    facet_grid(indel~mononucleotide) +
+    facet_grid(indel~mononucleotide, scale='free_y') +
     panel_border() +
-    scale_y_log10()
+    labs(color = ' ', x = 'Homopolymer length (nt)',
+         y = 'Indel rate',
+         shape = '') +
+    theme(text = element_text(size=30,  family = 'Arial')) +
+    theme(strip.text = element_text(size = 30,  family = 'Arial'))+
+    theme(axis.text = element_text(size = 30, family = 'Arial'))+
+    theme(legend.key.size = unit(2,'line')) +
+    scale_color_manual(values=colors, 
+                       guide= guide_legend(ncol=2)) +
+    theme(legend.position = c(0.2,0.9)) +
+    theme(legend.position = 'none') +
+    scale_x_continuous(breaks = 4:9, labels=4:9)
+
+p <- plot_grid(base_indel_p, insert_p, ncol=1)
+
