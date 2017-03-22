@@ -10,7 +10,7 @@ PROGRAM=genomeWPS.py
 PYTHON=$(which python)
 
 mkdir -p $RESULT_PATH
-for BED in  $BED_PATH/P11*.bed #$BED_PATH/*.bed
+for BED in  $BED_PATH/P13*.bed #$BED_PATH/*.bed
 do
 	SAMPLENAME=$(basename ${BED%.bed})
 	CHROM=$(echo $SAMPLENAME | rev | cut -d'.' -f1 | rev)
