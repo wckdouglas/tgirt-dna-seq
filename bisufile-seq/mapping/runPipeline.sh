@@ -1,14 +1,13 @@
 #!/bin/bash
 
 PROJECTPATH=/stor/work/Lambowitz/cdw2854/bisufite_seq
-DATAPATH=$DATA/JA16234/bisulfite
-INDEXPATH=$REF/GRCh38/hg38_rDNA
-INDEX=$INDEXPATH/genome_rDNA.fa
+DATAPATH=$PROJECTPATH/raw_Data
+INDEXPATH=$REF/hg19/Sequence/WholeGenomeFasta
+INDEX=$INDEXPATH/genome.fa
 ADAPTORS=adaptors.fa
 CORES=24
-MEMORY=1g
 
-for FQ in $DATAPATH/PDB*R1_001.fastq.gz
+for FQ in $DATAPATH/P*B*R1_001.fastq.gz
 do
 	SAMPLENAME=$(basename $FQ)
 	echo python DNAmapping.py --fq1=$FQ \

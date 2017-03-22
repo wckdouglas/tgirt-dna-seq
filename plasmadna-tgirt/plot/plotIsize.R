@@ -20,36 +20,32 @@ rename <- function(x){
 insert_df <- insert_data_path %>%
     stri_c('isizeTable.tsv',sep='/') %>%
     read_tsv()%>%
-    filter(grepl('SRR2130052|P1',samplename))  %>%
+    filter(grepl('SRR2130051|SRR2130052|P1022',samplename))  %>%
+    filter(grepl('umi2id|SRR', samplename)) %>%
     filter(!grepl('cluster',samplename))  %>%
     filter(isize > 22) %>%
-    mutate(samplename = rename(samplename))  %>%
-    group_by(isize,samplename) %>%
+    mutate(prep = rename(samplename))  %>%
+    group_by(isize,samplename, prep) %>%
     summarize(count = sum(count)) %>%
     ungroup() %>%
-    group_by(samplename) %>%
+    group_by(prep,samplename) %>%
     do(data_frame(count = .$count/sum(.$count),
                   isize = .$isize)) %>% 
+    ungroup() %>%
+    mutate(prep = factor(prep, level = rev(unique(prep)))) %>%
+    arrange(isize) %>%
     tbl_df
 
-main_peak <- 167
+main_peak <- insert_df %>% filter(count == max(count)) %>% .$isize
 periodicity <- 10.4
 peaks <- main_peak - periodicity * seq(0,10,1)
 peaks_df <- data_frame(peak = peaks, colors = c('head',rep('none',length(peaks)-1)))
-insert_p <- ggplot(data = insert_df, aes(x=isize, y=count*100)) + 
-    geom_bar(stat='identity', color = 'dark blue') + 
-    facet_grid(.~samplename)   + 
-    theme(axis.text.y = element_text(size=35,face='plain',family = 'Arial')) +
-    theme(axis.text.x = element_text(angle=50,hjust=1,size=30, face='plain',family = 'Arial')) +
-    theme(text = element_text(size=35, face='bold',family = 'Arial'))+
-    labs(x='Fragment length (nt)',y='Percent Reads')+
-    scale_x_continuous(breaks=seq(0,401,50), limits=c(0,400)) +
-    geom_vline(data = peaks_df, aes(xintercept = peak, color = colors), linetype= 2, size=1) +
-    theme(legend.position='none') +
-    scale_color_manual(values = c('green','grey'))
+
 
 insert_p_merge <- ggplot(data = insert_df) + 
-    geom_line(size = 1.5, alpha=0.8,aes(x=isize, y=count*100, color = samplename)) +
+    geom_line(size=2,alpha=0.8,aes(x=isize, y=count*100, 
+                                        color = prep,
+                                        group = samplename)) +
     theme(axis.text.y = element_text(size=35,face='plain',family = 'Arial')) +
     theme(axis.text.x = element_text(angle=50,hjust=1,size=30, face='plain',family = 'Arial')) +
     theme(text = element_text(size=35, family = 'Arial'))+
@@ -64,7 +60,7 @@ insert_p_merge <- ggplot(data = insert_df) +
                  arrow = arrow(length = unit(0.5, "cm"))) +
     annotate(geom='text', x = 234, y = 2.5, label = '167 nt', size = 12, fontface='bold') +
     ylim(0,2.5) +
-    scale_color_manual(values = c('salmon','black'))
+    scale_color_manual(values = c('black','salmon'))
 source('~/R/legend_to_color.R')
 insert_p_merge <- ggdraw(coloring_legend_text(insert_p_merge))
 figurename <- str_c(insert_data_path, '/plasma_insert_profile.pdf')

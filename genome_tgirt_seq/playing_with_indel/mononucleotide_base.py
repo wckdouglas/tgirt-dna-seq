@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 import numpy as np
@@ -15,17 +16,10 @@ from itertools import izip
 complementary = string.maketrans('ACTG','TGAC')
 
 def keep_indel(map_position,cigar_seq, start, end):
-    map_position_counter = 0
-    map_pos, cigar = [],[]
-    for cigar_char in cigar_seq:
-        if cigar_char == 'M':
-#            map_pos.append(map_position[map_position_counter])
-#            cigar.append(cigar_char)
-            map_position_counter += 1
-        elif cigar_char == 'I' or cigar_char == 'D':
-            if map_position_counter >= start - 2 and map_position_counter <= end +2:
-                #map_pos.append(map_position[map_position_counter-1])
-                cigar.append(cigar_char)
+    cigar_seq = np.array(list(cigar_seq))
+    map_position = np.array(map_position)
+    usable = (map_position >= start - 1) & (map_position <= end + 1)
+    cigar = cigar_seq[usable]
     return ''.join(cigar)
 
 
@@ -44,6 +38,40 @@ def cigar_to_seq(cigar):
         cigarSeq += int(n)*str(s)
     return cigarSeq
 
+def calibrate_seq(cigar_seq, sequence, ref_positions):
+    """
+    making cigar seq and seq as same length
+    with Deletions as '-'
+    """
+    new_sequence = ''
+    new_pos = []
+    new_cigar = ''
+
+    acceptable_cigar = list('M')
+    seq = iter(sequence)
+    pos = iter(ref_positions)
+    for cigar in cigar_seq:
+        if cigar == 'S':
+            seq.next()
+        elif cigar == 'D':
+            new_cigar += cigar
+            new_pos.append(current_position + 1)
+            new_sequence += '-'
+        elif cigar == 'I':
+            new_cigar += cigar
+            new_pos.append(current_position)
+            current_base = seq.next()
+            new_sequence += current_base
+
+        elif cigar == 'M':
+            current_base = seq.next()
+            current_position = pos.next()
+            new_sequence += current_base
+            new_pos.append(current_position)
+            new_cigar += cigar
+    return new_cigar, new_sequence, new_pos
+
+
 def get_strand(aln):
     cDNA_reverse =  aln.is_read1 and aln.is_reverse or aln.is_read2 and not aln.is_reverse
     return '+' if cDNA_reverse else '-'
@@ -55,19 +83,25 @@ def running_mononuclotide_regions(line, bam, out):
     output_line = ''
     pos_aln_count, neg_aln_count = 0, 0
     for aln in bam.fetch(seq_id, start, end):
-        if aln.is_reverse:
+        strand = get_strand(aln)
+        if strand == '-':
             neg_aln_count += 1
         else:
             pos_aln_count += 1
         if not aln.is_unmapped and re.search('I|D', aln.cigarstring):
-            strand = get_strand(aln)
-#            cigar = keep_indel(aln.get_reference_positions(), cigar_to_seq(aln.cigarstring), start, end)
-            indel = re.findall('[ID]', aln.cigarstring)
+            cigar_seq = cigar_to_seq(aln.cigarstring)
+            cigar_seq, sequence, ref_positions = calibrate_seq(cigar_seq, aln.query_sequence, aln.get_reference_positions())
+            cigar = keep_indel(ref_positions, cigar_seq, start, end)
+            indel = re.findall('[ID]', cigar)
             indel = set(indel) # normalized read
             cigar_counter = Counter(indel)
             mono_indel_count[strand]['deletion'] += cigar_counter['D']
             mono_indel_count[strand]['insertion'] += cigar_counter['I']
     if neg_aln_count + pos_aln_count !=0:
+        #print line, neg_aln_count, pos_aln_count
+        #print mono_indel_count
+        #print cigar_seq + '\n' + sequence + '\n', ref_positions
+        #print start, end, cigar
         output_line = '{nucleotide}\t{run_len}\t'.format(nucleotide = mononucleotide, run_len = run_length) +\
                 '{fwd_insert}\t{fwd_delete}\t'.format(
                             fwd_insert = mono_indel_count['+']['insertion'],
@@ -81,7 +115,7 @@ def running_mononuclotide_regions(line, bam, out):
 
 def make_index(bam_file):
     bam = pysam.Samfile(bam_file,'rb')
-    try: 
+    try:
         bam.check_index()
         bam.close()
     except ValueError:
@@ -89,7 +123,7 @@ def make_index(bam_file):
         pysam.index(bam_file)
         print 'Indexed %s' %bam_file
     return 0
-    
+
 def analyze_bam_files(out_path, indel_table, bam_file):
     samplename = os.path.basename(bam_file).replace('.bam','')
     out_file = out_path + '/' + samplename + '.tsv'
@@ -118,11 +152,11 @@ def main():
     out_path = project_path + '/base_indel_table'
     if not os.path.isdir(out_path):
         os.mkdir(out_path)
-    bam_files = glob.glob(bam_path + '/K12*UMI*umi2id*.subsampled.bam')
+    bam_files = glob.glob(bam_path + '/K12*UMI*clustered_family*.subsampled.bam')
     bam_files = filter(lambda x: re.search('[0-9].subsampled.bam',x), bam_files)
 
     analyzing_function = partial(analyze_bam_files, out_path, indel_table)
-    p = Pool(12)
+    p = Pool(24)
     p.map(analyzing_function, bam_files)
     #map(analyzing_function, bam_files)
     p.close()
@@ -132,4 +166,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

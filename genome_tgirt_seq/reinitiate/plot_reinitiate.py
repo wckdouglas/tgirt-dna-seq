@@ -4,7 +4,7 @@ from matplotlib import use as mpl_use
 mpl_use('Agg')
 import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.stats import poisson, ks_2samp
+from scipy.stats import poisson, chisquare
 import glob
 import os
 import seaborn as sns
@@ -48,6 +48,7 @@ def plot_line(d, k, pv, figurename):
         .apply(make_cdf)
     plt.figure()
     sns.set_style('white')
+    sns.color_palette(['black','green'])
     with sns.plotting_context('paper',font_scale=1.2):
         p = sns.FacetGrid(data = d, legend_out = False,
                   hue ='samplename')
@@ -56,9 +57,9 @@ def plot_line(d, k, pv, figurename):
     plt.xlabel('cDNA counts per substrate', fontweight='bold')
     plt.ylabel('Cumulative probability', fontweight='bold')
     p.set(xticks = range(0,6), xlim=(0,5))
-    p.fig.axes[0].annotate('KS-stat: %.3f\nP-value: %.3f' %(k,pv), xy=(2,0.996))
-    #p.fig.axes[0].spines['top'].set_visible(False)
-    #p.fig.axes[0].spines['right'].set_visible(False)
+    p.fig.axes[0].annotate('$\chi^{2}$: %.3f\np-value: %.3f' %(k,pv),
+                xy=(2,0.996))
+    plt.xlim(1,5)
     plt.savefig(figurename, transparent=True)
     print 'Plotted %s' %figurename
     return 0
@@ -67,12 +68,14 @@ def plot_line(d, k, pv, figurename):
 def plot_bar(d, k, pv, figurename):
     plt.figure()
     fs=20
+    palette = sns.color_palette(['black','green'])
     ax = sns.barplot(data = d,
                      x = 'fragment_counts',
                      y = 'normalized_count',
-                     hue='samplename')
-    ax.annotate('KS-stat: %.3f\nP-value: %.3f' %(k,pv),
-                xy=(2,0.3), fontsize=fs)
+                     hue='samplename',
+                     palette=palette)
+    ax.annotate('$\chi^{2}$: %.3f\nP-value: %.3f' %(k,pv),
+                xy=(2,0.01), fontsize=fs)
     ax.legend(title= ' ', fontsize=fs, loc = (0.5,0.2))
     ax.set_xlim(-0.5,5)
     ax.spines['right'].set_visible(False)
@@ -96,8 +99,8 @@ def main():
     df = pd.concat(df, axis = 0)
     df = pd.concat([df,sim_Df],axis=0)
 
-    k, pv = ks_2samp(df[df.samplename.str.contains('kh_1')]['normalized_count'],
-               sim_Df.normalized_count)
+    k, pv = chisquare(df[df.samplename.str.contains('kh_1')]['normalized_count'].values[:3], 
+                      sim_Df.normalized_count.values[:3])
 
     d = df[df.samplename.str.contains('kh_1|sim')]\
         .assign(samplename = lambda d: map(rename, d.samplename))

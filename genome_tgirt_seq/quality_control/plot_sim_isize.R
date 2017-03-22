@@ -32,7 +32,7 @@ df <- tablenames %>%
         grepl('ligation', .$filename) ~ "5' end only",
         grepl('template', .$filename) ~ "3' end only",
         grepl('no_bias',.$filename) ~'No bias',
-        grepl('sim',.$filename) ~ 'both ends',
+        grepl('sim',.$filename) ~ 'Both ends',
         grepl('^K12',.$filename) ~'Experimental'
     )) %>%
     filter(!is.na(prep)) %>%
@@ -45,15 +45,19 @@ gg_color_hue <- function(n) {
     hcl(h = hues, l = 65, c = 100)[1:n]
 }
 
-colors <- gg_color_hue(5) 
+colors <- c('black','red','goldenrod4','springgreen4','navyblue','grey72')
+sim_types <- c("Experimental","Both ends","5' end only","3' end only","No bias")
 source('~/R/legend_to_color.R')
-sim_size_p <- ggplot(data=df, aes(x=isize,y=percentage*100, color = sim_type, group=filename)) +
+sim_size_p <- ggplot(data=df, aes(x=isize,y=percentage*100, 
+                                  color = factor(sim_type, levels=sim_types), 
+                                  group=filename)) +
     geom_line() +
-    facet_grid(prep~.) +
+    #facet_grid(prep~.) +
     theme(text = element_text(size=30,face='plain',family = 'Arial')) +
     theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
     panel_border() +
     theme(legend.key.height = unit(2,'line')) +
+    theme(legend.position = c(0.6,0.6))+
     scale_color_manual(values = colors) + 
     labs(color = ' ', x= 'Fragment size', y='Percentage of fragments') 
 sim_size_p <- ggdraw(coloring_legend_text_match(sim_size_p, colors))

@@ -23,8 +23,8 @@ datapath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/fragment_ends'
 files <- list.files(path = datapath, pattern = '.csv')
 df <- files %>%
     map(read_files) %>%
-    reduce(rbind) %>%
-    filter(grepl('UMI|NEB|sim',filename)) %>%
+    purrr::reduce(rbind) %>%
+    filter(grepl('13N_K12_sim|13N_K12_sim_ligation_only|no_bias|UMI',filename)) %>%
     filter(grepl('MarkDuplicate',filename)) %>%
     filter(grepl('sim|umi2id',filename)) %>%
     mutate(prep = case_when(
@@ -48,6 +48,7 @@ df <- files %>%
 
 
 
+colors <- c('red','green','blue','purple')
 sim_end_p <- ggplot(data = df %>% 
                 filter(!grepl('Fragmentase',prep)) %>%
                 filter(grepl('E_NEB_S6_umi2id|UMI_1_S9_umi2id|.1.MarkDuplicate',filename)))+
@@ -57,9 +58,10 @@ sim_end_p <- ggplot(data = df %>%
     labs(x = 'Position Relative to Read ends',y='Fraction of Reads',color=' ') +
     theme(text = element_text(size=30,face='plain',family = 'Arial')) +
     theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
-    theme(strip.text.y = element_text(face='bold', size=15)) +
+    theme(strip.text.y = element_text(face='bold', size=18)) +
     panel_border() +
-    theme(legend.position = 'bottom')
+    theme(legend.position = c(0.2,0.95))  +
+    scale_color_discrete(guide = guide_legend(ncol=4))
 figurename <- str_c(datapath,'/sim_frag_ends.pdf')
 source('~/R/legend_to_color.R')
 sim_end_p <- ggdraw(coloring_legend_text(sim_end_p))

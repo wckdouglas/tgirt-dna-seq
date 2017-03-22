@@ -31,28 +31,28 @@ def CTCFline(feature, half_window):
     return a bed record line
     '''
     if 'CTCF' in feature.name:
-        if feature.strand == '+':
-            start = int(feature.start) - half_window
-            end = int(feature.start) + half_window
-        else:
-            start = int(feature.end) - half_window
-            end = int(feature.end) + half_window
+        binding_site = ((feature.end) + (feature.start))/2
+        start = int(binding_site) - half_window
+        end = int(binding_site) + half_window
         if start > 0:
             assert (start < end), ' Wrongly parsed gene TSS'
-	    CTCF = Interval(chrom = feature.chrom.replace('chr',''), start= start,
-		    end = end, name = feature.name, strand = feature.strand)
+	    CTCF = Interval(chrom = feature.chrom.replace('chr',''), 
+                            start= start,
+		            end = end, 
+                            name = feature.name, 
+                            strand = feature.strand)
 	    return CTCF
 
 def makeCTCFbed(tssFile, halfTSSwindow):
-    tssBed = os.path.dirname(tssFile) + '/CTCF_regions.bed'
-    if not os.path.isfile(tssBed):
+    ctcf_bed = os.path.dirname(tssFile) + '/CTCF_regions.bed'
+    if not os.path.isfile(ctcf_bed):
         BedTool(tssFile)\
 		.each(CTCFline,half_window = halfTSSwindow)\
-		.saveas(tssBed)
-	print 'Saved and using: %s' %tssBed
+		.saveas(ctcf_bed)
+	print 'Saved and using: %s' %ctcf_bed
     else:
-        print 'Using %s ' %tssBed
-    return tssBed
+        print 'Using %s ' %ctcf_bed
+    return ctcf_bed
 
 def extractTSSaln(bam, tssBed, windowSize, wpsWindow, halfWPSwindow, upperBound, lowerBound):
     '''
@@ -142,7 +142,7 @@ def main():
     set_tempdir(resultPath)
 
     #define reference files
-    genesGTF = referencePath + '/MotifFeatures.gff'
+    featuresGTF = referencePath + '/MotifFeatures.gff'
     genome = referencePath + '/genome_rDNA.fa.fai'
 
     #define input/output files
@@ -155,7 +155,7 @@ def main():
 
     #run files
     halfTSSwindow = (windowSize-1)/2
-    ctcfBed = BedTool(makeCTCFbed(genesGTF, halfTSSwindow))
+    ctcfBed = BedTool(makeCTCFbed(featuresGTF, halfTSSwindow))
     p = Pool(threads)
     processFileFunc = partial(runFile, ctcfBed, genome, windowSize)
     wpsDF = p.map(processFileFunc, bedFiles)

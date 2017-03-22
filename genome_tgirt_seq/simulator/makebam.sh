@@ -15,7 +15,7 @@ do
 	do
 		SAMPLENAME=$(basename ${BED%.bed})
 		echo  cat $BED \
-			\| bedtools sample -n 2000000 -seed %i -i - \
+			\| bedtools sample -n 2000000 -seed $i -i - \
 			\| bedtools nuc -bed - -fi $GENOME -s -seq \
 			\| sed 1d \
 			\| awk \''{print $4,$NF}'\' OFS=\'\\t\'\

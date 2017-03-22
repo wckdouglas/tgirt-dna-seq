@@ -34,7 +34,7 @@ df <- list.files(path = indel_table_path, pattern = '.tsv', full.names = T) %>%
     select(grep('samplename|num_D|num_I|index',names(.))) %>%
     filter(grepl('^75|umi2',samplename)) %>%
     filter(grepl('nextera|UMI|kh|kq|NEB',samplename)) %>%
-    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera XT',
+    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera-XT',
                             grepl('pb',.$samplename) ~ 'Pacbio',
                             grepl('sim',.$samplename) ~ 'Covaris Sim',
                             grepl('SRR',.$samplename) ~ 'Covaris SRR',
@@ -58,11 +58,12 @@ d <- df %>%
 form <- y ~ poly(x,2)
 #form <- y ~ poly(x,1)
 source('~/R/legend_to_color.R')
-colors <- c('salmon','black','green','orange')
+colors <- c('black','salmon','green','orange')
 indel_p<-ggplot(data = df %>%
                     filter(grepl('13N|Nextera',prep)) %>%
                     mutate(prep = ifelse(grepl('13N', prep), 'TGIRT-seq',prep)) %>%
-                    filter(grepl('umi2|nex', samplename)),
+                    filter(grepl('umi2|nex', samplename)) %>%
+                    mutate(prep = factor(prep, levels = rev(unique(prep)))),
                 aes(x = indel_index, y = normalized_indel, color = prep))+
     geom_smooth(se = F,method = 'loess') +
 #    geom_smooth(se = F,formula=form, method='lm') +
@@ -80,6 +81,7 @@ indel_p<-ggplot(data = df %>%
 #    theme(legend.text = element_text(size = 25, color = colors)) +
     theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
     theme(text = element_text(size=30,face='plain',family = 'Arial')) +
+    theme(legend.text = element_text(size=25,face='plain',family = 'Arial')) +
     theme(legend.key.height = unit(2,'line')) 
 indel_p <- ggdraw(coloring_legend_text(indel_p)) 
 figure_name <- str_c(indel_table_path,'/indel_per_repeat.pdf')

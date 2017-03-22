@@ -42,18 +42,21 @@ project_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/'
 picard_path <- str_c( project_path, '/picard_results')
 figure_path <- str_c( project_path, '/figures')
 figurename <- str_c( figure_path, '/wgs_plot.pdf')
-table_names <- list.files(path = picard_path , pattern = '.subsampled.wgs.metrics')
-    
-df <- table_names %>%
-	map(read_wgs_table, picard_path) %>%
-    reduce(rbind) %>%
-    mutate(line_type = 'WGS') %>%
-#    select(-subsampled) %>%
+table_names <- list.files(path = picard_path , pattern = '.subsampled.wgs.metrics') 
+table_names <- data.frame(samplename = table_names) %>%
+    #    select(-subsampled) %>%
     filter(grepl('^75|UMI', samplename)) %>%
-#    filter(grepl('nextera|UMI|NEB|kh|kq', samplename)) %>%
+    #    filter(grepl('nextera|UMI|NEB|kh|kq', samplename)) %>%
     filter(grepl('nextera|UMI',samplename))  %>%
     filter(grepl('nextera|umi2',samplename)) %>%
-    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera~XT',
+    filter(!grepl('family',samplename)) %>%
+    tbl_df
+    
+df <- table_names$samplename %>%
+	map(read_wgs_table, picard_path) %>%
+    purrr::reduce(rbind) %>%
+    mutate(line_type = 'WGS') %>%
+    mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera-XT',
                             grepl('pb',.$samplename) ~ 'Pacbio',
                             grepl('sim',.$samplename) ~ 'Covaris Sim',
                             grepl('SRR',.$samplename) ~ 'Covaris SRR',
@@ -96,8 +99,8 @@ rsqrd_df <- plot_df %>%
 
 rsqrd <- rsqrd_df %>%
     group_by(prep) %>%
-    summarize(mean_rsqd = signif(mean(rsqrd),3),
-              sd_rsqd = signif(sd(rsqrd),3)) %>%
+    summarize(mean_rsqd = format(signif(mean(rsqrd),2)),
+              sd_rsqd = format(signif(sd(rsqrd),1))) %>%
     tbl_df
 
 plot_df <- inner_join(plot_df, rsqrd) %>%
@@ -105,7 +108,8 @@ plot_df <- inner_join(plot_df, rsqrd) %>%
     mutate(prep = ifelse(grepl('13N', prep),'TGIRT-seq', prep)) %>%
     mutate(clustered = ifelse(grepl('cluster',samplename),' Clustered','')) %>%
     mutate(prep = str_c(prep, clustered)) %>%
-    mutate(prep = str_c(prep, '~(R^{2}:', signif(mean_rsqd,3),'%+-%',signif(sd_rsqd,1),')')) %>%
+    mutate(prep = str_c(prep, '~(R^{2}:', mean_rsqd,' %+-% ',sd_rsqd,')')) %>%
+    mutate(prep = factor(prep, levels = rev(unique(prep)))) %>%
     tbl_df
 preps <- plot_df$prep %>% unique
 
@@ -125,9 +129,9 @@ wgs_p <- ggplot() +
 	theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
 	labs(x ='Level of Coverage', y = '% Genome', color =' ') +
     theme(legend.position = 'none') +
-    annotate(geom='text',x=10,y=12,label=preps[1],parse=T, 
+    annotate(geom='text',x=10,y=10.5,label=preps[1],parse=T, 
            hjust = 0, color = colors[1], size = 8) +
-    annotate(geom='text',x=10,y=11,label=preps[2],parse=T, 
+    annotate(geom='text',x=10,y=12,label=preps[2],parse=T, 
            hjust = 0, color = colors[2], size = 8) +
     geom_segment(aes(x = 14, xend = 16, y = 8, yend = 8), linetype=1,size = 1) +
     geom_segment(aes(x = 14, xend = 16, y = 7, yend = 7), linetype=2,size = 1) +

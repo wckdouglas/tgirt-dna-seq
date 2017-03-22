@@ -28,12 +28,12 @@ datapath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/fragment_ends'
 files <- list.files(path = datapath, pattern = '.csv')
 df <- files %>%
     map(read_files) %>%
-    reduce(rbind) %>%
+    purrr::reduce(rbind) %>%
     filter(!grepl('subsampled|sim|Ecoli|q5|phus|SRR',filename)) %>%
     filter(grepl('nextera|kq|kh|UMI|NEB',filename)) %>%
     filter(grepl('MarkDuplicate',filename)) %>%
     filter(grepl('nextera|clustered|umi2id',filename)) %>%
-    mutate(prep = case_when(grepl('nextera',.$filename) ~ 'Nextera XT',
+    mutate(prep = case_when(grepl('nextera',.$filename) ~ 'Nextera-XT',
                             grepl('pb',.$filename) ~ 'Pacbio',
                             grepl('sim',.$filename) ~ 'Covaris Sim',
                             grepl('SRR',.$filename) ~ 'Covaris SRR',
@@ -47,19 +47,19 @@ df <- files %>%
     mutate(bit = -log2(base_fraction)) %>%
     mutate(read_end = as.character(read_end))
 
-colors <- c('light sky blue','salmon','green4','gold2')
 end_p <- ggplot(data = df %>% 
               filter(grepl('UMI|XT',prep)) %>%
-              mutate(prep = ifelse(grepl('UMI',prep),'TGIRT-seq',prep)), 
+              mutate(prep = ifelse(grepl('UMI',prep),'TGIRT-seq',prep)) %>%
+              mutate(prep = factor(prep, level = rev(unique(prep)))), 
             aes(x = actual_positions, 
                            color = prep, 
                            group=filename, 
                            y = base_fraction)) +
     geom_line(size = 1.3, alpha=0.6) +
     facet_grid(base~read_end, scale ='free_x') +
-    labs(x = 'Position Relative to Read ends',y='Fraction of Reads',color=' ') +
+    labs(x = ' ',y='Fraction of Reads',color=' ') +
     panel_border() +
-    scale_color_manual(values = c('salmon','black'))+
+    scale_color_manual(values = c('black','salmon'))+
     theme(strip.text.x = element_text(size = 25, face='plain')) +
     theme(strip.text.y = element_text(size = 25, face='plain', angle = 0)) +
     theme(axis.title = element_text(size = 25, face='plain')) +
@@ -68,33 +68,34 @@ end_p <- ggplot(data = df %>%
     theme(legend.text = element_text(size = 18, face='plain'))+
     theme(legend.key.size=unit(8,'mm'))
 source('~/R/legend_to_color.R')
-end_p<-ggdraw(coloring_legend_text(end_p))
+end_p<-ggdraw(coloring_legend_text_match(end_p,c('black','salmon')))
 figurename <- str_c(datapath , '/end_bias_plot.pdf')
 ggsave(end_p , file = figurename, height = 8, width = 14)
 message('Plotted: ', figurename)
 
 
-colors <- c('light sky blue','salmon','green4','gold2')
-prep_end_p <- ggplot(data = df,
+pdf <- df %>% filter(prep!='Nextera-XT')
+colors <- c('khaki4','black','green4','red')
+prep_end_p <- ggplot(data = pdf,
             aes(x = actual_positions, 
                 color = prep, 
                 group=filename, 
                 y = base_fraction)) +
-  geom_line(size = 1.3, alpha=0.6) +
+  geom_line(size = 1.3, alpha=0.5) +
   facet_grid(base~read_end, scale ='free_x') +
   labs(x = 'Position relative to read ends',y='Fraction of reads',color=' ') +
   panel_border() +
   scale_color_manual(values = colors)+
-  theme(strip.text.x = element_text(size = 30, face='plain', family='Arial')) +
-  theme(strip.text.y = element_text(size = 30, face='plain', angle = 0,, family='Arial')) +
-  theme(axis.title = element_text(size = 30, face='plain', family='Arial')) +
-  theme(axis.text = element_text(size = 25, face='plain', family='Arial'))  +
-  #    theme(legend.position = c(0.65,0.45))+
-  theme(legend.text = element_text(size = 25, face='plain', family='Arial'))+
+  theme(strip.text.x = element_text(size = 25, face='plain', family='Arial')) +
+  theme(strip.text.y = element_text(size = 25, face='plain', angle = 0,, family='Arial')) +
+  theme(axis.title = element_text(size = 25, face='plain', family='Arial')) +
+  theme(axis.text = element_text(size = 18, face='plain', family='Arial'))  +
+  theme(legend.position = c(0.65,0.45))+
+  theme(legend.text = element_text(size = 18, face='plain', family='Arial'))+
   theme(legend.key.size=unit(8,'mm'))
 figurename <- str_c(datapath , '/end_bias_plot_fragmentation.pdf')
-prep_end_p<-ggdraw(coloring_legend_text(prep_end_p))
-ggsave(p , file = figurename, height = 8, width = 14)
+prep_end_p<-ggdraw(coloring_legend_text_match(prep_end_p,colors))
+ggsave(prep_end_p , file = figurename, height = 8, width = 14)
 message('Plotted: ', figurename)
 
 

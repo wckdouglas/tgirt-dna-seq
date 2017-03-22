@@ -6,13 +6,13 @@ library(cowplot)
 library(purrr)
 library(stringr)
 library(tidyr)
-
+library(extrafont)
 
 datapath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/base_indel_table'
 indel_tables <- list.files(path = datapath, 
                            pattern = '.tsv',
                            full.names = T)
-indel_tables <- indel_tables[grepl('UMI',indel_tables)]
+indel_tables <- indel_tables[grepl('clustered_fam',indel_tables)]
 
 complementary_base <- function(b){
     return (str_replace(b, 'ACTG','TGAC'))
@@ -34,6 +34,7 @@ read_file <- function(indel_table){
         mutate(indel_rate = counts/aln_count) %>%
         mutate(method = ifelse(grepl('nextera',samplename),'Nextera-XT','TGIRT-seq')) %>%
         mutate(samplename = samplename) %>%
+        filter(counts != 0) %>%
         tbl_df 
     return(df)
 }
@@ -50,9 +51,9 @@ base_indel_p<-ggplot(data = df,
            x = run_length, 
            #shape = method,
            y = indel_rate)) + 
-    geom_jitter(alpha=0.3, size=3) + 
-    facet_grid(indel~., scale='free_y')+
-    #panel_border()+
+    geom_jitter(alpha=0.8, size=1) + 
+    facet_grid(indel~mononucleotide, scale='free_y')+
+    panel_border()+
     #viridis::scale_color_viridis() +
     labs(color = ' ', x = 'Homopolymer length (nt)',
          y = 'Indel rate',
@@ -62,12 +63,13 @@ base_indel_p<-ggplot(data = df,
     theme(axis.text = element_text(size = 30, family = 'Arial'))+
     theme(legend.key.size = unit(2,'line')) +
     scale_color_manual(values=colors, 
-                       guide= guide_legend(ncol=4)) +
-    theme(legend.position = c(0.5,0.9)) +
+                       guide= guide_legend(ncol=2)) +
+    theme(legend.position = c(0.2,0.9)) +
+    theme(legend.position = 'none') +
     scale_x_continuous(breaks = 4:9, labels=4:9)
 source('~/R/legend_to_color.R')
 base_indel_p<-ggdraw(coloring_legend_text_match(base_indel_p,colors))
     
 figurename <- str_c(datapath, '/base_mononucleotide.pdf')
-ggsave(p, file =  figurename, height = 7, width = 7)
+ggsave(base_indel_p, file =  figurename, height = 7, width = 7)
 message('plotted: ', figurename)

@@ -29,16 +29,26 @@ isize_table <- bampath %>%
     filter(grepl('_umi2id',.$samplename)) %>%
   	tbl_df 
 
+median_size <- isize_table %>%
+    group_by(isize) %>% 
+    summarize(counts = sum(counts)) %>% 
+    ungroup() %>% 
+    filter(counts == max(counts)) %>%
+    .$isize
 
 isize_p <- ggplot(data = isize_table, aes(x = isize, y = counts)) +
 	geom_line(aes(color = prep, group = samplename), size=1.3) +
 	theme(text = element_text(size = 20)) +
 	theme(axis.text = element_text(size = 18)) +
-	labs(x = 'Insert Size', y = '% of fragments', color = ' ') +
+	labs(x = 'Insert Size', y = '% fragments', color = ' ') +
     theme(legend.position = 'none') +
     theme(text = element_text(size = 25, face='bold')) +
     theme(axis.text = element_text(size = 25, face='bold')) +
-    xlim(0,600)
+    xlim(0,600)+
+    geom_segment(y = 0.78,x = 200, yend = 0.73, xend = 156,
+                 arrow = arrow(length = unit(0.5, "cm"))) +
+    annotate(geom='text', x = 270, y = 0.78, label = str_c(median_size,' nt'), size = 12, fontface='bold') 
+
 figurepath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/figures'
 figurename <- str_c(figurepath, '/k12_isize.pdf')
 ggsave(isize_p, file = figurename)

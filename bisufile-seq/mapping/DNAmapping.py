@@ -44,7 +44,7 @@ def mappingProcess(samplename, trim_path, index, threads, rmdup_bam_path, bam_pa
                 '| samtools view -@ %i -b ' %(threads) +\
                 '| samtools sort -@ %i -T %s/%s -O bam' %(threads, bam_path, samplename) +\
                 '> %s/%s.bam ' %(bam_path,samplename) 
-    #runProcess(command, samplename)
+    runProcess(command, samplename)
     return '%s/%s.bam' %(bam_path, samplename)
 
 def postProcess(bamFile, samplename, rmdup_bam_path):

@@ -23,23 +23,27 @@ df <- datapath %>%
         distance = .$distance,
         nucleosome_count = .$nucleosome_count
     ))  %>%
+    ungroup() %>%
+    mutate(prep = factor(prep, level = rev(unique(prep)))) %>%
     tbl_df()
 
 dist_p <- ggplot(data = df, aes(x = distance, weight=normalized_count)) +
-    geom_density(size=1.4,alpha=0.3, aes(color = prep, fill=prep,
-                                         y=..count..))+
+    geom_density(size=1.4,alpha=0.3, linetype=1, aes(color = prep,# fill=prep,
+                                         y=..count..), show.legend =F)+
+    stat_density(aes(x=distance, color=prep, weight=normalized_count),
+                 geom="line",position="identity", size = 0) +
 #    geom_histogram(binwidth=3, alpha=0.3, 
 #                   position = 'identity',
 #                   aes(y=..count../sum(..count..)*100,
 #                   fill=prep, color = prep))+
-    labs(x = 'Distance to the nearest\nnucleosome center (bp)', y='Percentage of peaks', color=' ', fill= ' ') +
-    scale_color_manual(values =c('salmon','black')) +
-    scale_fill_manual(values =c('salmon','black')) +
+    labs(x = 'Inter-nucleosome distance for each individual(bp)', y='Percentage of peaks', color=' ', fill= ' ') +
+    scale_color_manual(values =c('black','salmon')) +
     theme(text = element_text(size=30, face='plain', family = 'Arial')) +
     theme(legend.key.height = unit(2,'line')) +
     theme(axis.text = element_text(size=30, face='plain', family = 'Arial')) +
     theme(legend.position = c(0.7, 0.5)) +
-    xlim(0,450)
+    xlim(0,450)+
+    guides(color = guide_legend(override.aes=list(size=1)))
 source('~/R/legend_to_color.R')
 dist_p <- ggdraw(coloring_legend_text(dist_p))
 figurename <- str_c(datapath, 'peak_distance.pdf',sep='/') 
