@@ -145,15 +145,17 @@ linearity <- gc_df %>%
 
 
 supplemental_df <- df %>%
-    filter(grepl('K12_UMI_[123]|no_bias|13N',samplename)) %>%
+    filter(grepl('K12_UMI_3|no_bias|13N',samplename)) %>%
     filter(grepl('[0-9]$', samplename)) %>%
-    filter(grepl('13N_K12_sim_template_switch|75bp_K12_UMI_1|13N_K12_sim|13N_K12_sim_ligation_only|no_bias',samplename)) %>%
+    filter(grepl('13N_K12_sim_template_switch|75bp_K12_UMI_3|13N_K12_sim|13N_K12_sim_ligation_only|no_bias',samplename)) %>%
+#    filter(grepl('13N_kmer_K12_sim_template_switch|75bp_K12_UMI_1|13N_kmer_K12_sim|13N_K12_sim_ligation_only|no_bias',samplename)) %>%
     mutate(prep = case_when(grepl('no_bias',.$samplename) ~ 'Simulation: No bias',
                             grepl('sim.[0-9]$',.$samplename) ~'Simulation: Reads 1 and 2 bias',
                             grepl('^fragmentase',.$samplename) ~ 'Simulation: Template switching/Fragmentase bias only',
                             grepl('sim_template_switch',.$samplename) ~ 'Simulation: Template switching',#/Covaris bias only',
-                            grepl('ligation',.$samplename) ~ 'Simulation: Ligation bias only')) %>%
-    mutate(prep = ifelse(is.na(prep),'Experimental',prep)) %>%
+                            grepl('ligation',.$samplename) ~ 'Simulation: Ligation bias only',
+                            TRUE ~ 'Experimental')) %>%
+#    filter(!grepl('13N_K12_sim_template_switch|13N_K12_sim.[0-9]',samplename)) %>%
     mutate(prep = str_replace(prep,'Simulation: ',''))
 
 supplement_df <- supplemental_df %>% 
@@ -166,7 +168,7 @@ supplement_df <- supplemental_df %>%
     tbl_df
 
 rmse_df <- supplement_df %>% 
-    filter(GC <= 80, GC>=12) %>% 
+    #filter(GC <= 80, GC>=12) %>% 
     group_by(prep) %>% 
     summarize(rmse = sqrt(mean((experiment-NORMALIZED_COVERAGE)^2))) %>%
     ungroup() %>%

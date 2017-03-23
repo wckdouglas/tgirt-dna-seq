@@ -73,3 +73,16 @@ figurename <- str_c(datapath, '/insertion_bases.pdf')
 ggsave(p, file =  figurename, height = 10, width = 20)
 message('plotted: ', figurename)
 
+uniqchars <- function(x) unique(strsplit(x, "")[[1]]) 
+indel_base_df %>% 
+    filter(indel=='insertions') %>% 
+    group_by(mononucleotide,patterns) %>% 
+    summarize(freq = sum(freq)) %>%
+    ungroup() %>%
+    group_by(mononucleotide) %>%
+    do(data_frame(
+        fraction = .$freq/sum(.$freq),
+        freq = .$freq,
+        patterns = .$patterns
+    )) %>%
+    filter(mononucleotide==patterns)

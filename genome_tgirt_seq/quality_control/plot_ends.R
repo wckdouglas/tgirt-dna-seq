@@ -56,6 +56,7 @@ end_p <- ggplot(data = df %>%
                            group=filename, 
                            y = base_fraction)) +
     geom_line(size = 1.3, alpha=0.6) +
+    geom_vline(aes(xintercept = actual_positions), linetype=2, alpha=0.3, color = 'grey') +    
     facet_grid(base~read_end, scale ='free_x') +
     labs(x = ' ',y='Fraction of Reads',color=' ') +
     panel_border() +
@@ -82,6 +83,7 @@ prep_end_p <- ggplot(data = pdf,
                 group=filename, 
                 y = base_fraction)) +
   geom_line(size = 1.3, alpha=0.5) +
+  geom_vline(aes(xintercept = actual_positions), linetype=2, alpha=0.3, color = 'grey') +    
   facet_grid(base~read_end, scale ='free_x') +
   labs(x = 'Position relative to read ends',y='Fraction of reads',color=' ') +
   panel_border() +
@@ -135,6 +137,7 @@ en_p <- ggplot(data = bit_df, aes(x = actual_positions, y = entropy,
     theme(axis.title = element_text(size = 25)) +
     theme(axis.text = element_text(size = 25))  +
     theme(legend.position = c(0.65,0.45))+
+    geom_vline(aes(xintercept = actual_positions), linetype=2, alpha=0.3, color = 'grey') +    
 #    theme(legend.text = element_text(size = 125, face='plain'))+
     theme(legend.key.size=unit(8,'mm'))+
     ylim(0,2)

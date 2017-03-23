@@ -25,6 +25,7 @@ df <- files %>%
     map(read_files) %>%
     purrr::reduce(rbind) %>%
     filter(grepl('13N_K12_sim|13N_K12_sim_ligation_only|no_bias|UMI',filename)) %>%
+    #filter(grepl('13N_kmer_K12_sim|13N_K12_sim_ligation_only|no_bias|UMI',filename)) %>%
     filter(grepl('MarkDuplicate',filename)) %>%
     filter(grepl('sim|umi2id',filename)) %>%
     mutate(prep = case_when(

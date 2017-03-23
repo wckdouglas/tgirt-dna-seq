@@ -28,8 +28,8 @@ def rename(x):
 
 def make_simulation_data():
     sim = pd.DataFrame({
-            'counts':[1264781, 3120, 12],
-            'fragment_counts':[1 ,2, 3]
+            'counts':[18511210, 132626, 2130, 51],
+            'fragment_counts':[1 ,2, 3,4]
             }) \
         .append(padding) \
         .assign(normalized_count = lambda s: s['counts']/np.sum(s['counts'])) \
@@ -99,10 +99,10 @@ def main():
     df = pd.concat(df, axis = 0)
     df = pd.concat([df,sim_Df],axis=0)
 
-    k, pv = chisquare(df[df.samplename.str.contains('kh_1')]['normalized_count'].values[:3], 
+    k, pv = chisquare(df[df.samplename.str.contains('UMI_1')]['normalized_count'].values[:3], 
                       sim_Df.normalized_count.values[:3])
 
-    d = df[df.samplename.str.contains('kh_1|sim')]\
+    d = df[df.samplename.str.contains('UMI_1|sim')]\
         .assign(samplename = lambda d: map(rename, d.samplename))
 
     plot_line(d, k, pv, figurename)

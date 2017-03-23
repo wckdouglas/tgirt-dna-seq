@@ -20,7 +20,7 @@ nucleo_p <- ggplot(data = df, aes(x = distance, weights=count/10000)) +
     theme(text = element_text(size=30, family='Arial', face='plain')) +
     theme(axis.text.x = element_text(size=30,face='plain', family='Arial',angle=50, hjust=0.5, vjust=0.5)) +
     theme(axis.text.y = element_text(size=30,face='plain', family='Arial')) +
-    labs(x = 'Inter-nucleosome distance for\ndifferent maile individual\n[TGIRT-seq and ssDNA-seq]', 
+    labs(x = 'Inter-nucleosome distance for\ndifferent male individual\n[TGIRT-seq and ssDNA-seq] (bp)', 
          y = 'Peak count') 
 label <- expression(paste('x10'^{4}))
 nucleo_p <- ggdraw(nucleo_p) +

@@ -40,7 +40,7 @@ isize_p <- ggplot(data = isize_table, aes(x = isize, y = counts)) +
 	geom_line(aes(color = prep, group = samplename), size=1.3) +
 	theme(text = element_text(size = 20)) +
 	theme(axis.text = element_text(size = 18)) +
-	labs(x = 'Insert Size', y = '% fragments', color = ' ') +
+	labs(x = 'Insert Size (nt)', y = '% fragments', color = ' ') +
     theme(legend.position = 'none') +
     theme(text = element_text(size = 25, face='bold')) +
     theme(axis.text = element_text(size = 25, face='bold')) +

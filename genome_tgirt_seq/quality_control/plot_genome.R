@@ -61,7 +61,7 @@ p<-ggdraw()+
     draw_plot(end_p, 
               0, 0.66, 1, 0.33) +
     draw_plot(prep_end_p, 0, 0.33, 1, 0.33) +
-    draw_plot(small_en_p, 0, 0, 0.5, 0.33) +
+    draw_plot(small_en_p, 0, 0, 0.54, 0.33) +
     draw_plot_label(letters[1:3],c(0,0,0),c(1,0.66,0.33), size =40, family='Arial') 
 figurename <- str_c(figurepath, '/genome_supplemental_2.pdf')
 ggsave(p, file = figurename, width = 20, height = 20)
