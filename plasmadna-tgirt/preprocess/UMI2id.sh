@@ -3,7 +3,7 @@
 PROJECT_PATH=/scratch/02727/cdw2854/plasmaDNA
 FASTQ_PATH=${PROJECT_PATH}/rawData
 OUTPATH=${FASTQ_PATH}/umi2id
-PROGRAM_PATH=/home1/02727/cdw2854/TGIRT_UMI
+PROGRAM_PATH=/home1/02727/cdw2854/TGIRT_UMI/preproces_fastq
 PYTHON=$(which python)
 mkdir -p ${OUTPATH}
 
