@@ -101,7 +101,7 @@ index_annotation <- gini_df %>%
         sd_gini=sd(gini)
     ) %>%
     ungroup() %>%
-    mutate(annotation = str_c('Gini: ', signif(mean_gini,2),'±',signif(sd_gini,1))) %>%
+    mutate(annotation = str_c('Gini: ', signif(mean_gini,2),' ± ',signif(sd_gini,1))) %>%
     select(prep, annotation) %>%
     tbl_df
 
@@ -125,7 +125,7 @@ gc_p <- plot_gc(gc_df) +
 figurename <- str_c(figure_path, '/gc_plot.pdf')
 source('~/R/legend_to_color.R')
 gc_p<-ggdraw(coloring_legend_text_match(gc_p,colors)) +
-  annotate('text', x=0.2, y = 0.39, 
+  annotate('text', x=0.23, y = 0.41, 
            label = 'No bias', size = 7)
 ggsave(gc_p, file = figurename , height = 7, width = 9)
 message('Plotted: ', figurename)
@@ -239,7 +239,7 @@ lonrenz_df_annotation <- lonrenz_df %>%
         sd_gini=sd(gini)
     ) %>%
     ungroup() %>%
-    mutate(annotation = str_c('Gini: ', signif(mean_gini,2),'±',signif(sd_gini,1))) %>%
+    mutate(annotation = str_c('Gini: ', signif(mean_gini,2),' ± ',signif(sd_gini,1))) %>%
     select(prep, annotation) %>%
     tbl_df 
 lonrenz_df <- lonrenz_df %>% 

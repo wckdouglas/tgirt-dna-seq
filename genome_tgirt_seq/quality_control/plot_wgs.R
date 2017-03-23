@@ -108,7 +108,7 @@ plot_df <- inner_join(plot_df, rsqrd) %>%
     mutate(prep = ifelse(grepl('13N', prep),'TGIRT-seq', prep)) %>%
     mutate(clustered = ifelse(grepl('cluster',samplename),' Clustered','')) %>%
     mutate(prep = str_c(prep, clustered)) %>%
-    mutate(prep = str_c(prep, '~(R^{2}:', mean_rsqd,' %+-% ',sd_rsqd,')')) %>%
+    mutate(prep = str_c(prep, '~(R^{2}:~', mean_rsqd,'%+-%','~',sd_rsqd,')')) %>%
     mutate(prep = factor(prep, levels = rev(unique(prep)))) %>%
     tbl_df
 preps <- plot_df$prep %>% unique
@@ -133,48 +133,9 @@ wgs_p <- ggplot() +
            hjust = 0, color = colors[1], size = 8) +
     annotate(geom='text',x=10,y=12,label=preps[2],parse=T, 
            hjust = 0, color = colors[2], size = 8) +
-    geom_segment(aes(x = 14, xend = 16, y = 8, yend = 8), linetype=1,size = 1) +
-    geom_segment(aes(x = 14, xend = 16, y = 7, yend = 7), linetype=2,size = 1) +
+    annotate(geom='segment',x = 14, xend = 16, y = 8, yend = 8, linetype=1,size = 1) +
+    annotate(geom='segment',x = 14, xend = 16, y = 7, yend = 7, linetype=2,size = 1) +
     annotate(geom='text', x = 17, y = 8, label = 'Experimental', size = 8, hjust =0, family='Arial') +
     annotate(geom='text', x = 17, y = 7, label = 'Theoretical (Poisson)', size = 8, hjust=0, family='Arial')
 ggsave(wgs_p, file = figurename, height=8,width=9)
 message('Plotted: ', figurename)
-
-
-# rsqrd_p <- ggplot(data = rsqrd_df, aes(x = prep, y = rsqrd, 
-#                                        color = prep)) +
-#     geom_boxplot(size=2) +
-#     labs(x = ' ', y=expression(R^{2}),parse=T) +
-#     theme(legend.position = 'none') +
-#     theme(axis.text.y = element_text(face='bold',size = 20))+
-#     theme(text = element_text(size = 18)) +
-#     theme(axis.text = element_text(size = 18)) +
-#     theme(axis.ticks.y = element_blank()) +
-#     theme(axis.text.x = element_text(size = 18, angle = 60, hjust = 1, vjust =1)) +
-#     coord_flip()
-# 
-# model_df <- plot_df %>% 
-#     spread(line_type, density) %>% 
-#     set_names(c('samplename','prep','coverage','wgs','model')) %>% 
-#     filter(!is.na(model))  %>%
-#     group_by(samplename, prep) %>%
-#     nest() %>%
-#     mutate(lm_model = map(data, ~lm(wgs~model, data = .))) %>%
-#     mutate(anova_test = map(lm_model, anova)) %>%
-#     mutate(summary_stat = map(anova_test, tidy))  %>%
-#     unnest(summary_stat)  %>%
-#     filter(term == 'Residuals') 
-# 
-# residual_p <- ggplot(data = model_df, aes(x = prep, y = sumsq, 
-#                                        color = prep)) +
-#     geom_boxplot(size=2) +
-#     labs(x = ' ', y='Residual Sum of Squares') +
-#     theme(legend.position = 'none') +
-#     theme(axis.text.y = element_text(face='bold',size = 20))+
-#     theme(text = element_text(size = 18)) +
-#     theme(axis.text = element_text(size = 18)) +
-#     theme(axis.ticks.y = element_blank()) +
-#     theme(axis.text.x = element_text(size = 18, angle = 60, hjust = 1, vjust =1)) +
-#     coord_flip()
-
-   

@@ -3,8 +3,11 @@
 library(rtracklayer)
 library(ggbio)
 library(readr)
+library(dplyr)
+library(cowplot)
 
 #make genome chromosome ranges
+source('/stor/home/cdw2854/tgirt-dna-seq/bisufile-seq/tissue_mapping/tissue_map.R')
 genome <- '/stor/work/Lambowitz/ref/hg19/Sequence/WholeGenomeFasta/hg19.genome' %>%
     read_tsv(col_names = c('seqname','seqlength')) %>%
     filter(!seqname %in% c('chrM','chrX','chrY')) %>%
@@ -23,26 +26,35 @@ seqlevels(mbg) <- genome$seqname
 
 # read methylation sites
 methyl_marker_table <- '/stor/work/Lambowitz/ref/hg19/methylation/methyl_table.bed'
-tl<-qdf$tissue_type %>% levels
+tl<-qdf$tissue_type 
+marker_II <- 'Type II biomarkers'
+tl <- c(as.vector(tl),marker_II)
 marker_annotation <- read_tsv(methyl_marker_table,
                               col_names=c('chrom','start','end','genome_coord','tissues'))  %>%
+    filter(tissues!='none') %>%
     mutate(tissue_type = case_when(
             grepl('B.cells|T.cells',.$tissues) ~ "Lymphocytes",
             grepl('Lung',.$tissues) ~'Lungs',
+            .$tissues=='none' ~marker_II,
             TRUE~str_replace(.$tissues,'\\.',' ')
         )) %>%
-    mutate(tissue_type = factor(tissue_type, level = tl))
+    mutate(tissue_alpha = case_when(
+            .$tissues=='none' ~0.1,
+            TRUE~1
+        )) %>%
+    mutate(tissue_type = factor(tissue_type, level = tl)) %>%
+    arrange(rev(tissue_type)) %>%
     tbl_df
 methyl_marker <- GRanges(marker_annotation$genome_coord)
-mcols(methyl_marker) <- marker_annotation %>% select(tissues, tissue_type)
+mcols(methyl_marker) <- marker_annotation %>% 
+    select(tissues, tissue_type, tissue_alpha)
 seqlevels(methyl_marker) <- genome$seqname
 seqinfo(methyl_marker) <- seqinfo(hg19_genome)
 
 
-colors <- RColorBrewer::brewer.pal(12,'Paired')
-colors <- c(colors, 'black')
 p <- ggbio() + 
-    circle(methyl_marker, geom='rect', aes(color=tissue_type,fill=tissue_type)) + # add tissue annotation
+    circle(methyl_marker, geom='rect', aes(color=tissue_type,fill=tissue_type, alpha=tissue_alpha)) + # add tissue annotation
+    scale_alpha_continuous(guide=F) +
     scale_fill_manual(values=colors) +
     scale_color_manual(values=colors) +
     circle(mbg, geom='bar', aes(y = score), color = 'rosybrown') + # add methylation density bar
@@ -50,12 +62,12 @@ p <- ggbio() +
     circle(hg19_genome, geom = "scale", size = 6) + # add base pair length scale
     circle(hg19_genome, geom = "text", aes(label = seqnames), vjust = -1, size = 10) + # add chrome name 
     labs(color=' ', fill= ' ') +
-    theme(legend.text = element_text(size=25)) +
+    theme(legend.text = element_text(size=25, family='Arial')) +
     theme(legend.key.height = unit(1.5,'line')) +
     theme(legend.position = c(0.5,0.5))
 figurepath <- '/stor/work/Lambowitz/cdw2854/bisufite_seq/figures'
 figurename <- str_c(figurepath, '/methyl_genome_cicular.pdf')
-pdf(figurename, height=15, width=15)
+pdf(figurename, height=13, width=13)
 p
 dev.off()
 message('Plotted: ', figurename)

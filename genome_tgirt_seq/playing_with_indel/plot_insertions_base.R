@@ -85,4 +85,4 @@ indel_base_df %>%
         freq = .$freq,
         patterns = .$patterns
     )) %>%
-    filter(mononucleotide==patterns)
+    filter(mononucleotide==patterns | patterns == str_c(mononucleotide,mononucleotide))

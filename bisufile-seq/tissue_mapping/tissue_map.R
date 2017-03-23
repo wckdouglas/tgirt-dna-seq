@@ -19,8 +19,8 @@ solveQP <- function(Xmat, Y){
     return(solution$solution)
 }
 
-tissue_ref_table <- '/stor/work/Lambowitz/ref/hg19/methylation/pnas.1508736112.sd01.xlsx' %>% 
-    readxl::read_excel(sheet = 1) %>%
+tissue_ref_table <- '/stor/work/Lambowitz/ref/hg19/methylation/methyl_tissue_table.tsv' %>% 
+    read_tsv()%>%
     set_names(make.names(names(.))) %>%
     tbl_df
 
@@ -28,9 +28,9 @@ df <- '/stor/work/Lambowitz/cdw2854/bisufite_seq/tissue_table/P13B_mix_S1_CpG.me
     read_tsv(col_names = c('chrom','start','end','methyl_density')) %>%
     mutate(Genomic.location = str_c(chrom,':',start,'-',end)) %>%
     inner_join(tissue_ref_table, by = c("Genomic.location"))  %>%
-    select(-chrom,-start,-end,-Placenta)
+    select(-chrom,-start,-end,-Placenta,-Mean)
 
-dm <- select(df,1,4:16) %>%
+dm <- select(df,1,3:15) %>%
     data.matrix()
 
 result <- solveQP(dm[,-1], dm[,1])
@@ -46,22 +46,25 @@ qdf <- data_frame(tissues = colnames(dm[,-1]),
     arrange(tissue_type) %>%
     mutate(pos = 1 - cumsum(fraction) + fraction/2)  
 
-colors <- RColorBrewer::brewer.pal(12,'Paired')
-colors <- c(colors, 'black')
+colors <- c('lightgoldenrod2','khaki1','purple4','orange','brown','darkgrey','pink',
+            'darkgreen','slateblue','red','skyblue','darkblue')
 pie_methyl <- ggplot(data=qdf, aes(x = factor(1),y=fraction, fill=tissue_type))+
     geom_bar(stat='identity')+
-    geom_text(data = qdf %>% filter(fraction > 0.05), aes(x= factor(1), y=pos, label = tissue_type), size=5) +
+    geom_text(data = qdf %>% filter(fraction > 0.1), aes(x= factor(1), y=pos, label = tissue_type), size=5) +
     theme(axis.text.x = element_text(angle=0)) +
     coord_polar(theta = "y")  +
     scale_fill_manual(values=colors) +
     labs(x = ' ',y = ' ', fill=' ')+
     theme_void() +
-    theme(legend.text = element_text(size=15)) +
+    theme(legend.text = element_text(size=13, family='Arial')) +
     theme(legend.key.height  = unit(1,'line'))  +
     theme(legend.position = c(1.1,0.5))
+p<-ggdraw() +
+    draw_plot(pie_methyl, 0, 0, 0.6, 0.6)+
+    draw_plot_label(letters[1:2], c(0,0),c(1,0.45), size=25)
 figurepath <- '/stor/work/Lambowitz/cdw2854/bisufite_seq/figures'
 figurename <- str_c(figurepath, '/methyl_pie.pdf')
-ggsave(pie_methyl, file = figurename)
+ggsave(p, file = figurename, width = 7, height=12)
 message('Plotted: ', figurename)
 
     

@@ -63,12 +63,12 @@ wps_p <- ggdraw() +
 
 message('Start plotting')
 p <- ggdraw() + 
-    draw_plot(insert_p_merge, 0.02,0.4,0.48,0.58) +
-    draw_plot(wps_p, 0.5,0.4,0.48,0.58)  +
+    draw_plot(insert_p_merge, 0.02,0.42,0.48,0.56) +
+    draw_plot(wps_p, 0.5,0.42,0.48,0.56)  +
     draw_plot(dinucleotide_p, 0, 0, 1, 0.38)  +
     draw_plot_label(letters[1:3],
                     x = c(0,0.5,0), 
-                    y =c(1,1,0.4), 
+                    y =c(1,1,0.42), 
                     size=50,family = 'Arial') 
 
 figure_path <- str_c(project_path,'/figures')
