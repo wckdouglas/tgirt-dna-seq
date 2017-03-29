@@ -5,6 +5,8 @@ library(ggbio)
 library(readr)
 library(dplyr)
 library(cowplot)
+library("extrafont")
+loadfonts() 
 
 #make genome chromosome ranges
 source('/stor/home/cdw2854/tgirt-dna-seq/bisufile-seq/tissue_mapping/tissue_map.R')
@@ -19,7 +21,7 @@ genome(hg19_genome) <- 'hg19'
 
 
 #read annotated data binned to 500bp and extracted from markers 
-bed_graph_methyl <- '/stor/work/Lambowitz/cdw2854/bisufite_seq/tissue_table/P13B_mix_S1_CpG.meth.bedGraph'
+bed_graph_methyl <- '/stor/work/Lambowitz/cdw2854/bisufite_seq/tissue_table/P13B_mix_S1_CpG.bedGraph'
 mbg<-import(bed_graph_methyl, format='bedGraph', genome='hg19')
 seqlevels(mbg) <- genome$seqname
 
@@ -31,7 +33,7 @@ marker_II <- 'Type II biomarkers'
 tl <- c(as.vector(tl),marker_II)
 marker_annotation <- read_tsv(methyl_marker_table,
                               col_names=c('chrom','start','end','genome_coord','tissues'))  %>%
-    filter(tissues!='none') %>%
+    #filter(tissues!='none') %>%
     mutate(tissue_type = case_when(
             grepl('B.cells|T.cells',.$tissues) ~ "Lymphocytes",
             grepl('Lung',.$tissues) ~'Lungs',
@@ -53,7 +55,11 @@ seqinfo(methyl_marker) <- seqinfo(hg19_genome)
 
 
 p <- ggbio() + 
-    circle(methyl_marker, geom='rect', aes(color=tissue_type,fill=tissue_type, alpha=tissue_alpha)) + # add tissue annotation
+    circle(methyl_marker[mcols(methyl_marker)$tissue_type=='Type II biomarkers'], 
+           geom='rect', color='grey72',fill='grey72') + # add tissue annotation
+    circle( methyl_marker[mcols(methyl_marker)$tissue_type!='Type II biomarkers'], 
+            geom='rect', 
+            aes(color=tissue_type,fill=tissue_type, alpha=tissue_alpha)) + # add tissue annotation
     scale_alpha_continuous(guide=F) +
     scale_fill_manual(values=colors) +
     scale_color_manual(values=colors) +

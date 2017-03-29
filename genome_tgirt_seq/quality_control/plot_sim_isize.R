@@ -19,6 +19,7 @@ tablenames <- list.files(path = data_path,
            pattern = '.tsv',
            full.names = T)
 
+simulation_annotation <- c('Experimental',"5' and 3' bias","5' bias","3' bias","No bias")
 df <- tablenames %>%
     map_df(read_file)  %>%
     filter(grepl('UMI|NEB|sim',filename)) %>%
@@ -29,11 +30,11 @@ df <- tablenames %>%
         grepl('fragmentase|NEB',.$filename) ~ 'Fragmentase'
     )) %>%
     mutate(sim_type = case_when(
-        grepl('ligation', .$filename) ~ "5' end only",
-        grepl('template', .$filename) ~ "3' end only",
-        grepl('no_bias',.$filename) ~'No bias',
-        grepl('sim',.$filename) ~ 'Both ends',
-        grepl('^K12',.$filename) ~'Experimental'
+        grepl('ligation', .$filename) ~ simulation_annotation[3],
+        grepl('template', .$filename) ~ simulation_annotation[4],
+        grepl('no_bias',.$filename) ~ simulation_annotation[5],
+        grepl('sim',.$filename) ~ simulation_annotation[2],
+        grepl('^K12',.$filename) ~ simulation_annotation[1]
     )) %>%
     filter(!is.na(prep)) %>%
     mutate(prep = ifelse(sim_type=='No bias', 'No bias', prep)) %>%
@@ -46,10 +47,9 @@ gg_color_hue <- function(n) {
 }
 
 colors <- c('black','red','goldenrod4','springgreen4','navyblue','grey72')
-sim_types <- c("Experimental","Both ends","5' end only","3' end only","No bias")
 source('~/R/legend_to_color.R')
 sim_size_p <- ggplot(data=df, aes(x=isize,y=percentage*100, 
-                                  color = factor(sim_type, levels=sim_types), 
+                                  color = factor(sim_type, levels=simulation_annotation), 
                                   group=filename)) +
     geom_line() +
     #facet_grid(prep~.) +

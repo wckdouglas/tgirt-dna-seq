@@ -24,7 +24,7 @@ tissue_ref_table <- '/stor/work/Lambowitz/ref/hg19/methylation/methyl_tissue_tab
     set_names(make.names(names(.))) %>%
     tbl_df
 
-df <- '/stor/work/Lambowitz/cdw2854/bisufite_seq/tissue_table/P13B_mix_S1_CpG.meth.bedGraph' %>%
+df <- '/stor/work/Lambowitz/cdw2854/bisufite_seq/tissue_table/P13B_mix_S1_CpG.bedGraph' %>%
     read_tsv(col_names = c('chrom','start','end','methyl_density')) %>%
     mutate(Genomic.location = str_c(chrom,':',start,'-',end)) %>%
     inner_join(tissue_ref_table, by = c("Genomic.location"))  %>%
@@ -42,13 +42,15 @@ qdf <- data_frame(tissues = colnames(dm[,-1]),
     )) %>%
     group_by(tissue_type) %>%
     summarize(fraction = sum(fraction)) %>%
+    mutate(tissue_type_annot = str_c(tissue_type,': ', signif(fraction*100,2),'%')) %>%
+    mutate(tissue_type_annot = fct_reorder(tissue_type_annot, -fraction)) %>%
     mutate(tissue_type = fct_reorder(tissue_type, -fraction)) %>%
-    arrange(tissue_type) %>%
+    arrange(tissue_type_annot) %>%
     mutate(pos = 1 - cumsum(fraction) + fraction/2)  
 
-colors <- c('lightgoldenrod2','khaki1','purple4','orange','brown','darkgrey','pink',
+colors <- c('lightgoldenrod2','khaki1','purple4','orange','brown','mediumseagreen','pink',
             'darkgreen','slateblue','red','skyblue','darkblue')
-pie_methyl <- ggplot(data=qdf, aes(x = factor(1),y=fraction, fill=tissue_type))+
+pie_methyl <- ggplot(data=qdf, aes(x = factor(1),y=fraction, fill=tissue_type_annot))+
     geom_bar(stat='identity')+
     geom_text(data = qdf %>% filter(fraction > 0.1), aes(x= factor(1), y=pos, label = tissue_type), size=5) +
     theme(axis.text.x = element_text(angle=0)) +
@@ -58,7 +60,7 @@ pie_methyl <- ggplot(data=qdf, aes(x = factor(1),y=fraction, fill=tissue_type))+
     theme_void() +
     theme(legend.text = element_text(size=13, family='Arial')) +
     theme(legend.key.height  = unit(1,'line'))  +
-    theme(legend.position = c(1.1,0.5))
+    theme(legend.position = c(1.3,0.5))
 p<-ggdraw() +
     draw_plot(pie_methyl, 0, 0, 0.6, 0.6)+
     draw_plot_label(letters[1:2], c(0,0),c(1,0.45), size=25)

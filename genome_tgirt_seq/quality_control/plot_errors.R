@@ -141,8 +141,8 @@ error_p <- ggplot(data = plot_df,
     panel_border() +
     theme(panel.border = element_rect(colour = "black", fill=NA, size=1))+ 
     facet_grid(var~data_label, scale = 'free_y')  
-label1 <- expression(paste('x10'^{'-5'}))
-label2 <- expression(paste('x10'^{'-3'}))
+label1 <- expression(paste('x10'^{'-3'}))
+label2 <- expression(paste('x10'^{'-5'}))
 source('~/R/legend_to_color.R')
 error_fig <- ggdraw(coloring_legend_text_match(error_p, colors)) +
     theme(plot.margin = grid::unit(c(0,0,5,0),'mm')) +

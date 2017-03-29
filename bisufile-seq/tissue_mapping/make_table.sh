@@ -1,7 +1,7 @@
 #!/bin/bash
 
 REF_TABLE=$REF/hg19/methylation/methyl_table.bed
-SAMPLE_TABLE=$WORK/cdw2854/bisufite_seq/methyl_calling/P13B_mix_S1_CpG.meth.bedGraph
+SAMPLE_TABLE=$WORK/cdw2854/bisufite_seq/methyl_calling/filtered/P13B_mix_S1_CpG.bedGraph
 OUT_PATH=$WORK/cdw2854/bisufite_seq/tissue_table
 OUT_TABLE=$OUT_PATH/$(basename ${SAMPLE_TABLE%.bedGraph}.bedGraph)
 mkdir -p $OUT_PATH

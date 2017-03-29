@@ -81,7 +81,7 @@ def main(args):
     map(makedir,[trim_path, bam_path, rmdup_bam_path])
 
     ####triming sequences
-    #trim = trimming(fq1, threads, trim_path, samplename,  adaptor)
+    trim = trimming(fq1, threads, trim_path, samplename,  adaptor)
     #map
     bamFile = mappingProcess(samplename, trim_path, index, threads, rmdup_bam_path, bam_path)
     ok = postProcess(bamFile, samplename, rmdup_bam_path)

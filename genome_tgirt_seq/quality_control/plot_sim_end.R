@@ -20,6 +20,7 @@ read_files <- function(filename){
 }
 
 datapath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/fragment_ends'
+simulation_annotation <- c('Experimental',"5' and 3' bias","5' bias","3' bias","No bias")
 files <- list.files(path = datapath, pattern = '.csv')
 df <- files %>%
     map(read_files) %>%
@@ -33,12 +34,13 @@ df <- files %>%
                         grepl('fragmentase|NEB',.$filename) ~ 'Fragmentase'
                         )) %>%
     mutate(sim_type = case_when(
-                        grepl('ligation', .$filename) ~ "5' end only",
-                        grepl('template', .$filename) ~ "3' end only",
-                        grepl('no_bias',.$filename) ~'No bias',
-                        grepl('sim',.$filename) ~ 'Both ends',
-                        grepl('^K12',.$filename) ~'Experimental'
+                        grepl('ligation', .$filename) ~ simulation_annotation[3],
+                        grepl('template', .$filename) ~ simulation_annotation[4],
+                        grepl('no_bias',.$filename) ~ simulation_annotation[5],
+                        grepl('sim',.$filename) ~ simulation_annotation[2],
+                        grepl('^K12',.$filename) ~ simulation_annotation[1]
                         )) %>%
+    mutate(sim_type = factor(sim_type, levels = simulation_annotation )) %>%
     filter(!is.na(prep)) %>%
     mutate(prep = ifelse(sim_type=='No bias', ' ', prep)) %>%
     mutate(read_end = ifelse(read_end == "5'", 'Read 1', 'Read 2')) %>%
@@ -59,7 +61,7 @@ sim_end_p <- ggplot(data = df %>%
     labs(x = 'Position Relative to Read ends',y='Fraction of Reads',color=' ') +
     theme(text = element_text(size=30,face='plain',family = 'Arial')) +
     theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
-    theme(strip.text.y = element_text(face='bold', size=18)) +
+    theme(strip.text.y = element_text(face='plain',family='Arial', size=30)) +
     panel_border() +
     theme(legend.position = c(0.2,0.95))  +
     scale_color_discrete(guide = guide_legend(ncol=4))
@@ -68,26 +70,3 @@ source('~/R/legend_to_color.R')
 sim_end_p <- ggdraw(coloring_legend_text(sim_end_p))
 ggsave(sim_end_p, file=figurename, height = 13, width = 7)
 message('Plotted: ', figurename)
-
-ddf <- df %>% 
-    filter(grepl('E_NEB_S6_umi2id|UMI_1_S9_umi2id|.2.MarkDuplicate',filename)) %>%
-    filter(grepl('sim.2|umi2id', filename)) %>% 
-    mutate(sim_type = ifelse(grepl('Both',sim_type),'Simulation','Experimental')) %>%
-    select(sim_type, base_fraction, positions, read_end,base, prep) %>%
-    group_by(sim_type, positions, read_end, prep) %>%
-#    summarize(bit = -sum(base_fraction * log2(base_fraction))) %>%
-#    spread(sim_type, bit) %>%
-    spread(sim_type, base_fraction) %>%
-    mutate(residual =  -(Experimental - Simulation) )
-
-dp <- ggplot(data = ddf, aes(x = positions, y = residual, color = base)) +
-    geom_line() +
-    geom_hline(yintercept = 0, color = 'grey', alpha=0.7, linetype='dashed')+
-    facet_grid(prep~read_end, scale='free_x') +
-    labs(y = 'Residual\n(Simulation - Experimental)', x='Position relative to read ends (nt)', color = ' ') +
-    panel_border() +
-    theme(axis.text = element_text(size = 25, face= 'bold')) +
-    theme(axis.title = element_text(size = 25, face= 'bold')) +
-    theme(strip.text = element_text(size = 25, face= 'bold'))
-    
-

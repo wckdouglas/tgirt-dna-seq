@@ -150,10 +150,10 @@ supplemental_df <- df %>%
     filter(grepl('13N_K12_sim_template_switch|75bp_K12_UMI_3|13N_K12_sim|13N_K12_sim_ligation_only|no_bias',samplename)) %>%
 #    filter(grepl('13N_kmer_K12_sim_template_switch|75bp_K12_UMI_1|13N_kmer_K12_sim|13N_K12_sim_ligation_only|no_bias',samplename)) %>%
     mutate(prep = case_when(grepl('no_bias',.$samplename) ~ 'Simulation: No bias',
-                            grepl('sim.[0-9]$',.$samplename) ~'Simulation: Reads 1 and 2 bias',
-                            grepl('^fragmentase',.$samplename) ~ 'Simulation: Template switching/Fragmentase bias only',
-                            grepl('sim_template_switch',.$samplename) ~ 'Simulation: Template switching',#/Covaris bias only',
-                            grepl('ligation',.$samplename) ~ 'Simulation: Ligation bias only',
+                            grepl('sim.[0-9]$',.$samplename) ~"Simulation: 5' and 3' bias",
+                            grepl('^fragmentase',.$samplename) ~ "Simulation: Template switching/Fragmentase bias only",
+                            grepl('sim_template_switch',.$samplename) ~ "Simulation: 3' bias",#/Covaris bias only',
+                            grepl('ligation',.$samplename) ~ "Simulation: 5' bias",
                             TRUE ~ 'Experimental')) %>%
 #    filter(!grepl('13N_K12_sim_template_switch|13N_K12_sim.[0-9]',samplename)) %>%
     mutate(prep = str_replace(prep,'Simulation: ',''))
@@ -174,7 +174,7 @@ rmse_df <- supplement_df %>%
     ungroup() %>%
     mutate(rmse = signif(rmse, 3)) %>%
     inner_join(supplement_df) %>%
-    mutate(prep = str_c(prep, '\n(RMSE: ',rmse,')')) %>%
+    mutate(prep = str_c(prep, ' (RMSE: ',rmse,')')) %>%
     mutate(prep = ifelse(grepl('Experimental',prep),'Experimental', prep)) %>%
     mutate(prep = fct_reorder(prep, rmse)) %>%
     tbl_df
@@ -183,7 +183,7 @@ colors <- c('black','red','goldenrod4','springgreen4','navyblue','grey72')
 supplemental_p <- plot_gc(rmse_df) + 
         scale_color_manual(values = colors) +
         theme(legend.position = c(0.4,0.75)) +
-        theme(legend.key.height = unit(4,'line')) +
+        theme(legend.key.height = unit(2,'line')) +
         theme(legend.text = element_text(size = 23, hjust=0.5)) 
 source('~/R/legend_to_color.R')
 supplemental_p <-ggdraw(coloring_legend_text_match(supplemental_p, colors))

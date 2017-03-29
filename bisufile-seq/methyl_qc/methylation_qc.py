@@ -1,16 +1,13 @@
+#!?usr/bin/env python
 
-# coding: utf-8
 
-# In[7]:
-
-get_ipython().magic(u'matplotlib inline')
-
+from matplotlib import rc, use as mpl_use
+mpl_use('Agg')
 import pandas as pd
 import numpy as np
 import seaborn as sns
 from itertools import izip
 import matplotlib.pyplot as plt
-from matplotlib import rc
 sns.set_style('white')
 font = {'family' : 'normal',
         'sans-serif':'Arial',

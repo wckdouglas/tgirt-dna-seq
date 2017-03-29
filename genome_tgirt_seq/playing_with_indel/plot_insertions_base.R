@@ -8,6 +8,7 @@ library(tidyr)
 library(purrr)
 
 datapath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/base_insertion_table'
+datapath <- '/stor/work/Lambowitz/Data/archived_work/TGIRT_ERCC_project/base_insertion_table'
 table_files <- list.files(path = datapath, pattern = '.tsv', full.names = T)
 
 paste_and_split <- function(x){
@@ -25,7 +26,8 @@ paste_and_split <- function(x){
 }
 
 read_df <- function(table_file){
-    read_tsv(table_file) %>% 
+    read_tsv(table_file,
+             col_type = 'iccicc') %>% 
     select(-strand) %>%
     group_by(run_length, mononucleotide, indel) %>%
     nest() %>%
@@ -65,12 +67,11 @@ insert_p<-ggplot(data = indel_base_df, aes(x = run_length, y = rate,
 #    scale_color_manual(values=colors, 
 #                       guide= guide_legend(ncol=2)) +
 #    theme(legend.position = c(0.2,0.9)) +
-#    theme(legend.position = 'none') +
-    scale_x_continuous(breaks = 4:9, labels=4:9)
+#    scale_x_continuous(breaks = 4:9, labels=4:9)+
+    theme(legend.position = 'none') 
 
-p <- plot_grid(base_indel_p, insert_p, ncol=1)
-figurename <- str_c(datapath, '/insertion_bases.pdf')
-ggsave(p, file =  figurename, height = 10, width = 20)
+figurename <- str_c(datapath, '/rna_insertion_bases.pdf')
+ggsave(insert_p, file =  figurename, height = 10, width = 20)
 message('plotted: ', figurename)
 
 uniqchars <- function(x) unique(strsplit(x, "")[[1]]) 

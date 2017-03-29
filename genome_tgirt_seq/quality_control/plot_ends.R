@@ -76,7 +76,7 @@ message('Plotted: ', figurename)
 
 pdf <- df %>% 
     filter(prep!='Nextera-XT') %>%
-    mutate(prep = relevel(factor(pdf$prep),'TGIRT-seq Covaris (UMI direct ligation)'))
+    mutate(prep = relevel(factor(prep),'TGIRT-seq Covaris (UMI direct ligation)'))
 colors <- c('black','khaki4','green4','red')
 prep_end_p <- ggplot(data = pdf,
             aes(x = actual_positions, 
