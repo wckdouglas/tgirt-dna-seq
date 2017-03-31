@@ -36,7 +36,7 @@ def fragment_center(start, end, window):
     cdef:
         long center, center_start, center_end
 
-    center = (long(end) + long(start))
+    center = (long(end) + long(start))/2
     center_start = center - window
     center_end = center + window
     return center_start, center_end
@@ -57,10 +57,10 @@ def parse_bed(bed_file, ref_fasta, window, regular_chrom):
             chrom, start, end, insert_size, strand = itemgetter(0,1,2,4,5)(fields)
             if int(insert_size) == 167 and chrom in regular_chrom:
                 center_start, center_end = fragment_center(start, end, window)
-                if center_end < len(ref[chrom]):
+                if center_end < len(ref[chrom]) and center_start > 0:
                     fragment_counts += 1
                     sequence = ref[chrom][center_start:center_end]
                     sequence = sequence if strand == '+' else sequence.reverse.complement
-                    dinucleotides_count_dict = extract_dinucleotide(dinucleotide_count_dict, str(sequence))
+                    dinucleotide_count_dict = extract_dinucleotide(dinucleotide_count_dict, str(sequence))
     print 'Parsed %i 167-nt fragments' %(fragment_counts)
     return dinucleotide_count_dict

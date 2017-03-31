@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 from matplotlib import use as mpl_use
@@ -27,10 +28,10 @@ def makeDF(nucleotideDict, lenType, window):
         .assign(position = lambda d: d.index - window) \
         .pipe(pd.melt, id_vars=['position','rowsum'], var_name='dinucleotide', value_name = 'count')\
         .assign(fraction = lambda d: np.true_divide(d['count'],d['rowsum'])) \
-        .assign(lenType = lenType) 
+        .assign(lenType = lenType)
 
 def from_bed_to_df(bed_file, ref_fasta, window, regular_chrom):
-    parse_bed(bed_file, ref_fasta, window, regular_chrom)
+    dinucleotide_count_dict = parse_bed(bed_file, ref_fasta, window, regular_chrom)
     df = makeDF(dinucleotide_count_dict, '167 bp', window)
     return df
 
@@ -50,7 +51,7 @@ def renameDinucleotide(di):
 
 def plotting(df, figurename):
     #start plotting
-    df = df[df['lenType'].str.contains('long')]
+    df = df[df['lenType'].str.contains('167')]
     number_of_wrap = len(set(df['samplename']))
     with sns.plotting_context('paper', font_scale=2.5, rc={"lines.linewidth":2}):
         p = sns.FacetGrid(data = df,
