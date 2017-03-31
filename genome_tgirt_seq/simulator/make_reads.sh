@@ -1,7 +1,7 @@
 for SIDE in 3 5 both no
 do
 	FOLD=1000
-	for PROFILE_PREFIX in 13N_kmer
+	for PROFILE_PREFIX in 13N_clustered
 	do
 		if [[ $SIDE == both ]]
 		then

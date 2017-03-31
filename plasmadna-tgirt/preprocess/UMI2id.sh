@@ -2,8 +2,9 @@
 
 PROJECT_PATH=/scratch/02727/cdw2854/plasmaDNA
 FASTQ_PATH=${PROJECT_PATH}/rawData
+FASTQ_PATH=/stor/work/Lambowitz/Data/NGS/JA17166
 OUTPATH=${FASTQ_PATH}/umi2id
-PROGRAM_PATH=/home1/02727/cdw2854/TGIRT_UMI/preproces_fastq
+PROGRAM_PATH=${HOME}/TGIRT_UMI/preproces_fastq
 PYTHON=$(which python)
 mkdir -p ${OUTPATH}
 
@@ -15,9 +16,7 @@ do
 			--fastq1=${FQ1} \
 			--fastq2=${FQ2} \
 			--idxBase=13 \
-			--constant_region=CATCG \
 			--barcodeCutOff=20 \
-			--mismatch=2 \
 			--outputprefix=- \
 		\| ${PYTHON} ${PROGRAM_PATH}/deinterleave_fastq.py \
 			- \
@@ -25,3 +24,5 @@ do
 			$OUTPATH/${SAMPLENAME}_umi2id_R2_001.fastq.gz
 done
 
+#			--constant_region=CATCG \
+#			--mismatch=2 \
