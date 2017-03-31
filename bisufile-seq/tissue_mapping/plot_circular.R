@@ -21,7 +21,7 @@ genome(hg19_genome) <- 'hg19'
 
 
 #read annotated data binned to 500bp and extracted from markers 
-bed_graph_methyl <- '/stor/work/Lambowitz/cdw2854/bisufite_seq/tissue_table/P13B_mix_S1_CpG.bedGraph'
+bed_graph_methyl <- '/stor/work/Lambowitz/cdw2854/bisufite_seq/tissue_table/P13B_mix_S1_CpG.meth.bedGraph'
 mbg<-import(bed_graph_methyl, format='bedGraph', genome='hg19')
 seqlevels(mbg) <- genome$seqname
 

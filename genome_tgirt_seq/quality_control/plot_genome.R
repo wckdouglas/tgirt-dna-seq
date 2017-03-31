@@ -19,14 +19,15 @@ source('./plot_sim_end.R') #sim_end_p
 source('./plot_sim_isize.R') #sim_size_p
 source('./plot_isize.R') #isize_p
 source('./plot_bits.R') #small_en_p
+source('./plot_mismatch.R') #small_en_p
 
 figurepath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome//figures'
 # main fig plot
 p <- ggdraw() +
     draw_plot(wgs_p, 0, 0.666, 0.5, 0.31) +
-    draw_plot(gc_p, 0.5, 0.666, 0.5, 0.31) +
-    draw_plot(lonrenz_curve, 0, 0.333, 0.5, 0.31) +
-    draw_plot(error_fig, 0.5, 0.333,0.5,0.33) +
+    draw_plot(lonrenz_curve, 0.52, 0.666, 0.5, 0.31) +
+    draw_plot(gc_p, 0, 0.333, 0.49, 0.31) +
+    draw_plot(error_fig, 0.52, 0.333,0.5,0.33) +
     draw_plot(indel_p, 0,0,0.5,0.31) +
     draw_plot_label(label = letters[1:5], 
                     c(0,0.5,0,0.5,0), c(1,1,0.666,0.666,0.333), 
@@ -74,3 +75,11 @@ figurename <- str_c(figurepath, '/simulation.pdf')
 ggsave(p, file = figurename, width = 25, height = 15)
 message('plotted: ', figurename)
     
+#indel + mismatch
+p <- plot_grid(mismatch_p,
+               base_indel_p, 
+               ncol=1, 
+               labels = letters[1:2], label_size = 40)
+figurename <- str_c(figurepath,'/error_profile.pdf')
+ggsave(p, file = figurename, width = 15, height = 22)
+message('plotted: ', figurename)

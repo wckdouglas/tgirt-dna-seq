@@ -116,7 +116,9 @@ plot_df <-  df %>%
     mutate(fold = fraction/base_error) %>% 
     mutate(var = factor(var, levels = c('Mismatch Rate','Indel Rate'))) %>%
     filter(prep != 'TGRIT-seq (Error-corrected all)') %>%
+#    filter(grepl('Error|Nexter', prep)) %>%
     tbl_df
+
 colors <- c('salmon','black','green4','orange')
 error_p <- ggplot(data = plot_df,
             aes(x = prep, y = fraction)) +

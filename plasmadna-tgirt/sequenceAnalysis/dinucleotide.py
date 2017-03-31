@@ -9,33 +9,17 @@ import os
 import re
 import pandas as pd
 import glob
-from pybedtools import BedTool, set_tempdir
-from pybedtools.cbedtools import Interval
 import seaborn as sns
 from multiprocessing import Pool
 from scipy.signal import medfilt
 from itertools import product
 from functools import partial
 import math
+import pyximport
+pyximport.install()
+from sequence_analytic_tools import parse_bed
 sns.set_style('white')
 
-def allDinucleotides():
-    bases = ['A','C','T','G','N']
-    dinucleotides_header = [''.join(combination) for combination in product(bases,repeat=2)]
-    return dinucleotides_header
-
-def makeDinucleotideMatrix(dinucleotides, window):
-    length = window * 2
-    dinucleotide_dict = {di : {i: 0 for i in range(length)} for di in dinucleotides}
-    return dinucleotide_dict
-
-def extractDinucleotide(dinucleotide_count_dict, sequence):
-    first_nucleotide = sequence[:-1]
-    second_nucleotide = sequence[1:]
-    dinucleotides = map(lambda x,y: x+y, first_nucleotide, second_nucleotide)
-    for i,di in enumerate(dinucleotides):
-        dinucleotide_count_dict[di][i] += 1
-    return dinucleotide_count_dict
 
 def makeDF(nucleotideDict, lenType, window):
     return pd.DataFrame.from_dict(nucleotideDict) \
@@ -43,43 +27,11 @@ def makeDF(nucleotideDict, lenType, window):
         .assign(position = lambda d: d.index - window) \
         .pipe(pd.melt, id_vars=['position','rowsum'], var_name='dinucleotide', value_name = 'count')\
         .assign(fraction = lambda d: np.true_divide(d['count'],d['rowsum'])) \
-        .assign(lenType = lenType)
+        .assign(lenType = lenType) 
 
-def fragmentCenter(fragment,window):
-    center = (long(fragment.end) + long(fragment.start)) / 2
-    center_start = center - window
-    center_end = center + window
-    return Interval(chrom = fragment.chrom,
-            start = center_start,
-            end = center_end,
-            score = fragment.score,
-            strand = fragment.strand)
-
-def parseBed(bed_file, ref_fasta, window, regular_chrom):
-    dinucleotides_header = allDinucleotides()
-    short_dinucleotides_count = makeDinucleotideMatrix(dinucleotides_header, window)
-    long_dinucleotides_count = makeDinucleotideMatrix(dinucleotides_header, window)
-    large_fragments = [167, 167]
-    small_fragments = [35,80]
-    long_count, short_count = 0, 0
-    for fragment in BedTool(bed_file)\
-            .filter(lambda x: x.chrom in regular_chrom)\
-            .each(fragmentCenter, window)\
-            .nucleotide_content(fi=ref_fasta, s =True, seq =True):
-        insert_size = int(fragment.score)
-        sequence = fragment.fields[-1]
-        if small_fragments[0] <= insert_size <= small_fragments[1]:
-            short_dinucleotides_count = extractDinucleotide(short_dinucleotides_count, sequence)
-            short_count += 1
-        elif large_fragments[0] <= insert_size <= large_fragments[1]:
-            long_dinucleotides_count = extractDinucleotide(long_dinucleotides_count, sequence)
-            long_count += 1
-    print 'Parsed %i long fragments and %i short fragments' %(long_count, short_count)
-    iterable = zip([short_dinucleotides_count, long_dinucleotides_count],
-                ['short (%i-%ibp)' %(small_fragments[0],small_fragments[1]),
-                'long (%i-%ibp)' %(large_fragments[0],large_fragments[1])])
-    dfs = [makeDF(nucleotideDict, lenType, window) for nucleotideDict, lenType in iterable]
-    df = pd.concat(dfs)
+def from_bed_to_df(bed_file, ref_fasta, window, regular_chrom):
+    parse_bed(bed_file, ref_fasta, window, regular_chrom)
+    df = makeDF(dinucleotide_count_dict, '167 bp', window)
     return df
 
 AT = list(map(lambda x: ''.join(x), product(['A','T'],repeat=2)))
@@ -126,9 +78,8 @@ def analyze_bam(ref_fasta, window_size, outputpath, bed_file):
     figurename = outputPrefix + '.pdf'
     tablename = outputPrefix + '.tsv'
     regular_chrom = map(str, np.arange(1,23))
-    regular_chrom.extend(['X','Y'])
     print 'Start analyzing %s ' %samplename
-    df = parseBed(bed_file, ref_fasta, window_size, regular_chrom)\
+    df = from_bed_to_df(bed_file, ref_fasta, window_size, regular_chrom)\
         .assign(dinucleotide_type = lambda d: map(renameDinucleotide, d['dinucleotide'])) \
         .pipe(lambda d: d[d['dinucleotide_type'] != 'Nope'])\
         .groupby(['dinucleotide_type','position','lenType'])\
@@ -156,7 +107,6 @@ def main():
     bedFilePath = projectpath + '/bedFiles'
     outputpath = projectpath + '/nucleotidesAnaylsis/dinucleotides'
     makedir(outputpath)
-    set_tempdir(outputpath)
     bedFiles = glob.glob(bedFilePath + '/*.bed')
     outputprefix = outputpath + '/dinucleotides'
     tablename = outputprefix + '.tsv'
@@ -166,6 +116,7 @@ def main():
     if not os.path.isfile(tablename):
         pool = Pool(24)
         dfs = pool.map(analyze_bam_func, bedFiles)
+        #dfs = map(analyze_bam_func, bedFiles)
         pool.close()
         pool.join()
         df = pd.concat(dfs)

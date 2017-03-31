@@ -15,5 +15,5 @@ do
 			-l 75 \
 			-o $MISMATCH_PATH/$SAMPLENAME \
 			-q 30 \
-			-n 1000000 
+			-n 10000
 done

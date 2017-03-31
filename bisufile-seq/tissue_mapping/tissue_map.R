@@ -24,7 +24,7 @@ tissue_ref_table <- '/stor/work/Lambowitz/ref/hg19/methylation/methyl_tissue_tab
     set_names(make.names(names(.))) %>%
     tbl_df
 
-df <- '/stor/work/Lambowitz/cdw2854/bisufite_seq/tissue_table/P13B_mix_S1_CpG.bedGraph' %>%
+df <- '/stor/work/Lambowitz/cdw2854/bisufite_seq/tissue_table/P13B_mix_S1_CpG.meth.bedGraph' %>%
     read_tsv(col_names = c('chrom','start','end','methyl_density')) %>%
     mutate(Genomic.location = str_c(chrom,':',start,'-',end)) %>%
     inner_join(tissue_ref_table, by = c("Genomic.location"))  %>%
