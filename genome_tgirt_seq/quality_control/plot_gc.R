@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env Rscript
 
 library(stringr)
 library(readr)
@@ -29,7 +29,7 @@ project_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/'
 picard_path <- str_c( project_path, '/picard_results')
 figure_path  <- str_c(project_path, '/figures')
 table_names <- list.files(path = picard_path, pattern = 'gc_metrics')
-table_names<- table_names[grepl('^75|sim',table_names)]
+table_names<- table_names[grepl('^75|sim|10X',table_names)]
 df <- table_names %>%
 	map(read_gc_table, picard_path) %>%
 	purrr::reduce(rbind) %>%
@@ -37,7 +37,7 @@ df <- table_names %>%
     mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera-XT',
                             grepl('pb',.$samplename) ~ 'Pacbio',
                             grepl('sim',.$samplename) ~ 'Covaris Sim',
-                            grepl('UMI',.$samplename) ~ 'TGIRT-seq 13N',
+                            grepl('UMI|10X',.$samplename) ~ 'TGIRT-seq 13N',
                             grepl('NEB',.$samplename) ~ 'TGIRT-seq Fragmentase')) %>%
     mutate(prep = ifelse(is.na(prep),'TGIRT-seq Covaris',prep)) %>%
     tbl_df
@@ -51,7 +51,7 @@ gini_df <- df %>%
     group_by(samplename, prep) %>% 
     summarize(gini=ineq(NORMALIZED_COVERAGE,type='Gini')) %>%
     filter(grepl('nextera|_[EF]_|K12_kh|pb|K12_UMI',samplename)) %>%
-    filter(!grepl('clustered', samplename)) %>%
+    #filter(!grepl('clustered', samplename)) %>%
     filter(gini < 0.5) %>%
     ungroup() %>%
     tbl_df

@@ -20,7 +20,7 @@ filenames <- list.files(path = data_path,
 
 df <- filenames %>%
     #.[grepl('SRR2130051.tsv|P1022_2_S4_umi2id_unique.tsv',.)] %>%
-    .[grepl('52|P1022',.)]%>%
+    .[grepl('52|P1022_3_S5_clustered_rmdup',.)]%>%
     map_df(read_tsv) %>%
     #filter(grepl('52|P1113_3_S20_umi2id', samplename)) %>%
     mutate( name = ifelse(grepl('SRR',samplename),'ssDNA-seq','TGIRT-seq')) %>%
@@ -28,7 +28,7 @@ df <- filenames %>%
     filter(position < 120) %>%
     mutate(dinucleotide_type = str_replace_all(dinucleotide_type,"\\|",'/')) %>%
     mutate(name = factor(name, levels = c('TGIRT-seq','ssDNA-seq')))
-dinucleotide_p <- ggplot(data = df, aes(x = position, y = fraction, color = dinucleotide_type)) +
+dinucleotide_p <- ggplot(data = df, aes(x = position, y = adjusted_signal, color = dinucleotide_type)) +
 	    geom_line(size=1.2) +
 	    facet_grid(.~name) +
 	    theme(axis.text.x = element_text(size=35,angle = 45, hjust= 1,face='plain',family = 'Arial')) +
