@@ -25,7 +25,7 @@ class bernoulli_generator:
     def __init__(self, p):
         self.p = p
 
-    def get_prob(self):
+    def get_random_variable(self):
         out = 1 if next_rand() <= self.p else 0
         return out
 
@@ -149,20 +149,20 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table, 
             insert_sizes = insert_dist.rvs(size = fold)
             for strand, insert_size in zip(strands, insert_sizes):
                 if strand == 1:
-                    out = base_dist["5'"][k_nucleotide_5].get_prob()
+                    out = base_dist["5'"][k_nucleotide_5].get_random_variable()
                     if out == 1:
                         start_site = start_chrom + position - 1  #is for adjusting the 0-base python?
                         end_site = int(start_site + insert_size)
                         if end_site < (chrom_len - max_kmer):
                             k_nucleotide_3 = str(fasta.get_seq(chrom, end_site - kmer_3 + 1, end_site))
                             #assert len(k_nucleotide_3) == kmer, "Wrong extraction of + strand 3' kmer: " + k_nucleotide_3
-                            if 'N' not in k_nucleotide_3 and base_dist["3'"][k_nucleotide_3].get_prob() == 1:
+                            if 'N' not in k_nucleotide_3 and base_dist["3'"][k_nucleotide_3].get_random_variable() == 1:
                                 line = generate_line(chrom, start_site, end_site, seq_count, insert_size, '+')
                                 seq_count.value += 1
                                 outfile.write(line + '\n')
                 else:
                     reverse_k_nucleotide_5  = reverse_complement(k_nucleotide_5)
-                    out = base_dist["5'"][reverse_k_nucleotide_5].get_prob()
+                    out = base_dist["5'"][reverse_k_nucleotide_5].get_random_variable()
                     if out == 1:
                         end_site = start_chrom + position + 2 #reversed This is the start when the read is reversed
                         start_site = int(end_site - insert_size) #this is the end site
@@ -170,7 +170,7 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table, 
                             k_nucleotide_3 = str(fasta.get_seq(chrom, start_site, start_site + kmer_3 - 1))
                             k_nucleotide_3 = reverse_complement(k_nucleotide_3)
                             #assert len(k_nucleotide_3) == kmer, "Wrong extraction of - strand 3' kmer: " + k_nucleotide_3
-                            if 'N' not in k_nucleotide_3 and base_dist["3'"][k_nucleotide_3].get_prob() == 1:
+                            if 'N' not in k_nucleotide_3 and base_dist["3'"][k_nucleotide_3].get_random_variable() == 1:
                                 line = generate_line(chrom, start_site - 1, end_site, seq_count, insert_size, '-')
                                 seq_count.value += 1
                                 outfile.write(line + '\n')
