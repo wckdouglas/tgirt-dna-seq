@@ -26,7 +26,7 @@ class bernoulli_generator:
         self.p = p
 
     def get_prob(self):
-        out = 0 if next_rand() <= self.p else 1
+        out = 1 if next_rand() <= self.p else 0
         return out
 
 
@@ -129,6 +129,9 @@ def extract_interval(side, ref_fasta, insert_profile_table, base_profile_table, 
     max_kmer = max(kmer_5, kmer_3)
     insert_dist = len_profile(insert_profile_table)
     base_dist = base_profile(base_profile_table, side, kmer_5, kmer_3)
+    #print base_dist["5'"]['AAA'].p
+    #print base_dist["3'"]['AAAAAAAA'].p
+    #sys.exit()
     print 'Constructed base distribution'
     #plot_dist(base_dist, outprefix)
     random.seed(iternum)

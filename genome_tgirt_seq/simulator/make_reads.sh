@@ -27,7 +27,8 @@ do
 			-i ./profiles/${PROFILE_PREFIX}_len_profile.csv \
 			-b ./profiles/${PROFILE_PREFIX}_base_profile.csv \
 			-o $WORK/cdw2854/ecoli_genome/simulation/${PROFILE_PREFIX}_${SAMPLENAME} \
-			-t 5 \
-			-s $SIDE
+			-t 20 \
+			-s $SIDE \
+			\&\> log/${PROFILE_PREFIX}_${SAMPLENAME}.log
 	done
 done

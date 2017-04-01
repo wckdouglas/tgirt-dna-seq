@@ -1,13 +1,13 @@
 #!/bin/bash
 
 PROJECT_PATH=$WORK/cdw2854/plasmaDNA
-PROJECT_PATH=$SCRATCH/plasmaDNA
+#PROJECT_PATH=$SCRATCH/plasmaDNA
 BED_PATH=$PROJECT_PATH/bedFiles/umi_splitted
 OUT_PATH=$BED_PATH/demultiplexed
 PROGRAM_PATH=$HOME/TGIRT_UMI/dedup_bed
 mkdir -p $OUT_PATH
 
-for BED in $BED_PATH/*umi2id.*.bed
+for BED in $BED_PATH/*.bed
 do
 	SAMLENAME=$(echo $(basename $BED) | cut -d'.' -f1)
 	CHROM=$(echo $(basename $BED) | cut -d'.' -f2)
