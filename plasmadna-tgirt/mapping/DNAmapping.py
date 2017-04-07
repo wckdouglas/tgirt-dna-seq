@@ -36,7 +36,10 @@ def trimming(fq1, threads, trim_path, samplename, adaptor):
     return 0
 
 #MAPPING
-def mappingProcess(samplename, trim_path, index, threads, bam_path):
+def bwa_mapping(samplename, trim_path, index, threads, bam_path):
+    '''
+    map reads with bwa mem
+    '''
     sys.stderr.write('Running mapping with %s\n' %samplename)
     file1 = trim_path + '/' + samplename + '_1P.fq.gz'
     file2 = file1.replace('1P','2P')
@@ -49,7 +52,10 @@ def mappingProcess(samplename, trim_path, index, threads, bam_path):
     runProcess(command, samplename)
     return bam_file
 
-def makeBed(bam_file, samplename, bed_path):
+def make_bed(bam_file, samplename, bed_path):
+    '''
+    merge pair end reads into fragments and convert to bed file
+    '''
     sys.stderr.write('Running post mapping processes with %s\n' %samplename)
     bed_file = '%s/%s.bed' %(bed_path, samplename)
     #command = 'bamtools filter -script flag_filter.json -in %s' %(bam_file)+\
@@ -63,6 +69,22 @@ def makeBed(bam_file, samplename, bed_path):
         '> %s' %(bed_file)
     runProcess(command,samplename)
     return bed_file
+
+def split_bed(bed_file, samplename, split_bed_path):
+    '''
+    Splitting bed by chromosome
+    '''
+    chroms = range(1,22)
+    chroms.extend(list('XY'))
+    chroms.append('MT')
+    for chrom in chroms:
+        out_name = '%s/%s.%s.bed' %(split_bed_path, samplename, chrom)
+        if os.path.isfile(out_name):
+            os.remove(out_name)
+    command = 'awk \'$1~/^[0-9]+$|^[XY]$|^MT$/ {print $0 >> "%s/%s."$1".bed"}\' %s' \
+            %(split_bed_path, samplename,bed_file)
+    runProcess(command, samplename)
+    return 0
 
 def makedir(directory):
     if not os.path.isdir(directory):
@@ -85,13 +107,15 @@ def main(args):
     bam_path= outdir + '/bamFiles'
     bed_path = outdir + '/bedFiles'
     rmdup_bed_path = outdir + '/rmdup_bed'
-    map(makedir,[trim_path, bam_path, rmdup_bed_path, bed_path])
+    split_bed_path = bed_path + '/chrom_split_bed'
+    map(makedir,[trim_path, bam_path, rmdup_bed_path, bed_path, split_bed_path])
 
     #trim
     trim = trimming(fq1, threads, trim_path, samplename, adaptor)
     #map
-    bam_file = mappingProcess(samplename, trim_path, index, threads, bam_path)
-    bed_file = makeBed(bam_file, samplename, bed_path)
+    bam_file = bwa_mapping(samplename, trim_path, index, threads, bam_path)
+    bed_file = make_bed(bam_file, samplename, bed_path)
+    split_bed(bed_file, samplename, split_bed_path)
     sys.stderr.write('Finished mapping %s\n' %samplename)
     return 0
 
