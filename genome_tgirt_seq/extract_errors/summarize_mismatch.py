@@ -4,7 +4,7 @@ import pyximport
 pyximport.install()
 from parse_pilebed import summarize_mismatch
 import glob
-from multiprocessing import pool
+from multiprocessing import Pool
 import pandas as pd
 
 mismatch_table_path = '/stor/work/Lambowitz/cdw2854/ecoli_genome/mismatch_profiles'

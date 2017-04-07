@@ -11,6 +11,9 @@ from multiprocessing import Pool
 from functools import partial
 from itertools import izip
 import argparse
+import pyximport
+pyximport.install()
+from call_peak_tools import merge_peaks, maxSubArray
 
 def get_opt():
     chromosomes = range(1,23)
@@ -38,49 +41,6 @@ def find_peak_region(wps):
     start = np.where(np.diff(signs)>0)[0]
     end = np.where(np.diff(signs)<0)[0]
     return start, end
-
-
-def merge_peaks(peak_start, peak_end):
-    new_start = []
-    new_end = []
-    tolerance_unprotected = 5
-    i = 0
-    while i < len(peak_start)-2:
-        new_start.append(peak_start[i])
-        j = i
-        while j < len(peak_start)-2 and peak_start[j+1] - peak_end[j] <= tolerance_unprotected:
-            j += 1
-        new_end.append(peak_end[j])
-        j += 1
-        i = j
-    new_start.append(peak_start[i])
-    new_end.append(peak_end[i])
-    return np.array(new_start), np.array(new_end)
-
-def maxSubArray(ls):
-    '''
-    #https://gist.github.com/alabid/3734606
-    '''
-    if len(ls) == 0:
-       raise Exception("Array empty") # should be non-empty
-
-    runSum = maxSum = ls[0]
-    i = 0
-    start = finish = 0
-
-    for j in range(1, len(ls)):
-    	if ls[j] > (runSum + ls[j]):
-            runSum = ls[j]
-            i = j
-        else:
-            runSum += ls[j]
-
-        if runSum > maxSum:
-            maxSum = runSum
-            start = i
-            finish = j
-
-    return start, finish
 
 
 def pick_peak(above_median_starts, above_median_ends, sub_wps):

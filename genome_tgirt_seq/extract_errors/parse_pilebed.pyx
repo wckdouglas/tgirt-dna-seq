@@ -24,7 +24,7 @@ def summarize_mismatch(filename):
                 for read, count in zip(bases, map(int, [A,C,T,G])):
                     mismatch_id = ref+'>'+read
                     read_ref_dict[mismatch_id] += int(count)
-                if lineno % 100000 == 0:
+                if lineno % 1000000 == 0:
                     sys.stderr.write('[%s] Parsed: %i lines\n' %(samplename, lineno))
 
     df = pd.DataFrame({
