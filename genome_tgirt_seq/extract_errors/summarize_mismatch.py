@@ -7,9 +7,11 @@ import glob
 from multiprocessing import Pool
 import pandas as pd
 import sys
+import re
 
 mismatch_table_path = '/stor/work/Lambowitz/cdw2854/ecoli_genome/mismatch_profiles'
 files = glob.glob(mismatch_table_path + '/*tsv')
+files = filter(lambda x: not re.search('mismatch_profiles.tsv$',x), files)
 p = Pool(24)
 df = p.map(summarize_mismatch ,files)
 p.close()

@@ -55,7 +55,6 @@ sim_size_p <- ggplot(data=df, aes(x=isize,y=percentage*100,
     #facet_grid(prep~.) +
     theme(text = element_text(size=30,face='plain',family = 'Arial')) +
     theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
-    panel_border() +
     theme(legend.key.height = unit(2,'line')) +
     theme(legend.position = c(0.6,0.6))+
     scale_color_manual(values = colors) + 

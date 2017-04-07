@@ -38,7 +38,7 @@ def maxSubArray(ls):
         int j
 
     for j in range(1, len(ls)):
-    	if ls[j] > (runSum + ls[j]):
+        if ls[j] > (runSum + ls[j]):
             runSum = ls[j]
             i = j
         else:

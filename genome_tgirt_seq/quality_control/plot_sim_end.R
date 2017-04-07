@@ -58,7 +58,7 @@ sim_end_p <- ggplot(data = df %>%
     geom_line(aes(x=actual_positions, y = base_fraction, color=base)) +
     geom_vline(aes(xintercept = actual_positions), linetype=2, alpha=0.3, color = 'grey') +    
     facet_grid(sim_type~read_end, scale='free_x')+
-    labs(x = 'Position Relative to Read ends',y='Fraction of Reads',color=' ') +
+    labs(x = 'Position relative to read ends',y='Fraction of Reads',color=' ') +
     theme(text = element_text(size=30,face='plain',family = 'Arial')) +
     theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
     theme(strip.text.y = element_text(face='plain',family='Arial', size=30)) +

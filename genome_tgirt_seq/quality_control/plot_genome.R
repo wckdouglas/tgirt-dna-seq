@@ -52,32 +52,35 @@ message('plotted: ', figurename)
 
 # ligation supplement
 p<-ggdraw()+
-    draw_plot(end_p, 
+    draw_plot(end_p + 
+                  theme(axis.title.y = element_text(margin=margin(0,0,4,0,unit='line'))), 
               0, 0.66, 1, 0.33) +
-    draw_plot(prep_end_p, 0, 0.33, 1, 0.33) +
+    draw_plot(prep_end_p +  
+                  theme(axis.title.y = element_text(margin=margin(0,0,4,0,unit='line'))), 
+              0, 0.33, 1, 0.33) +
     draw_plot(small_en_p, 0, 0, 0.54, 0.33) +
     draw_plot_label(letters[1:3],c(0,0,0),c(1,0.66,0.33), size =40, family='Arial') 
 figurename <- str_c(figurepath, '/genome_supplemental_2.pdf')
-ggsave(p, file = figurename, width = 20, height = 20)
+ggsave(p, file = figurename, width = 15, height = 18)
 message('plotted: ', figurename)
 
 
 # simulation plots
 p <- ggdraw() +
-    draw_plot(supplemental_p, 0, 0.5, 0.5,0.5)  +
+    draw_plot(supplemental_p, 0, 0.5, 0.5,0.48)  +
     draw_plot(sim_size_p, 0,0,0.5,0.5) + 
-    draw_plot(sim_end_p, 0.5,0, 0.5, 1) +
+    draw_plot(sim_end_p, 0.5,0, 0.5, 0.98) +
     draw_plot_label(letters[1:3], 
                     x = c(0,0, 0.5), 
                     y = c(1,0.5,1),
                     size = 40,
                     family='Arial')
 figurename <- str_c(figurepath, '/simulation.pdf')
-ggsave(p, file = figurename, width = 25, height = 15)
+ggsave(p, file = figurename, width = 25, height = 16)
 message('plotted: ', figurename)
     
 #indel + mismatch
-p <- plot_grid(mismatch_p,
+p <- plot_grid(sub_p,
                base_indel_p, 
                ncol=1, 
                labels = letters[1:2], label_size = 40)

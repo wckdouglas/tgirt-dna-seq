@@ -14,6 +14,7 @@ import argparse
 import pyximport
 pyximport.install()
 from call_peak_tools import merge_peaks, maxSubArray
+from numba import jit
 
 def get_opt():
     chromosomes = range(1,23)
@@ -29,7 +30,7 @@ def get_opt():
     args = parser.parse_args()
     return args
 
-
+@jit()
 def find_peak_region(wps):
     """
     given a wps array, output list of cooridinate of:
@@ -42,7 +43,6 @@ def find_peak_region(wps):
     end = np.where(np.diff(signs)<0)[0]
     return start, end
 
-
 def pick_peak(above_median_starts, above_median_ends, sub_wps):
     '''
         from region that has 50 < size < 150,
@@ -54,7 +54,6 @@ def pick_peak(above_median_starts, above_median_ends, sub_wps):
     max_wps_array = np.array([sub_wps[s:e].max() for s, e in izip(above_median_starts, above_median_ends)])
     maximum_wps = np.where(max_wps_array == max_wps_array.max())[0]
     return above_median_starts[maximum_wps], above_median_ends[maximum_wps]
-
 
 def adjust_peaks(wps, peak_start, peak_end):
     sub_wps = wps[peak_start:peak_end]

@@ -57,7 +57,7 @@ end_p <- ggplot(data = df %>%
     geom_line(size = 1.3, alpha=0.6) +
     geom_vline(aes(xintercept = actual_positions), linetype=2, alpha=0.3, color = 'grey') +    
     facet_grid(base~read_end, scale ='free_x') +
-    labs(x = ' ',y='Fraction of Reads',color=' ') +
+    labs(x = ' ',y='Fraction of Read\n',color=' ') +
     panel_border() +
     scale_color_manual(values = c('black','salmon'))+
     theme(strip.text.x = element_text(size = 25, face='plain')) +
@@ -86,7 +86,7 @@ prep_end_p <- ggplot(data = pdf,
   geom_line(size = 1.3, alpha=0.5) +
   geom_vline(aes(xintercept = actual_positions), linetype=2, alpha=0.3, color = 'grey') +    
   facet_grid(base~read_end, scale ='free_x') +
-  labs(x = 'Position relative to read ends',y='Fraction of reads',color=' ') +
+  labs(x = 'Position relative to read ends',y='Fraction of read\n',color=' ') +
   panel_border() +
   scale_color_manual(values = colors)+
   theme(strip.text.x = element_text(size = 25, face='plain', family='Arial')) +

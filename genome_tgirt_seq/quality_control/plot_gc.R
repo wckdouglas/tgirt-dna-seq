@@ -251,7 +251,7 @@ lonrenz_df <- lonrenz_df %>%
     mutate(p = map(lc, function(x) x$p)) %>% 
     unnest(l,p) %>%
     inner_join(lonrenz_df_annotation) %>%
-    mutate(prep = str_c(prep, '(', annotation, ')')) %>% #added for poster
+    mutate(prep = str_c(prep, ' (', annotation, ')')) %>% #added for poster
     mutate(prep = factor(prep, levels = rev(unique(prep))))  %>%
     tbl_df
     

@@ -149,7 +149,7 @@ def main():
     genome = referencePath + '/genome_rDNA.fa.fai'
 
     #define input/output files
-    bedFiles = glob.glob(bedPath + '/P1*.bed')
+    bedFiles = glob.glob(bedPath + '/P1022_1*.bed')
     outputprefix = resultPath + '/CTCFwps'
     figurename = outputprefix + '.pdf'
     tablename = outputprefix + '.tsv'

@@ -20,8 +20,8 @@ rename <- function(x){
 insert_df <- insert_data_path %>%
     stri_c('isizeTable.tsv',sep='/') %>%
     read_tsv()%>%
-    filter(grepl('SRR2130051|SRR2130052|P11|P13',samplename))  %>%
-    filter(grepl('umi2id|SRR', samplename)) %>%
+    filter(grepl('SRR2130051|SRR2130052|P11|P13|P10',samplename))  %>%
+    filter(grepl('unique|SRR', samplename)) %>%
     filter(!grepl('cluster',samplename))  %>%
     filter(isize > 22) %>%
     mutate(prep = rename(samplename))  %>%

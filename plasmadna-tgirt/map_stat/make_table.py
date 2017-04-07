@@ -3,11 +3,20 @@
 import pandas as pd
 import numpy as np
 
+
+def add_comma(x):
+    b = ''
+    for i, c in enumerate(str(x)[::-1]):
+        b += c
+        if (i+1) % 3 == 0:
+            b += ','
+    return b[::-1]
+
+
 def raw_df():
     seq_read = '/stor/work/Lambowitz/cdw2854/plasmaDNA/raw_data/seq_count.tsv'
     raw_read = pd.read_table(seq_read, names=['filename','read_count']) \
         .assign(samplename = lambda d: d.filename.str.replace('_R1_001.fastq.gz','')) \
-        .assign(samplename = lambda d: d.samplename.str.replace('75bp_','')) \
         .drop(['filename'],axis=1) \
         .assign(umi = lambda d: map(lambda x: 'umi' if 'umi2id' in x else 'raw', d.samplename)) \
         .assign(samplename = lambda d: d.samplename.str.replace('_umi2id','')) \
@@ -15,7 +24,7 @@ def raw_df():
         .reset_index()\
         .assign(umi = lambda d: d.umi.fillna(d.raw))  \
         .query('raw > 0') \
-        .pipe(lambda d: d[d.samplename.str.contains('P1022|51$|52$')]) \
+        .pipe(lambda d: d[d.samplename.str.contains('P1022|P1016|P13|P1113|51$|52$')]) \
         .pipe(lambda d: d[~d.samplename.str.contains('clustered$')])
     return raw_read
 
@@ -61,7 +70,7 @@ def main():
     df.columns = ['Method','Sample ID','Raw reads', 'UMI > Q20', 'Trimmed reads', 
                   'Mapped reads','Concordant pair','Chimeric reads']
     tablename = '/stor/work/Lambowitz/cdw2854/plasmaDNA/figures/map_summary.csv'
-    df.transpose().to_csv(tablename,header=False)
+    df.to_csv(tablename,index=False)
     print 'Written %s' %(tablename)
 
 if __name__ == '__main__':
