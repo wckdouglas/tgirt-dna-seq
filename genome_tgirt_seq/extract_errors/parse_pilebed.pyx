@@ -14,7 +14,7 @@ def summarize_mismatch(filename):
 
     read_ref_dict = defaultdict(int)
     bases = list('ACTG')
-    samplename = os.path.basename(filename).split('.')[0]
+    samplename = os.path.basename(filename).replace('.tsv','')
     sys.stderr.write('Analyzing %s\n' %samplename)
     with open(filename, 'r') as infile:
         for lineno, line in enumerate(infile):

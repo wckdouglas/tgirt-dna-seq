@@ -1,4 +1,4 @@
-%>% #!/usr/bin/env Rscript
+#!/usr/bin/env Rscript
 
 library(stringr)
 library(cowplot)
@@ -19,7 +19,8 @@ source('./plot_sim_end.R') #sim_end_p
 source('./plot_sim_isize.R') #sim_size_p
 source('./plot_isize.R') #isize_p
 source('./plot_bits.R') #small_en_p
-source('./plot_mismatch.R') #small_en_p
+source('./plot_mismatch.R') #mismatch_p
+source('../extract_errors/plot_substitution_errors.R') #sub_p
 
 figurepath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome//figures'
 # main fig plot
