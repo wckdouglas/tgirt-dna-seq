@@ -1,10 +1,14 @@
 #!/bin/bash
 
-PROJECTPATH=/scratch/02727/cdw2854/plasmaDNA
+PROJECTPATH=$WORK/cdw2854/plasmaDNA
 BED_PATH=$PROJECTPATH/bedFiles/merged/splittedBed
+<<<<<<< HEAD
 BED_PATH=$PROJECTPATH/bedFiles/umi_splitted/demultiplexed/merged/splittedBed
+=======
+BED_PATH=$PROJECTPATH/bedFiles/splittedBed
+>>>>>>> 57d5eccb6c1ad751fd8b63eae7888be42a69d8cf
 RESULT_PATH=$PROJECTPATH/genomeWPS
-REF_PATH=$SCRATCH/GRCh38/hg38_rDNA
+REF_PATH=$REF/GRCh38/hg38_rDNA
 GENOME=$REF_PATH/genome_rDNA.fa.fai
 PROGRAM=genomeWPS.py
 #PROGRAM=strandedGenomeWPS.py

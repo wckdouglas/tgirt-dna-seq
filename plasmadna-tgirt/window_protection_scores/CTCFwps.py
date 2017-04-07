@@ -36,10 +36,10 @@ def CTCFline(feature, half_window):
         end = int(binding_site) + half_window
         if start > 0:
             assert (start < end), ' Wrongly parsed gene TSS'
-	    CTCF = Interval(chrom = feature.chrom.replace('chr',''), 
+	    CTCF = Interval(chrom = feature.chrom.replace('chr',''),
                             start= start,
-		            end = end, 
-                            name = feature.name, 
+		            end = end,
+                            name = feature.name,
                             strand = feature.strand)
 	    return CTCF
 
@@ -111,7 +111,7 @@ def runBoundaries(samplename, bedFile, bam, windowSize, ctcfBed, boundary):
         .assign(type = typename)
     return wpsDF
 
-def runFile(ctcfBed, genome, windowSize, bedFile):
+def runFile(resultPath,ctcfBed, genome, windowSize, bedFile):
     '''
     main function for controling the work flow
     '''
@@ -122,7 +122,10 @@ def runFile(ctcfBed, genome, windowSize, bedFile):
         func = partial(runBoundaries, samplename, bedFile, bam, windowSize, ctcfBed)
         wpsDF = map(func,boundaries)
     wpsDF = pd.concat(wpsDF,axis=0)
-    return wpsDF
+    tablename = resultPath + '/' + samplename + '.csv'
+    wpsDF.to_csv(tablename, index=False)
+    print 'Written:', tablename
+    return  0
 
 def makedir(directory):
     if not os.path.isdir(directory):
@@ -146,7 +149,7 @@ def main():
     genome = referencePath + '/genome_rDNA.fa.fai'
 
     #define input/output files
-    bedFiles = glob.glob(bedPath + '/*.bed')
+    bedFiles = glob.glob(bedPath + '/P1*.bed')
     outputprefix = resultPath + '/CTCFwps'
     figurename = outputprefix + '.pdf'
     tablename = outputprefix + '.tsv'
@@ -157,13 +160,13 @@ def main():
     halfTSSwindow = (windowSize-1)/2
     ctcfBed = BedTool(makeCTCFbed(featuresGTF, halfTSSwindow))
     p = Pool(threads)
-    processFileFunc = partial(runFile, ctcfBed, genome, windowSize)
+    processFileFunc = partial(runFile, resultPath, ctcfBed, genome, windowSize)
     wpsDF = p.map(processFileFunc, bedFiles)
     p.close()
     p.join()
-    df = pd.concat(wpsDF)
-    df.to_csv(tablename, sep='\t', index=False)
-    plotResult(df, figurename)
+    #df = pd.concat(wpsDF)
+    #df.to_csv(tablename, sep='\t', index=False)
+    #plotResult(df, figurename)
     return 0
 
 if __name__ == '__main__':

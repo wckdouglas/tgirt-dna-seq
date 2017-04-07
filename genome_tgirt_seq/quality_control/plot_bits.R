@@ -30,7 +30,7 @@ df <- list.files(path = datapath,
     mutate(method = case_when(
                     grepl('7N', .$samplename) ~ '7N',
                     grepl('UMI', .$samplename) ~ 'UMI direct ligation',
-                    grepl('K12_k', .$samplename) ~ 'UMI + CATCG')) %>%
+                    grepl('K12_k', .$samplename) ~ "5' CGATG + UMI")) %>%
     mutate(read_end = ifelse(read_end == "5'", 'Read 1', 'Read 2')) %>%
     filter(!grepl('7N',method)) %>%
     tbl_df()
@@ -73,19 +73,22 @@ ggsave(en_p, file = fig_name,
        width=fig_width, height = fig_height)
 message('Plotted ', fig_name)
 
-colors <- c('khaki4','black','green4')
-small_en_p <- ggplot(data = df %>% filter(read_end=='Read 1'), 
+colors <- c('black','khaki4','green4')
+small_en_p <- ggplot(data = df %>% 
+                         filter(read_end=='Read 1') %>% 
+                         mutate(method = relevel(factor(method),'UMI direct ligation')), 
                      aes(color = method, x = adjusted_position, 
                         y = entropy, group=samplename)) +
     geom_line(size = 1.5, alpha=0.4) +
     facet_zoom(x = adjusted_position < 5)  +
     theme(legend.key.height = unit(2,'line')) +
+    geom_vline(aes(xintercept = adjusted_position), linetype=2, alpha=0.3, color = 'grey') +    
     labs(x = 'Positions', y = 'Entropy (bits)', color = ' ')  +
-    theme(text = element_text(family='Arial', size = 25)) +
+    theme(text = element_text(family='Arial', size = 20)) +
     theme(legend.position = c(0.3,0.15)) +
-    theme(axis.text = element_text(family ='Arial', size = 30)) +
+    theme(axis.text = element_text(family ='Arial', size = 20)) +
     scale_color_manual(values = colors) +
-    theme(legend.text = element_text(family ='Arial', size = 30)) 
+    theme(legend.text = element_text(family ='Arial', size = 20)) 
 source('~/R/legend_to_color.R')
 small_en_p <- ggdraw(coloring_legend_text_match(small_en_p, colors))
 ggsave(small_en_p, file = combined_fig_name, 

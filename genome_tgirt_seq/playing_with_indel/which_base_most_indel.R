@@ -71,5 +71,5 @@ source('~/R/legend_to_color.R')
 base_indel_p<-ggdraw(coloring_legend_text_match(base_indel_p,colors))
     
 figurename <- str_c(datapath, '/base_mononucleotide.pdf')
-ggsave(base_indel_p, file =  figurename, height = 7, width = 7)
+ggsave(base_indel_p, file =  figurename, height = 7, width = 10)
 message('plotted: ', figurename)

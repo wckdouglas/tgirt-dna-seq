@@ -38,9 +38,8 @@ df <- files %>%
                             grepl('sim',.$filename) ~ 'Covaris Sim',
                             grepl('SRR',.$filename) ~ 'Covaris SRR',
                             grepl('UMI',.$filename) ~ 'TGIRT-seq Covaris (UMI direct ligation)',
-                            grepl('kh|kq',.$filename) ~ 'TGIRT-seq Covaris',
-                            grepl('NEB',.$filename) ~ 'TGIRT-seq Fragmentase')) %>%
-    mutate(prep = ifelse(is.na(prep),'UMI + CATCG',prep))  %>%
+                            grepl('kh|kq',.$filename) ~ "TGIRT-seq Covaris (5' CGATG + UMI)",
+                            grepl('NEB',.$filename) ~ "TGIRT-seq Fragmentase (5' CGATG + UMI)")) %>%
     mutate(read_end = ifelse(read_end == "5'", 'Read 1', 'Read 2')) %>%
     mutate(read_end = factor(read_end, levels=c("Read 1","Read 2"))) %>%
     mutate(actual_positions = ifelse(read_end == "Read 2", positions-20, positions)) %>%
@@ -48,14 +47,15 @@ df <- files %>%
     mutate(read_end = as.character(read_end))
 
 end_p <- ggplot(data = df %>% 
-              filter(grepl('UMI|XT',prep)) %>%
-              mutate(prep = ifelse(grepl('UMI',prep),'TGIRT-seq',prep)) %>%
+              filter(grepl('direct|XT',prep)) %>%
+              mutate(prep = ifelse(grepl('direct',prep),'TGIRT-seq',prep)) %>%
               mutate(prep = factor(prep, level = rev(unique(prep)))), 
             aes(x = actual_positions, 
                            color = prep, 
                            group=filename, 
                            y = base_fraction)) +
     geom_line(size = 1.3, alpha=0.6) +
+    geom_vline(aes(xintercept = actual_positions), linetype=2, alpha=0.3, color = 'grey') +    
     facet_grid(base~read_end, scale ='free_x') +
     labs(x = ' ',y='Fraction of Reads',color=' ') +
     panel_border() +
@@ -64,7 +64,7 @@ end_p <- ggplot(data = df %>%
     theme(strip.text.y = element_text(size = 25, face='plain', angle = 0)) +
     theme(axis.title = element_text(size = 25, face='plain')) +
     theme(axis.text = element_text(size = 18, face='plain'))  +
-    theme(legend.position = c(0.65,0.45))+
+    theme(legend.position = c(0.3,0.7))+
     theme(legend.text = element_text(size = 18, face='plain'))+
     theme(legend.key.size=unit(8,'mm'))
 source('~/R/legend_to_color.R')
@@ -74,14 +74,17 @@ ggsave(end_p , file = figurename, height = 8, width = 14)
 message('Plotted: ', figurename)
 
 
-pdf <- df %>% filter(prep!='Nextera-XT')
-colors <- c('khaki4','black','green4','red')
+pdf <- df %>% 
+    filter(prep!='Nextera-XT') %>%
+    mutate(prep = relevel(factor(prep),'TGIRT-seq Covaris (UMI direct ligation)'))
+colors <- c('black','khaki4','green4','red')
 prep_end_p <- ggplot(data = pdf,
             aes(x = actual_positions, 
                 color = prep, 
                 group=filename, 
                 y = base_fraction)) +
   geom_line(size = 1.3, alpha=0.5) +
+  geom_vline(aes(xintercept = actual_positions), linetype=2, alpha=0.3, color = 'grey') +    
   facet_grid(base~read_end, scale ='free_x') +
   labs(x = 'Position relative to read ends',y='Fraction of reads',color=' ') +
   panel_border() +
@@ -90,7 +93,7 @@ prep_end_p <- ggplot(data = pdf,
   theme(strip.text.y = element_text(size = 25, face='plain', angle = 0,, family='Arial')) +
   theme(axis.title = element_text(size = 25, face='plain', family='Arial')) +
   theme(axis.text = element_text(size = 18, face='plain', family='Arial'))  +
-  theme(legend.position = c(0.65,0.45))+
+  theme(legend.position = c(0.3,0.7))+
   theme(legend.text = element_text(size = 18, face='plain', family='Arial'))+
   theme(legend.key.size=unit(8,'mm'))
 figurename <- str_c(datapath , '/end_bias_plot_fragmentation.pdf')
@@ -135,6 +138,7 @@ en_p <- ggplot(data = bit_df, aes(x = actual_positions, y = entropy,
     theme(axis.title = element_text(size = 25)) +
     theme(axis.text = element_text(size = 25))  +
     theme(legend.position = c(0.65,0.45))+
+    geom_vline(aes(xintercept = actual_positions), linetype=2, alpha=0.3, color = 'grey') +    
 #    theme(legend.text = element_text(size = 125, face='plain'))+
     theme(legend.key.size=unit(8,'mm'))+
     ylim(0,2)

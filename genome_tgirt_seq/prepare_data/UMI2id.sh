@@ -2,12 +2,13 @@
 
 PROJECT_PATH=$WORK/cdw2854/ecoli_genome/rawData/k12
 FASTQ_PATH=${PROJECT_PATH}
+FASTQ_PATH=/stor/work/Lambowitz/Data/NGS/JA17166
 OUTPATH=${FASTQ_PATH}/umi2id
-PROGRAM_PATH=${HOME}/TGIRT_UMI
+PROGRAM_PATH=${HOME}/TGIRT_UMI/preproces_fastq
 PYTHON=$(which python)
 mkdir -p ${OUTPATH}
 
-for FQ1 in `ls ${FASTQ_PATH}/K12*UMI*R1_001.fastq.gz | grep -v cluster`
+for FQ1 in `ls ${FASTQ_PATH}/K12*R1_001.fastq.gz | grep -v cluster`
 do
 	FQ2=${FQ1/_R1_/_R2_}
 	SAMPLENAME=$(basename ${FQ1%_R1_001.fastq.gz})
@@ -15,7 +16,7 @@ do
 			--fastq1=${FQ1} \
 			--fastq2=${FQ2} \
 			--idxBase=13 \
-			--barcodeCutOff=20 \
+			--barcodeCutOff=30 \
 			--mismatch=2 \
 			--outputprefix=- \
 		\| ${PYTHON} ${PROGRAM_PATH}/deinterleave_fastq.py \

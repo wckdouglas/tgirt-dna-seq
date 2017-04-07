@@ -8,6 +8,8 @@ library(tidyr)
 library(ggplot2)
 library(ggpmisc)
 library(cowplot)
+library(extrafont)
+loadfonts()
 
 indel_index_table <- '/stor/work/Lambowitz/ref/Ecoli/k12_mg1655_repeat_index.tsv'
 indel_index_df <- read_tsv(indel_index_table) %>%
@@ -29,11 +31,11 @@ read_indel_table <- function(tablename){
 
 indel_table_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/indel_table'
 df <- list.files(path = indel_table_path, pattern = '.tsv', full.names = T) %>%
+    .[grepl('^75bp_|UMI',basename(.))] %>%
+    .[grepl('_nextera|clustered_fam',.)] %>%
     map_df(read_indel_table) %>%
     inner_join(indel_index_df)%>% 
     select(grep('samplename|num_D|num_I|index',names(.))) %>%
-    filter(grepl('^75|umi2',samplename)) %>%
-    filter(grepl('nextera|UMI|kh|kq|NEB',samplename)) %>%
     mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera-XT',
                             grepl('pb',.$samplename) ~ 'Pacbio',
                             grepl('sim',.$samplename) ~ 'Covaris Sim',
@@ -41,7 +43,7 @@ df <- list.files(path = indel_table_path, pattern = '.tsv', full.names = T) %>%
                             grepl('UMI',.$samplename) ~ 'TGIRT-seq 13N direct ligation',
                             grepl('kh|kq',.$samplename) ~ 'TGIRT-seq Covaris',
                             grepl('NEB',.$samplename) ~ 'TGIRT-seq Fragmentase')) %>%
-    filter(!grepl('clustered',samplename)) %>%
+    filter(grepl('clustered_fam|nexter',samplename)) %>%
     mutate(indel_index = negative_index + positive_index ) %>%
     mutate(number_of_indel = num_D + num_I) %>%
     group_by(prep, samplename, indel_index) %>%
@@ -62,12 +64,11 @@ colors <- c('black','salmon','green','orange')
 indel_p<-ggplot(data = df %>%
                     filter(grepl('13N|Nextera',prep)) %>%
                     mutate(prep = ifelse(grepl('13N', prep), 'TGIRT-seq',prep)) %>%
-                    filter(grepl('umi2|nex', samplename)) %>%
                     mutate(prep = factor(prep, levels = rev(unique(prep)))),
                 aes(x = indel_index, y = normalized_indel, color = prep))+
     geom_smooth(se = F,method = 'loess') +
 #    geom_smooth(se = F,formula=form, method='lm') +
-    geom_point() +
+    geom_jitter() +
 #    geom_line( data= df %>% 
 #                   filter(grepl('13N|Nextera',prep)) %>%
 #                   mutate(prep = ifelse(grepl('13N', prep), 'TGIRT-seq',prep)) %>%

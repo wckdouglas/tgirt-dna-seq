@@ -116,8 +116,8 @@ def profile_to_distribution(insert_profile_table, base_profile_table, side, k):
     for kmer in  product('ACTG',repeat=k):
         kmer = ''.join(kmer)
         for end in ["5'","3'"]:
-            base_fraction = [extract_prob(pos, nuc, end) for pos, nuc in enumerate(kmer)]
-            base_dist[end][kmer] = cycle(bernoulli(p = np.prod(base_fraction)*1000).rvs(pre_generate_p))
+            base_fraction = [extract_prob(pos, nuc, end) for pos, nuc in enumerate(k)]
+            base_dist[end][k] = cycle(bernoulli(p = np.prod(base_fraction)*1000).rvs(pre_generate_p))
 
     return insert_dist, base_dist
 

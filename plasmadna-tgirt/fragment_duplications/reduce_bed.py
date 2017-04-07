@@ -6,7 +6,8 @@ import numpy as np
 import os
 from itertools import product
 
-in_path = '/scratch/02727/cdw2854/plasmaDNA/bedFiles/umi_splitted/demultiplexed'
+project_path = os.environ['WORK'] + '/cdw2854/plasmaDNA'
+in_path = project_path+ '/bedFiles/umi_splitted/demultiplexed'
 out_path = in_path + '/merged'
 if not os.path.isdir(out_path):
     os.mkdir(out_path)

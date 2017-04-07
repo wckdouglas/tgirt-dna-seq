@@ -1,9 +1,10 @@
 #!/bin/bash
 
 PROJECTPATH=$WORK/cdw2854/ecoli_genome
-#PROJECTPATH=$WORK/cdw2854/genomeDNA
-DATAPATH1=$PROJECTPATH/rawData/k12
-DATAPATH2=$PROJECTPATH/rawData/k12/CUT_75BP
+#PROJECTPATH=$WORK/cdw2854/ecoli_genome/rawData/k12/umi2id_30
+#DATAPATH1=$PROJECTPATH/rawData/k12
+DATAPATH1=$PROJECTPATH/rawData/k12/CUT_75BP
+DATAPATH2=$PROJECTPATH/rawData/k12/umi2id
 INDEXPATH=$REF/Ecoli
 INDEX=$INDEXPATH/k12_mg1655.fa
 #INDEX=$REF//hg19/Sequence/WholeGenomeFasta/genome.fa
@@ -20,10 +21,11 @@ do
 		then
 			ADAPTORS=adaptors.fa
 		else
-			ADAPTORS=TruSeq2-PE.fa
+			ADAPTORS=NexteraPE-PE.fa
 		fi
 		echo $PYTHON DNAmapping.py --fq1=$FQ  \
 			--outdir=$PROJECTPATH --index=$INDEX \
-			--threads=$CORES --adaptor=$ADAPTORS 
+			--threads=$CORES --adaptor=$ADAPTORS \
+			\&\> log/$SAMPLENAME.log
 	done
 done 
