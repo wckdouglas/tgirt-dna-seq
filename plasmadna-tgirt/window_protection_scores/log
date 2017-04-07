@@ -1,19 +1,1449 @@
-using /stor/work/Lambowitz/cdw2854/reference/hg38/CTCF_regions.bed 
-Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/RNA-OCD.bed with insert size boundary: (120, 180)
-Used existing bamfile: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/RNA-OCD.sorted.bam
-Parsing 5000 genes
-Parsing 10000 genes
-Parsing 15000 genes
-Parsing 20000 genes
-Parsing 25000 genes
-Parsing 30000 genes
-Parsing 35000 genes
-Parsing 40000 genes
-Parsing 45000 genes
-Parsing 50000 genes
-Parsing 55000 genes
-Parsing 60000 genes
-Parsing 65000 genes
-nes
-s
-saved /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/CTCFwps.png
+Using /stor/work/Lambowitz/ref/GRCh38/hg38_rDNA/CTCF_regions.bed 
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/PD3_12X_S5_clustered_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/PD3_12X_S5_clustered_rmdup.sorted.bam
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/PD4_12X_S6_clustered.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/PD4_12X_S6_clustered.sorted.bam
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4_clustered_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4_clustered_rmdup.sorted.bam
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_1_S18_umi2id_unique.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_1_S18_umi2id_unique.sorted.bam
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3_clustered_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3_clustered_rmdup.sorted.bam
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_SQ1_S2_clustered.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_SQ1_S2_clustered.sorted.bam
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_3_S5_umi2id_unique.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_3_S5_umi2id_unique.sorted.bam
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_3_S5_clustered.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_3_S5_clustered.sorted.bam
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130011_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130011_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4_clustered_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_2_S4_clustered_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_2_S4_clustered_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1022_2_S4_clustered_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203-SQ2_S3_umi2id_unique.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203-SQ2_S3_umi2id_unique.sorted.bam
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130043.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130043.sorted.bam
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130032_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130032_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/PD4_12X_S6_clustered.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/PD4_12X_S6_clustered.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/PD4_12X_S6_clustered.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/PD4_12X_S6_clustered.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130004.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130004.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_3_S5_clustered.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_3_S5_clustered.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_3_S5_clustered.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1022_3_S5_clustered.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_SQ1_S2_clustered_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_SQ1_S2_clustered_rmdup.sorted.bam
+Differing number of BED fields encountered at line: 9736600.  Exiting...
+sort: write failed: standard output: Broken pipe
+sort: write error
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_SQ1_S2_clustered.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203_SQ1_S2_clustered.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203_SQ1_S2_clustered.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1203_SQ1_S2_clustered.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P13_mix_umi2id_unique.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P13_mix_umi2id_unique.sorted.bam
+[W::bam_hdr_read] EOF marker is absent. The input is probably truncated.
+Exception in thread Thread-3:
+Traceback (most recent call last):
+  File "/stor/work/Lambowitz/cdw2854/src/miniconda2/lib/python2.7/threading.py", line 801, in __bootstrap_inner
+    self.run()
+  File "/stor/work/Lambowitz/cdw2854/src/miniconda2/lib/python2.7/threading.py", line 754, in run
+    self.__target(*self.__args, **self.__kwargs)
+  File "/stor/work/Lambowitz/cdw2854/src/miniconda2/lib/python2.7/multiprocessing/pool.py", line 389, in _handle_results
+    task = get()
+TypeError: ('__init__() takes exactly 2 arguments (1 given)', <class 'pysam.utils.SamtoolsError'>, ())
+
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_SQ1_S2_clustered_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203_SQ1_S2_clustered_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203_SQ1_S2_clustered_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1203_SQ1_S2_clustered_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_umi_merged.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_umi_merged.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_3_S5_umi2id_unique.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_3_S5_umi2id_unique.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_3_S5_umi2id_unique.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1022_3_S5_umi2id_unique.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4_umi2id_unique.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4_umi2id_unique.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130011_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130011_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130011_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/SRR2130011_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P13_2_S3_umi2id_unique.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P13_2_S3_umi2id_unique.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_umi_merged.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203_umi_merged.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203_umi_merged.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1203_umi_merged.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P13_1_S2_umi2id_unique.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P13_1_S2_umi2id_unique.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3_clustered_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_1_S3_clustered_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_1_S3_clustered_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1022_1_S3_clustered_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/plasma_UMI_unique.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/plasma_UMI_unique.sorted.bam
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_umi_merged.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_umi_merged.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203-SQ2_S3_umi2id_unique.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203-SQ2_S3_umi2id_unique.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203-SQ2_S3_umi2id_unique.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1203-SQ2_S3_umi2id_unique.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130052.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130052.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/PD3_12X_S5_clustered_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/PD3_12X_S5_clustered_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/PD3_12X_S5_clustered_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/PD3_12X_S5_clustered_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/NT.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/NT.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P13_2_S3_umi2id_unique.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P13_2_S3_umi2id_unique.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P13_2_S3_umi2id_unique.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P13_2_S3_umi2id_unique.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/PD4_12X_S6_clustered_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/PD4_12X_S6_clustered_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130032_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130032_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130032_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/SRR2130032_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130043_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130043_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4_umi2id_unique.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_2_S4_umi2id_unique.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_2_S4_umi2id_unique.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1022_2_S4_umi2id_unique.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3_umi2id_unique.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3_umi2id_unique.sorted.bam
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_2_S19_umi2id.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_2_S19_umi2id.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/PD4_12X_S6_clustered_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/PD4_12X_S6_clustered_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/PD4_12X_S6_clustered_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/PD4_12X_S6_clustered_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130032.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130032.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130052.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130052.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130052.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/SRR2130052.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130052_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130052_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P13_1_S2_umi2id_unique.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P13_1_S2_umi2id_unique.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P13_1_S2_umi2id_unique.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P13_1_S2_umi2id_unique.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3_clustered.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3_clustered.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130043_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130043_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130043_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/SRR2130043_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/RNase-I_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/RNase-I_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3_umi2id_unique.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_1_S3_umi2id_unique.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_1_S3_umi2id_unique.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1022_1_S3_umi2id_unique.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_3_S20_umi2id_unique.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_3_S20_umi2id_unique.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130043.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130043.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130043.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/SRR2130043.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_umi_merged.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_umi_merged.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_umi_merged.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1022_umi_merged.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/RNase-I.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/RNase-I.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130052_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130052_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130052_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/SRR2130052_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_3_S5_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_3_S5_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/RNase-I_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/RNase-I_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/RNase-I_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/RNase-I_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/PD3_12X_S5_clustered.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/PD3_12X_S5_clustered.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/PD3_12X_S5_clustered.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/PD3_12X_S5_clustered.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/PD3_12X_S5_clustered.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/PD3_12X_S5_clustered.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203-SQ1_S2_umi2id_unique.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203-SQ1_S2_umi2id_unique.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130032.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130032.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130032.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/SRR2130032.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/NT.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/NT.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/NT.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/NT.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P13_mix_UMI_unique.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P13_mix_UMI_unique.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/plasma_UMI_unique.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/plasma_UMI_unique.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/plasma_UMI_unique.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/plasma_UMI_unique.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_3_S20_umi2id_unique.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1113_3_S20_umi2id_unique.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1113_3_S20_umi2id_unique.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1113_3_S20_umi2id_unique.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_SQ2_S3_clustered.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_SQ2_S3_clustered.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/RNase-I.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/RNase-I.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/RNase-I.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/RNase-I.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_SQ2_S3_clustered.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203_SQ2_S3_clustered.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203_SQ2_S3_clustered.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1203_SQ2_S3_clustered.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_2_S19_umi2id_unique.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_2_S19_umi2id_unique.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_2_S19_umi2id.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1113_2_S19_umi2id.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1113_2_S19_umi2id.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1113_2_S19_umi2id.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130011.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130011.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_3_S5_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_3_S5_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_3_S5_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1022_3_S5_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130004_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130004_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_1_S3_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_1_S3_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1022_1_S3_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_SQ2_S3_clustered_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_SQ2_S3_clustered_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_1_S3.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_1_S3.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1022_1_S3.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_3_S5_clustered_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_3_S5_clustered_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203-SQ1_S2_umi2id_unique.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203-SQ1_S2_umi2id_unique.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203-SQ1_S2_umi2id_unique.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1203-SQ1_S2_umi2id_unique.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_1_S18_umi2id.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_1_S18_umi2id.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1203_SQ2_S3_clustered_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203_SQ2_S3_clustered_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1203_SQ2_S3_clustered_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1203_SQ2_S3_clustered_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4_clustered.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4_clustered.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P13_mix_UMI_unique.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P13_mix_UMI_unique.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P13_mix_UMI_unique.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P13_mix_UMI_unique.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_3_S20_umi2id.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_3_S20_umi2id.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_1_S3_clustered.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_1_S3_clustered.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_1_S3_clustered.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1022_1_S3_clustered.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1016_10X_S6_umi2id.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1016_10X_S6_umi2id.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4_rmdup.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_2_S4_rmdup.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_2_S4_rmdup.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1022_2_S4_rmdup.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_3_S5.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_3_S5.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1113_1_S18_umi2id_unique.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1113_1_S18_umi2id_unique.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1113_1_S18_umi2id_unique.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1113_1_S18_umi2id_unique.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130033_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130033_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/P1022_2_S4.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_2_S4.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/P1022_2_S4.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/P1022_2_S4.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130033.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130033.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130004.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130004.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130004.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/SRR2130004.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130051.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130051.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130033.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130033.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130033.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/SRR2130033.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/NT_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/NT_rmdup.sorted.bam
+Indexed: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130051.sorted.bam
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130051.bed with insert size boundary: (35, 80)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Running file: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/SRR2130051.bed with insert size boundary: (120, 180)
+Parsing 5000 CTCF sites
+Parsing 10000 CTCF sites
+Parsing 15000 CTCF sites
+Parsing 20000 CTCF sites
+Parsing 25000 CTCF sites
+Parsing 30000 CTCF sites
+Parsing 35000 CTCF sites
+Parsing 40000 CTCF sites
+Parsing 45000 CTCF sites
+Parsing 50000 CTCF sites
+Parsing 55000 CTCF sites
+Parsing 60000 CTCF sites
+Parsing 65000 CTCF sites
+Written: /stor/work/Lambowitz/cdw2854/plasmaDNA/wpsCTCF/SRR2130051.csv
+Making /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130051_rmdup.sorted.bam 
+Converted to: /stor/work/Lambowitz/cdw2854/plasmaDNA/bedFiles/bamFiles/SRR2130051_rmdup.sorted.bam

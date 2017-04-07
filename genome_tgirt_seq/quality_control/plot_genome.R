@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript
+%>% #!/usr/bin/env Rscript
 
 library(stringr)
 library(cowplot)
@@ -24,11 +24,11 @@ source('./plot_mismatch.R') #small_en_p
 figurepath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome//figures'
 # main fig plot
 p <- ggdraw() +
-    draw_plot(wgs_p, 0, 0.666, 0.5, 0.31) +
-    draw_plot(lonrenz_curve, 0.52, 0.666, 0.5, 0.31) +
-    draw_plot(gc_p, 0, 0.333, 0.49, 0.31) +
-    draw_plot(error_fig, 0.52, 0.333,0.5,0.33) +
-    draw_plot(indel_p, 0,0,0.5,0.31) +
+    draw_plot(wgs_p, 0, 0.666, 0.5, 0.3) +
+    draw_plot(lonrenz_curve, 0.5, 0.666, 0.5, 0.3) +
+    draw_plot(gc_p, 0, 0.333, 0.49, 0.3) +
+    draw_plot(error_fig, 0.5, 0.333,0.5,0.33) +
+    draw_plot(indel_p, 0,0,0.5,0.3) +
     draw_plot_label(label = letters[1:5], 
                     c(0,0.5,0,0.5,0), c(1,1,0.666,0.666,0.333), 
                     size = 40, family='Arial') 

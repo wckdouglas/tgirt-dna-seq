@@ -1,16 +1,17 @@
 #!/bin/bash
 
-PROJECTPATH=/scratch/02727/cdw2854/plasmaDNA
+PROJECTPATH=$WORK/cdw2854/plasmaDNA
 BED_PATH=$PROJECTPATH/bedFiles/merged/splittedBed
+BED_PATH=$PROJECTPATH/bedFiles/splittedBed
 RESULT_PATH=$PROJECTPATH/genomeWPS
-REF_PATH=$SCRATCH/GRCh38/hg38_rDNA
+REF_PATH=$REF/GRCh38/hg38_rDNA
 GENOME=$REF_PATH/genome_rDNA.fa.fai
 PROGRAM=genomeWPS.py
 #PROGRAM=strandedGenomeWPS.py
 PYTHON=$(which python)
 
 mkdir -p $RESULT_PATH
-for BED in  $BED_PATH/P13*.bed #$BED_PATH/*.bed
+for BED in  $BED_PATH/*.bed #$BED_PATH/*.bed
 do
 	SAMPLENAME=$(basename ${BED%.bed})
 	CHROM=$(echo $SAMPLENAME | rev | cut -d'.' -f1 | rev)

@@ -36,7 +36,7 @@ dist_p <- ggplot(data = df, aes(x = distance, weight=normalized_count)) +
 #                   position = 'identity',
 #                   aes(y=..count../sum(..count..)*100,
 #                   fill=prep, color = prep))+
-    labs(x = 'Inter-nucleosome distance for each individual(bp)', y='% Peaks', color=' ', fill= ' ') +
+    labs(x = 'Inter-nucleosome distance in cfDNA of two individuals (bp)', y='% Peaks', color=' ', fill= ' ') +
     scale_color_manual(values =c('black','salmon')) +
     theme(text = element_text(size=30, face='plain', family = 'Arial')) +
     theme(legend.key.height = unit(2,'line')) +

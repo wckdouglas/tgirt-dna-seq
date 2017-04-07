@@ -90,7 +90,7 @@ plot_gc <-function(df){
         scale_linetype_manual(guide='none',values = rep(1,8)) +
         labs(x = '% GC', y = 'Normalized coverage', color = ' ')+
         ylim(0,4)+
-        scale_y_continuous(sec.axis = sec_axis(trans = ~.*10, name = '% of 100-bp sliding windows'))
+        scale_y_continuous(sec.axis = sec_axis(trans = ~.*10, name = '% 100-bp sliding windows'))
     return(p)
 }
 
@@ -147,7 +147,8 @@ linearity <- gc_df %>%
 supplemental_df <- df %>%
     filter(grepl('K12_UMI_3|no_bias|13N',samplename)) %>%
     filter(grepl('[0-9]$', samplename)) %>%
-    filter(grepl('13N_K12_sim_template_switch|75bp_K12_UMI_3|13N_K12_sim|13N_K12_sim_ligation_only|no_bias',samplename)) %>%
+    filter(grepl('13N_clustered_K12_sim_template_switch|75bp_K12_UMI_3|13N_clustered_K12_sim|13N_clustered_K12_sim_ligation_only|no_bias',samplename)) %>%
+#    filter(grepl('13N_K12_sim_template_switch|75bp_K12_UMI_3|13N_K12_sim|13N_K12_sim_ligation_only|no_bias',samplename)) %>%
 #    filter(grepl('13N_kmer_K12_sim_template_switch|75bp_K12_UMI_1|13N_kmer_K12_sim|13N_K12_sim_ligation_only|no_bias',samplename)) %>%
     mutate(prep = case_when(grepl('no_bias',.$samplename) ~ 'Simulation: No bias',
                             grepl('sim.[0-9]$',.$samplename) ~"Simulation: 5' and 3' bias",

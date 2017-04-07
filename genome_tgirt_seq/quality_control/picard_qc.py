@@ -115,7 +115,7 @@ def main():
 
     bam_files = glob.glob(bam_path + '/*.bam')
     bam_files = filter(lambda x: 'pb' not in x, bam_files)
-    bam_files = filter(lambda x: re.search('10X|75bp_[0-9]+_nextera',x), bam_files)
+    bam_files = filter(lambda x: re.search('13N_clustered_K12_sim',x), bam_files)
     picard_func = partial(pipeline, result_path, figures_path, ref)
     p = Pool(20)
     p.map(picard_func, bam_files)

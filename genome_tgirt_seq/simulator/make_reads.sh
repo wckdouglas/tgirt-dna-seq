@@ -6,6 +6,7 @@ do
 		if [[ $SIDE == both ]]
 		then
 			SAMPLENAME=K12_sim
+			FOLD=10000
 		elif [[ $SIDE == 5 ]]
 		then
 			SAMPLENAME=K12_sim_ligation_only

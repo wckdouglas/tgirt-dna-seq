@@ -127,19 +127,19 @@ error_p <- ggplot(data = plot_df,
     #geom_errorbar(aes(ymin = average_error - sd_error, 
     #                  ymax = average_error + sd_error),
     #              width = 0.25) +
-    labs(x = '', y = 'Error freq', fill= ' ', color = ' ') +
+    labs(x = '', y = 'Error rate', fill= ' ', color = ' ') +
     theme(text = element_text(size=30,face='plain',family = 'Arial')) +
     theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
     theme(strip.text = element_text(size = 20, family='Arial'))+
     theme(axis.text.x = element_blank()) +
-    scale_color_manual(values = colors, guide = guide_legend(ncol=1, keywidth = 2.5, keyheight=2)) +
+    scale_color_manual(values = colors, guide = guide_legend(ncol=1, keywidth = 2.5, keyheight=1.7)) +
     #scale_fill_manual(values = c('light sky blue','salmon','green4','orange'), guide = guide_legend(ncol=3)) +
     theme(axis.ticks.x = element_blank()) +
     theme(axis.text.y = element_text(size = 30)) +
     theme(legend.text = element_text(size = 20)) +
     #theme(legend.key.size = unit(9, 'mm')) +
     #theme(legend.position = c(0.5, -0.03)) + #poster
-    theme(legend.position = c(0.75,0.4)) + #paper
+    theme(legend.position = c(0.7,0.4)) + #paper
     panel_border() +
     theme(panel.border = element_rect(colour = "black", fill=NA, size=1))+ 
     facet_grid(var~data_label, scale = 'free_y')  
@@ -150,7 +150,7 @@ error_fig <- ggdraw(coloring_legend_text_match(error_p, colors)) +
     theme(plot.margin = grid::unit(c(0,0,5,0),'mm')) +
 #    draw_label(label1, x = 0.25, y = 0.897, size = 20, fontface ='bold') + #poster
 #    draw_label(label2, x = 0.25, y = 0.45, size = 20, fontface ='bold')  +#poster
-    draw_label(label1, x = 0.17, y = 0.89, size = 20, fontface ='bold') + #paper
+    draw_label(label1, x = 0.17, y = 0.87, size = 20, fontface ='bold') + #paper
     draw_label(label2, x = 0.17, y = 0.45, size = 20, fontface ='bold')  #paper
 figure_name <- str_c(figure_path,'/genome_errors.pdf')
 ggsave(error_fig, file = figure_name, height = 9, width = 13) #poster

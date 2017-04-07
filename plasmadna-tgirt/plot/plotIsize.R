@@ -20,7 +20,7 @@ rename <- function(x){
 insert_df <- insert_data_path %>%
     stri_c('isizeTable.tsv',sep='/') %>%
     read_tsv()%>%
-    filter(grepl('SRR2130051|SRR2130052|P1022',samplename))  %>%
+    filter(grepl('SRR2130051|SRR2130052|P11|P13',samplename))  %>%
     filter(grepl('umi2id|SRR', samplename)) %>%
     filter(!grepl('cluster',samplename))  %>%
     filter(isize > 22) %>%
@@ -46,9 +46,9 @@ insert_p_merge <- ggplot(data = insert_df) +
     geom_line(size=2,alpha=0.8,aes(x=isize, y=count*100, 
                                         color = prep,
                                         group = samplename)) +
-    theme(axis.text.y = element_text(size=35,face='plain',family = 'Arial')) +
+    theme(axis.text.y = element_text(size=30,face='plain',family = 'Arial')) +
     theme(axis.text.x = element_text(angle=50,hjust=1,size=30, face='plain',family = 'Arial')) +
-    theme(text = element_text(size=35, family = 'Arial'))+
+    theme(text = element_text(size=30, family = 'Arial'))+
     labs(x='Fragment length (nt)',y='% Reads', color = ' ')+
     theme(legend.key.size = unit(11,'mm')) +
     theme(legend.position = c(0.8,0.9)) +

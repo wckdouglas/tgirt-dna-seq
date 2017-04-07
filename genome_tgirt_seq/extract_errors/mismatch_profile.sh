@@ -16,4 +16,8 @@ do
 			-o $MISMATCH_PATH/$SAMPLENAME \
 			-q 30 \
 			-n 10000
+	echo samtools mpileup -f $REF/Ecoli/k12_mg1655.fa  $BAM \
+		\| pileup_to_bed.py -i - -q 30 -c 1 \
+		\> $MISMATCH_PATH/$SAMPLENAME.tsv
+	
 done
