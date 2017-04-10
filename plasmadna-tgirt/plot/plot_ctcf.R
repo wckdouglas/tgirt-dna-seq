@@ -27,9 +27,8 @@ read_file <- function(filename){
 ctcf_df <- wps_data_path %>%
     list.files(path=., pattern='.csv', full.names=T) %>%
 #    .[grepl('SRR|P13_mix_UMI', .)]  %>%
-    .[grepl('SRR|P1022_111', .)]  %>%
-    .[grepl('0051|0052|unique', .)]  %>%
-    .[grepl('rmdup|unique', .)]  %>%
+    .[grepl('0051_rmdup|P1022_111', .)]  %>%
+    .[grepl('rmdup|1016', .)]  %>%
 #    filter(grepl('SRR|P1022', samplename))  %>%
 #    .[grepl('0052|umi',.)]  %>%
 #    .[grepl('rmdup|umi', .)]  %>%

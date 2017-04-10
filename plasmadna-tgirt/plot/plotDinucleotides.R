@@ -20,7 +20,7 @@ filenames <- list.files(path = data_path,
 
 df <- filenames %>%
     #.[grepl('SRR2130051.tsv|P1022_2_S4_umi2id_unique.tsv',.)] %>%
-    .[grepl('51|P13_mix_UMI_unique',.)]%>%
+    .[grepl('51_rmdup|P1022_1113_13_1016_mix_unique',.)]%>%
     map_df(read_tsv) %>%
     #filter(grepl('52|P1113_3_S20_umi2id', samplename)) %>%
     mutate( name = ifelse(grepl('SRR',samplename),'ssDNA-seq','TGIRT-seq')) %>%

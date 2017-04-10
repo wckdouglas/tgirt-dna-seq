@@ -70,8 +70,6 @@ def analyze_bam(ref_fasta, window_size, outputpath, bed_file):
         .assign(samplename = samplename)
     df.to_csv(tablename, sep='\t',index=False)
     print 'Saved %s' %tablename
-    plotting(df, figurename)
-    print 'Saved %s' %figurename
     return df
 
 def makedir(directory):
@@ -87,23 +85,21 @@ def main():
     outputpath = projectpath + '/nucleotidesAnaylsis/dinucleotides'
     makedir(outputpath)
     bedFiles = glob.glob(bedFilePath + '/*.bed')
-    bedFiles = filter(lambda x: re.search('51_rmdup|52_rmdup|umi2id_unique',x), bedFiles)
+    bedFiles = filter(lambda x: re.search('51_rmdup|52_rmdup|umi2id_unique|mix_unique',x), bedFiles)
     bedFiles = filter(lambda x: not re.search('SQ',x), bedFiles)
-    print bedFiles
+    bedFiles = filter(lambda x: re.search('mix',x), bedFiles)
     outputprefix = outputpath + '/dinucleotides'
     tablename = outputprefix + '.tsv'
     figurename = outputprefix + '.pdf'
     window_size = 400
     analyze_bam_func = partial(analyze_bam, reference, window_size, outputpath)
-    if not os.path.isfile(tablename):
-        pool = Pool(12)
-        dfs = pool.map(analyze_bam_func, bedFiles)
-        #dfs = map(analyze_bam_func, bedFiles)
-        pool.close()
-        pool.join()
-        df = pd.concat(dfs)
-        df.to_csv(tablename,sep='\t', index=False)
-    df = pd.read_csv(tablename,sep='\t')
+    pool = Pool(12)
+    dfs = pool.map(analyze_bam_func, bedFiles)
+    #dfs = map(analyze_bam_func, bedFiles)
+    pool.close()
+    pool.join()
+    df = pd.concat(dfs)
+    df.to_csv(tablename,sep='\t', index=False)
     print 'Saved: %s.' %tablename
 
 if __name__ == '__main__':
