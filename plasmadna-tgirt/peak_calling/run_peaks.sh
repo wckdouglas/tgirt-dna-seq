@@ -1,11 +1,17 @@
 #!/bin/bash
 
-PROJECT_PATH=$WORK/cdw2854/plasmaDNA
+PROJECT_PATH=$SCRATCH/plasmaDNA
 #PROJECT_PATH=/stor/work/Lambowitz/cdw2854/plasmaDNA
 BW_PATH=$PROJECT_PATH/genomeWPS/bigWig_files
 BED_PATH=$PROJECT_PATH/genomeWPS/bed_files
 
-for BW in $BW_PATH/*bigWig
+for BW in $(ls $BW_PATH/*bigWig \
+	| egrep 'P1[013]|SRR213005[12]' \
+	| grep 'unique\|SRR' \
+	| grep 'rmdup\|unique' \
+	| grep -v cluster \
+	| grep -v 'MT' \
+	|grep -v Short )
 do
 	FILENAME=$(basename $BW)
 	SAMPLENAME=$(echo $FILENAME | cut -d'.' -f1)

@@ -54,7 +54,7 @@ def make_whole_gene(start, end ,strand):
     return start, end
 
 
-def run_gene(args, gene, out):
+def run_gene(args, gene, out, bw):
     chrom = gene['chrom']
     start = gene['start']
     end = gene['end']
@@ -79,7 +79,7 @@ def run_gene(args, gene, out):
     return 0
 
 
-def run_file(args):
+def run_file(args, chrom_genes):
     '''
     For genes in a chromosome, get tss/gene body and run fourier transform on the gene
     '''
@@ -88,13 +88,13 @@ def run_file(args):
     with open(args.out_bed,'w') as out:
         out.write('name\ttype\tid\tperiodicity\tintensity\n')
         for count, gene in chrom_genes.iterrows():
-            run_gene(args, gene, out)
+            run_gene(args, gene, out, bw)
             if count % 1000 == 0:
                 print 'Parsed {gene_count} for {filename} at {chrom}'.format(gene_count = gene_count,
                                                         filename = out.name,
                                                         chrom = args.chrom)
     bw.close()
-    return out_file
+    return 0
 
 def genes_to_mem(protein_bed):
     '''
@@ -127,6 +127,7 @@ def main():
     chrom_genes = protein_df.query("chrom == '%s'" %args.chrom)
     filename = os.path.basename(args.in_bigwig)
     print 'Running {filename} for chrom: {chrom}'.format(filename=filename, chrom=args.chrom)
+    run_file(args, chrom_genes)
 
     return 0
 
