@@ -93,7 +93,7 @@ prep_end_p <- ggplot(data = pdf,
   theme(strip.text.y = element_text(size = 25, face='plain', angle = 0,, family='Arial')) +
   theme(axis.title = element_text(size = 25, face='plain', family='Arial')) +
   theme(axis.text = element_text(size = 18, face='plain', family='Arial'))  +
-  theme(legend.position = c(0.3,0.7))+
+  theme(legend.position = c(0.3,0.73))+
   theme(legend.text = element_text(size = 18, face='plain', family='Arial'))+
   theme(legend.key.size=unit(8,'mm'))
 figurename <- str_c(datapath , '/end_bias_plot_fragmentation.pdf')

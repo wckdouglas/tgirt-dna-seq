@@ -85,7 +85,7 @@ small_en_p <- ggplot(data = df %>%
     geom_vline(aes(xintercept = adjusted_position), linetype=2, alpha=0.3, color = 'grey') +    
     labs(x = 'Positions', y = 'Entropy (bits)\n', color = ' ')  +
     theme(text = element_text(family='Arial', size = 25)) +
-    theme(legend.position = c(0.3,0.15)) +
+    theme(legend.position = c(0.25,0.15)) +
     theme(axis.text = element_text(family ='Arial', size = 25)) +
     scale_color_manual(values = colors) +
     theme(legend.text = element_text(family ='Arial', size = 25)) 

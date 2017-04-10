@@ -10,40 +10,32 @@ library(extrafont)
 loadfonts()
 
 project_path <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/'
-insert_data_path <- stri_c(project_path,'/insertSize')
+insert_data_path <- stri_c(project_path,'/bedFiles')
 
 rename <- function(x){
-    y = ifelse(grepl('^P',x),'TGIRT-seq','ssDNA-seq')
+    y = ifelse(grepl('^SRR',x),'ssDNA-seq','TGIRT-seq')
     return(y)
 }
 
 insert_df <- insert_data_path %>%
-    stri_c('isizeTable.tsv',sep='/') %>%
+    stri_c('insertSize.tsv',sep='/') %>%
     read_tsv()%>%
-    filter(grepl('SRR2130051|SRR2130052|P11|P13|P10',samplename))  %>%
-    filter(grepl('unique|SRR', samplename)) %>%
-    filter(!grepl('cluster',samplename))  %>%
-    filter(isize > 22) %>%
+    filter(grepl('51_rmdup|52_rmdup|umi2id_unique',samplename))  %>%
+    filter(!grepl('mix|SQ', samplename)) %>%
+    filter(isize > 22, isize<500) %>%
     mutate(prep = rename(samplename))  %>%
-    group_by(isize,samplename, prep) %>%
-    summarize(count = sum(count)) %>%
-    ungroup() %>%
-    group_by(prep,samplename) %>%
-    do(data_frame(count = .$count/sum(.$count),
-                  isize = .$isize)) %>% 
-    ungroup() %>%
     mutate(prep = factor(prep, level = rev(unique(prep)))) %>%
     arrange(isize) %>%
     tbl_df
 
-main_peak <- insert_df %>% filter(count == max(count)) %>% .$isize
+main_peak <- insert_df %>% filter(counts == max(counts)) %>% .$isize
 periodicity <- 10.4
 peaks <- main_peak - periodicity * seq(0,10,1)
 peaks_df <- data_frame(peak = peaks, colors = c('head',rep('none',length(peaks)-1)))
 
 
 insert_p_merge <- ggplot(data = insert_df) + 
-    geom_line(size=2,alpha=0.8,aes(x=isize, y=count*100, 
+    geom_line(size=1.5,alpha=0.5,aes(x=isize, y=counts, 
                                         color = prep,
                                         group = samplename)) +
     theme(axis.text.y = element_text(size=30,face='plain',family = 'Arial')) +

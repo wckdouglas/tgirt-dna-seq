@@ -34,7 +34,8 @@ sub_p<-ggplot(data= df, aes(x = str_c(ref, '-to-', read), y = fraction, color = 
     facet_grid(prep~ref, scales = 'free_x') +
     labs(x = 'Substitutions', y = expression(Substitution~rate~(x10^4)), color = ' ', parse=T) +
     theme(text = element_text(size=30,  family = 'Arial')) +
-    theme(strip.text = element_text(size = 25,  family = 'Arial'))+
+    theme(strip.text.y = element_text(size = 25,  family = 'Arial'))+
+    theme(strip.text.x = element_text(size = 30,  family = 'Arial'))+
     theme(axis.text = element_text(size = 30, family = 'Arial'))+
     theme(axis.text.x = element_text(angle = 70, hjust=0.5, vjust=0.5, family='Arial', size=30)) +
     theme(legend.position='none')+

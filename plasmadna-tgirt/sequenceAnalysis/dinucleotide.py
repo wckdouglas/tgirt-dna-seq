@@ -1,8 +1,6 @@
 
 #!/usr/bin/env python
 
-from matplotlib import use as mpl_use
-mpl_use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
@@ -49,26 +47,6 @@ def renameDinucleotide(di):
         label = 'Nope'
     return label
 
-def plotting(df, figurename):
-    #start plotting
-    df = df[df['lenType'].str.contains('167')]
-    number_of_wrap = len(set(df['samplename']))
-    with sns.plotting_context('paper', font_scale=2.5, rc={"lines.linewidth":2}):
-        p = sns.FacetGrid(data = df,
-                hue = 'dinucleotide_type',
-                col = 'samplename',
-                size = 4,
-                aspect = 1.6,
-                col_wrap = int(math.sqrt(number_of_wrap)))
-        p.map(plt.plot, 'position', 'adjusted_signal')
-        p.set_titles('{col_name}', fontweight='bold')
-        p.set_ylabels('log2(Observer/Expected)')
-        p.set_xlabels('Postion relative to middle of transcripts')
-        p.set_xticklabels(rotation=80)
-        p.add_legend()
-        p.savefig(figurename)
-    return 0
-
 def medianFilter(dt):
     dt['adjusted_signal'] = dt['fraction'] - medfilt(dt['fraction'],101)
     return dt
@@ -109,13 +87,16 @@ def main():
     outputpath = projectpath + '/nucleotidesAnaylsis/dinucleotides'
     makedir(outputpath)
     bedFiles = glob.glob(bedFilePath + '/*.bed')
+    bedFiles = filter(lambda x: re.search('51_rmdup|52_rmdup|umi2id_unique',x), bedFiles)
+    bedFiles = filter(lambda x: not re.search('SQ',x), bedFiles)
+    print bedFiles
     outputprefix = outputpath + '/dinucleotides'
     tablename = outputprefix + '.tsv'
     figurename = outputprefix + '.pdf'
     window_size = 400
     analyze_bam_func = partial(analyze_bam, reference, window_size, outputpath)
     if not os.path.isfile(tablename):
-        pool = Pool(24)
+        pool = Pool(12)
         dfs = pool.map(analyze_bam_func, bedFiles)
         #dfs = map(analyze_bam_func, bedFiles)
         pool.close()
@@ -123,8 +104,6 @@ def main():
         df = pd.concat(dfs)
         df.to_csv(tablename,sep='\t', index=False)
     df = pd.read_csv(tablename,sep='\t')
-    figurename = outputprefix + '.pdf'
-    plotting(df, figurename)
     print 'Saved: %s.' %tablename
 
 if __name__ == '__main__':

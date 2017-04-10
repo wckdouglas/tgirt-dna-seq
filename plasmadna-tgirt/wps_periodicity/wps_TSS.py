@@ -17,8 +17,8 @@ import sys
 
 r_periodogram = r_spec_pgram()
 def extract_fft(wps_array):
-    #periodicity, intensity = daniell_spectrum(wps_array)
-    periodicity, intensity = r_spectrum(wps_array, r_periodogram)
+    periodicity, intensity = daniell_spectrum(wps_array)
+    #periodicity, intensity = r_spectrum(wps_array, r_periodogram)
     usable_indices = (periodicity<=280) & (periodicity>=120)
     periodicity = periodicity[usable_indices]
     intensity = intensity[usable_indices]
@@ -56,8 +56,8 @@ def run_chrom_genes(chrom_genes, bw, gene_count, out):
         start = gene['start']
         end = gene['end']
         strand = gene['strand']
-        #tss_start, tss_end = make_tss_region(start, end, strand)
-        tss_start, tss_end = make_whole_gene(start, end, strand)
+        tss_start, tss_end = make_tss_region(start, end, strand)
+        #tss_start, tss_end = make_whole_gene(start, end, strand)
 
         wps_array = bw.values(chrom, tss_start, tss_end)
         try:
@@ -111,13 +111,13 @@ def main():
     protein_bed = ref_path + '/GRCh38/Bed_for_counts_only/protein.bed'
     project_path =  '/stor/work/Lambowitz/cdw2854/plasmaDNA/genomeWPS'
     bw_path = project_path + '/bigWig_files'
-    #out_path = project_path + '/tss_periodicity'
-    out_path = project_path + '/gene_body_periodicity_daniell_R'
+    out_path = project_path + '/tss_periodicity'
+    #out_path = project_path + '/gene_body_periodicity_daniell_R'
     #out_path = project_path + '/gene_body_periodicity_daniell'
     if not os.path.isdir(out_path):
         os.mkdir(out_path)
-    bw_files = glob.glob(bw_path + '/*.bigWig')
-    bw_files = filter(lambda x: 'P13_mix_umi2id_uniqu' not in x, bw_files)
+    bw_files = glob.glob(bw_path + '/P1022_1113_13_1016_mix_unique*.bigWig')
+    #bw_files = filter(lambda x: '' not in x, bw_files)
     bw_prefix = set(map(lambda x: os.path.basename(x).split('.')[0], bw_files))
     chroms = range(1,23)
     chroms.extend(['X','Y'])
@@ -125,7 +125,7 @@ def main():
     protein_df = genes_to_mem(protein_bed)\
         .pipe(lambda d: d[np.in1d(d.chrom, chroms)])
     run_file_func = partial(run_file, protein_df, out_path, bw_path)
-    p = Pool(12)
+    p = Pool(24)
     p.map(run_file_func, list(bw_prefix))
     p.close()
     p.join()

@@ -134,7 +134,7 @@ def makedir(directory):
 
 def main():
     #define folders/paths
-    threads = 12
+    threads = 20
     projectPath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     referencePath = '/stor/work/Lambowitz/ref/GRCh38/hg38_rDNA'
     #bedPath = projectPath + '/rmdupBedFiles'

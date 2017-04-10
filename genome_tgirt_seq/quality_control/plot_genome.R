@@ -81,9 +81,10 @@ message('plotted: ', figurename)
     
 #indel + mismatch
 p <- plot_grid(sub_p,
+               sub_p + ylim(0,2),
                base_indel_p, 
                ncol=1, 
-               labels = letters[1:2], label_size = 40)
+               labels = letters[1:3], label_size = 40)
 figurename <- str_c(figurepath,'/error_profile.pdf')
-ggsave(p, file = figurename, width = 15, height = 22)
+ggsave(p, file = figurename, width = 15, height = 30)
 message('plotted: ', figurename)
