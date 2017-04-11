@@ -45,7 +45,7 @@ def main():
     projectpath = '/stor/work/Lambowitz/cdw2854/plasmaDNA'
     bedpath = projectpath + '/genomeWPS/bed_files'
     tablename = projectpath + '/figures/predictedNucleosomeDistance.tsv'
-    file1 = 'P13_mixed'
+    file1 = 'P1022_1113_13_1016_mix_unique'
     file2 = 'SRR2130051_rmdup'
     chromosomes = map(str,np.arange(1,23))
     chromosomes = np.concatenate([chromosomes,['X','Y']])

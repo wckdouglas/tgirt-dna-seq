@@ -11,8 +11,7 @@ datapath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/figures'
 df <- datapath %>%
     str_c('peakDistance.tsv',sep='/') %>%
     read_tsv()  %>%
-    filter(grepl('umi|0052$',samplename)) %>%
-    filter(grepl('P1022|0052$',samplename)) %>%
+    filter(grepl('P1022_1113_13_1016_mix_unique|0051_rmdup$',samplename)) %>%
     mutate(prep = ifelse(grepl('SRR',samplename),'ssDNA-seq','TGIRT-seq')) %>%
     filter(distance < 450) %>%
     group_by(prep,distance) %>% 
