@@ -114,7 +114,8 @@ plot_df <-  df %>%
                             grepl('Nextera',.$prep) ~ 'Nextera-XT')) %>%
     inner_join(base_error)  %>%
     mutate(fold = fraction/base_error) %>% 
-    mutate(var = factor(var, levels = c('Mismatch Rate','Indel Rate'))) %>%
+    mutate(var = ifelse(var == 'Indel Rate','Indel rate','Substitution\nrate')) %>%
+    mutate(var = factor(var, levels = rev(unique(var)))) %>%
     filter(prep != 'TGRIT-seq (Error-corrected all)') %>%
 #    filter(grepl('Error|Nexter', prep)) %>%
     tbl_df

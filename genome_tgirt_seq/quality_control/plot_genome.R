@@ -26,8 +26,8 @@ figurepath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome//figures'
 # main fig plot
 p <- ggdraw() +
     draw_plot(wgs_p, 0, 0.666, 0.5, 0.3) +
-    draw_plot(lonrenz_curve, 0.5, 0.666, 0.5, 0.3) +
-    draw_plot(gc_p, 0, 0.333, 0.49, 0.3) +
+    draw_plot(gc_p, 0.5, 0.666, 0.5, 0.3) +
+    draw_plot(lonrenz_curve, 0, 0.333, 0.49, 0.3) +
     draw_plot(error_fig, 0.5, 0.333,0.5,0.33) +
     draw_plot(indel_p, 0,0,0.5,0.3) +
     draw_plot_label(label = letters[1:5], 
@@ -41,10 +41,10 @@ ggsave(p, file = figurename, width = 24, height = 18)
 
 # supplementary genome
 p <- ggdraw() +
-    draw_plot(isize_p,0,0,0.5,0.48) +
-    draw_plot_label(letters[1:3], 
-                    x = c(0, 0.5,0), 
-                    y = c(1, 1, 0.52), size = 40, family='Arial')
+    draw_plot(isize_p,0,0,0.5,0.48)# +
+#    draw_plot_label(letters[1:3], 
+#                    x = c(0, 0.5,0), 
+#                    y = c(1, 1, 0.52), size = 30, family='Arial')
 figurename <- str_c(figurepath, '/genome_supplemental_1.pdf')
 ggsave(p, file = figurename, width = 15, height = 15)
 message('plotted: ', figurename)

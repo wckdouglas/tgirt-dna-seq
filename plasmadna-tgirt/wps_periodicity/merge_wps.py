@@ -11,9 +11,9 @@ for analytic in analytics:
         files = glob.glob(work_path + '/' + analytic + '/' + fft + '/*.bed')
         samplenames = set(map(lambda x: x.split('.')[0], files))
         for samplename in list(samplenames):
-            out_table_name = samplenames + '.tsv'
+            out_table_name = samplename + '.tsv'
             table_names = glob.glob(samplename+'*.bed')
-            df = map(read_table, table_names)
+            df = map(pd.read_table, table_names)
             df = pd.concat(df, axis=0)
             df.to_csv(out_table_name, sep='\t', index=False)
             print 'Written: ', out_table_name

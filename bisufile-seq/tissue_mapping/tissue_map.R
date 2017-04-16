@@ -50,9 +50,16 @@ qdf <- data_frame(tissues = colnames(dm[,-1]),
 
 colors <- c('lightgoldenrod2','khaki1','purple4','orange','brown','mediumseagreen','pink',
             'darkgreen','slateblue','red','skyblue','darkblue')
-pie_methyl <- ggplot(data=qdf, aes(x = factor(1),y=fraction, fill=tissue_type_annot))+
+pie_methyl <- ggplot(data=qdf, aes(x = factor(1),
+                                   y=fraction, 
+                                   fill=tissue_type_annot))+
     geom_bar(stat='identity')+
-    geom_text(data = qdf %>% filter(fraction > 0.1), aes(x= factor(1), y=pos, label = tissue_type), size=5) +
+    geom_text(data = qdf %>% 
+                  filter(fraction > 0.1), 
+              aes(x= factor(1), 
+                  y=pos, 
+                  label = tissue_type), 
+              size=3.5) +
     theme(axis.text.x = element_text(angle=0)) +
     coord_polar(theta = "y")  +
     scale_fill_manual(values=colors) +

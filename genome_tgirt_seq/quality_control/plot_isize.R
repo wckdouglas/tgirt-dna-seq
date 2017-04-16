@@ -38,12 +38,10 @@ median_size <- isize_table %>%
 
 isize_p <- ggplot(data = isize_table, aes(x = isize, y = counts)) +
 	geom_line(aes(color = prep, group = samplename), size=1.3) +
-	theme(text = element_text(size = 20)) +
-	theme(axis.text = element_text(size = 18)) +
-	labs(x = 'Insert Size (nt)', y = '% Fragments', color = ' ') +
+	labs(x = '\nInsert Size (nt)', y = '% Fragments\n', color = ' ') +
     theme(legend.position = 'none') +
-    theme(text = element_text(size = 25, face='plain',family='Arial')) +
-    theme(axis.text = element_text(size = 25, face='plain',family='Arial')) +
+    theme(text = element_text(size = 30, face='plain',family='Arial')) +
+    theme(axis.text = element_text(size = 30, face='plain',family='Arial')) +
     xlim(0,600)+
     annotate(geom='segment', y = 0.78,x = 200, yend = 0.73, xend = 156,
                  arrow = arrow(length = unit(0.5, "cm"))) +

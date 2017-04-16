@@ -24,7 +24,7 @@ insert_df <- insert_data_path %>%
     filter(!grepl('mix|SQ', samplename)) %>%
     filter(isize > 22, isize<500) %>%
     mutate(prep = rename(samplename))  %>%
-    mutate(prep = factor(prep, level = rev(unique(prep)))) %>%
+    mutate(prep = factor(prep, level = unique(prep))) %>%
     arrange(isize) %>%
     tbl_df
 
@@ -34,6 +34,7 @@ peaks <- main_peak - periodicity * seq(0,10,1)
 peaks_df <- data_frame(peak = peaks, colors = c('head',rep('none',length(peaks)-1)))
 
 
+colors <- c('black','salmon')
 insert_p_merge <- ggplot(data = insert_df) + 
     geom_line(size=1.5,alpha=0.5,aes(x=isize, y=counts, 
                                         color = prep,
@@ -52,9 +53,9 @@ insert_p_merge <- ggplot(data = insert_df) +
                  arrow = arrow(length = unit(0.5, "cm"))) +
     annotate(geom='text', x = 234, y = 2.5, label = '167 nt', size = 12, fontface='bold') +
     ylim(0,2.5) +
-    scale_color_manual(values = c('black','salmon'))
+    scale_color_manual(values = colors )
 source('~/R/legend_to_color.R')
-insert_p_merge <- ggdraw(coloring_legend_text(insert_p_merge))
+insert_p_merge <- ggdraw(coloring_legend_text_match(insert_p_merge, colors))
 figurename <- str_c(insert_data_path, '/plasma_insert_profile.pdf')
 ggsave(insert_p_merge, file = figurename, height = 8)
 message('Plotted: ', figurename)
