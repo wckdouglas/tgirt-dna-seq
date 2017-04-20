@@ -3,6 +3,7 @@ BAM_FILE=/stor/work/Lambowitz/cdw2854/ecoli_genome/picard_results/K12_F_NEB_S7_u
 BAM_FILE=/stor/work/Lambowitz/cdw2854/ecoli_genome/bamFiles/mark_duplicate/K12_UMI_1_S9_clustered.bam
 
 samtools sort -n $BAM_FILE \
+	| samtools view -F 2048 -F 256 -F 1024 -F 512 -F 8 -F 4  -b \
 	| bamToBed -bedpe -mate1 \
 	| awk '$1 != "\."' \
 	| bedpe_to_bed.py \

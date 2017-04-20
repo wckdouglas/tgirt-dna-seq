@@ -38,7 +38,7 @@ def main():
     outbed = args.outbed
     outprefix = outbed .split('.')[0]
     side = args.side
-    kmer_5, kmer_3 = 3, 8
+    kmer_5, kmer_3 = 3, 12
 
     fasta = Fasta(ref_fasta)
     seq_id = fasta.keys()[0]

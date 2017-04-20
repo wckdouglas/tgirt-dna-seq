@@ -74,8 +74,9 @@ def base_profile(base_profile_table, side, kmer_5, kmer_3):
         .assign(kmer = lambda d: map(get_kmer, d['end'], d['kmer'])) \
         .groupby(['end','kmer'], as_index=False ) \
         .agg({'kmer_fraction':np.sum}) \
-        .group_by(['end'], as_index=False) \
-        .apply(scaling_factor)
+        .groupby(['end'], as_index=False) \
+        .apply(scaling_factor) \
+        .reset_index()
 
 
     # scale up kmers and make distribution
