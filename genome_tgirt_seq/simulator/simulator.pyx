@@ -42,12 +42,13 @@ cpdef str reverse_complement(str sequence):
 
 
 
-def define_scaling_factor(float_p):
+def scaling_factor(d):
     '''
     upscale all probability but limiting the highest prob < 1
     to save iteration for simulation
-    '''
-    return 10**(abs(int(np.log10(float_p))))
+        '''
+    d['scaled_kmer_fraction'] = d.kmer_fraction/d.kmer_fraction.max()
+    return d
 
 def extract_kmer(kmer_5, kmer_3, end, kmer):
     '''
@@ -65,26 +66,24 @@ def kmer_generator(kmer_length):
 
 
 def base_profile(base_profile_table, side, kmer_5, kmer_3):
+
     n = 1000
     # make kmer according to 5' or 3'
     get_kmer = partial(extract_kmer, kmer_5, kmer_3)
     base_df = pd.read_csv(base_profile_table) \
         .assign(kmer = lambda d: map(get_kmer, d['end'], d['kmer'])) \
         .groupby(['end','kmer'], as_index=False ) \
-        .agg({'kmer_fraction':np.sum})
+        .agg({'kmer_fraction':np.sum}) \
+        .group_by(['end'], as_index=False) \
+        .apply(scaling_factor)
 
-    fwd_max_p = base_df[base_df.end=="5'"]['kmer_fraction'].max()
-    rvs_max_p = base_df[base_df.end=="3'"]['kmer_fraction'].max()
-    fwd_scaling_factor = define_scaling_factor(fwd_max_p)
-    rvs_scaling_factor = define_scaling_factor(rvs_max_p)
 
     # scale up kmers and make distribution
     base_dist = defaultdict(lambda: defaultdict(float))
     for i, row in base_df.iterrows():
         end = row['end']
         kmer = row['kmer']
-        scaling_factor = fwd_scaling_factor if end == "5'" else rvs_scaling_factor
-        p = row['kmer_fraction'] * scaling_factor
+        p = row['scaled_kmer_fraction']
         base_dist[end][kmer] = bernoulli_generator(p)
 
     # store distribution in hash table

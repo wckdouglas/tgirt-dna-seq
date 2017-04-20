@@ -79,13 +79,15 @@ def main():
     figurename = data_path + '/reinitiate_model.pdf'
     bar_figurename = figurename.replace('.pdf','_bar.pdf')
     sim_Df = make_simulation_data()
-    df = map(read_file, glob.glob(data_path + '/*tsv'))
+    df = map(read_file, glob.glob(data_path + '/*UMI_1*tsv'))
     df = pd.concat(df, axis = 0)
     df = pd.concat([df,sim_Df],axis=0) \
             .assign(normalized_count = lambda d: d.normalized_count * 100)
 
-    k, pv = chisquare(df[df.samplename.str.contains('UMI_1')]['normalized_count'].values[:3], 
-                      sim_Df.normalized_count.values[:3])
+    how_many = 5
+    chi_df = df.query('fragment_counts < %i' %how_many)
+    k, pv = chisquare(chi_df[~chi_df.samplename.str.contains('sim')].normalized_count, 
+                      chi_df[chi_df.samplename.str.contains('sim')].normalized_count)
 
     d = df[df.samplename.str.contains('UMI_1|sim')]\
         .assign(samplename = lambda d: map(rename, d.samplename))

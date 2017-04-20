@@ -127,7 +127,7 @@ wgs_p <- ggplot() +
     scale_linetype_discrete(guide = guide_legend(ncol = 1))+
     theme(text = element_text(size=30,face='plain',family = 'Arial')) +
 	theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
-	labs(x ='Level of Coverage', y = '% Genome', color =' ') +
+	labs(x ='Fold coverage', y = '% Bases', color =' ') +
     theme(legend.position = 'none') +
     annotate(geom='text',x=10,y=10.5,label=preps[1],parse=T, 
            hjust = 0, color = colors[1], size = 8) +
