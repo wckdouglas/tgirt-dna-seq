@@ -73,13 +73,13 @@ ggsave(en_p, file = fig_name,
        width=fig_width, height = fig_height)
 message('Plotted ', fig_name)
 
-colors <- c('black','khaki4','green4')
+colors <- c('black','orange2','green4')
 small_en_p <- ggplot(data = df %>% 
                          filter(read_end=='Read 1') %>% 
                          mutate(method = relevel(factor(method),'UMI direct ligation')), 
                      aes(color = method, x = adjusted_position, 
                         y = entropy, group=samplename)) +
-    geom_line(size = 1.5, alpha=0.4) +
+    geom_line(size = 1.5, alpha=0.7) +
     facet_zoom(x = adjusted_position < 5)  +
     theme(legend.key.height = unit(2,'line')) +
     geom_vline(aes(xintercept = adjusted_position), linetype=2, alpha=0.3, color = 'grey') +    

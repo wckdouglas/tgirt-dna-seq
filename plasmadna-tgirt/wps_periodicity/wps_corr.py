@@ -40,10 +40,10 @@ def read_file(filename):
 
 
 def tissue_cor(selected_files, ge):
-    low_p, hi_p = 193, 199
+    low_p, hi_p = 190, 199
     df = map(read_file, selected_files)
     df = pd.concat(df, axis=0)\
-            .query('periodicity < %i & periodicity > %i' %(hi_p, low_p))\
+            .query('periodicity <= %i & periodicity >= %i' %(hi_p, low_p))\
             .groupby(['samplename','name','type','id'], as_index=False) \
             .agg({'intensity':'mean'})\
             .merge(ge,'inner')\

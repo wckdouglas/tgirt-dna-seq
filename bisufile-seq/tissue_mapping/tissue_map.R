@@ -42,6 +42,8 @@ qdf <- data_frame(tissues = colnames(dm[,-1]),
     )) %>%
     group_by(tissue_type) %>%
     summarize(fraction = sum(fraction)) %>%
+    ungroup() %>% 
+    mutate(fraction = ifelse(fraction < 0, 0, fraction)) %>%
     mutate(tissue_type_annot = str_c(tissue_type,': ', signif(fraction*100,2),'%')) %>%
     mutate(tissue_type_annot = fct_reorder(tissue_type_annot, -fraction)) %>%
     mutate(tissue_type = fct_reorder(tissue_type, -fraction)) %>%

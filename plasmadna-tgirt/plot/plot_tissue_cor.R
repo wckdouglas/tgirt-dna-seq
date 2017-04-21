@@ -4,6 +4,7 @@ library(readr)
 library(dplyr)
 library(cowplot)
 library(purrr)
+library(stringr)
 source('~/R/marginal_plot.R')
 
 colors = c('red','darkgreen','chocolate','purple4','gold','khaki',
@@ -23,16 +24,26 @@ plot_tissue <- function(datapath){
     
     corr <- signif(cor(df[,3:4], method='spearman')[2,1],2)
     correlation_label <- sprintf("\"Spearman's\" ~ rho == %0.2f", corr)
+    message(correlation_label)
     
     ylims <- c(0, 0.015)
-    xlims <- c(0, 0.04)
+    xlims <- c(0, 0.045)
     #tissue_cor_p<-ggplot(data=df, aes(x=SRR2130051_rmdup, y = P1022_UMI_merged, color = tissue_type)) +
     #tissue_cor_p<-ggplot(data=df, aes(x=SRR2130051_rmdup, y = P13_mix_UMI_unique, color = tissue_type)) +
-    tissue_cor_p<-ggplot(data=df, aes(x=ssdna, y = tgirt, color = tissue_type)) +
+    tissue_cor_p<-ggplot(data=df %>% arrange(desc(tissue_type)), aes(x=ssdna, y = tgirt, color = tissue_type)) +
         geom_point(size=10)+
+        ggrepel::geom_label_repel(data= df %>% 
+                                      top_n(5,tgirt) %>%
+                                      mutate(cells = ifelse(cells == 'testis','Testis', cells)) %>%
+                                      arrange(-tgirt),
+                                  aes(label = cells),
+                                #point.padding = unit(1.6, 'lines'),
+                                nudge_x = c(0, -0.005, 0.01, 0.01, 0.0005),
+                                nudge_y = c(0.001, 0, 0.002,-0.002,0.005),
+                                size=10,show.legend  = F) +
         scale_color_manual(values= colors) +
-#        ylim(ylims[1], ylims[2]) +
-#        xlim(xlims[1],xlims[2]) +
+        ylim(ylims[1], ylims[2]) +
+        xlim(xlims[1],xlims[2]) +
         labs(y=expression(paste("Pearson's"~rho~"(TGIRT-seq)")),
              x=expression(paste("Pearson's"~rho~"(ssDNA-seq)")),
              color = ' ') +
@@ -44,10 +55,10 @@ plot_tissue <- function(datapath){
         annotate(geom='text', label = correlation_label, 
                  parse=T, x = 0.01,y=0.013,
                  size =10, family='Arial') +
-#        ggrepel::geom_label_repel(data=df %>% top_n(10,tgirt), aes(label = cells),size=10) +
         geom_rug(size=2, alpha=0.5)
-    source('~/R/legend_to_color.R')
-    tissue_cor_p <- ggdraw(coloring_legend_text_match(tissue_cor_p, colors))
+        
+    #source('~/R/legend_to_color.R')
+    #tissue_cor_p <- ggdraw(coloring_legend_text_match(tissue_cor_p, colors))
     return(tissue_cor_p)
 }
 
@@ -56,12 +67,12 @@ analytic_type <- expand.grid(c('tss','gene_body'),c('R','scipy')) %>%
     mutate(folder = str_c(project_path,Var1,'/', Var2))  %>%
     mutate(title = str_c(Var1, '_',Var2))
 ps <- lapply(analytic_type$folder,plot_tissue)
-p <- plot_grid(plotlist=ps, labels = analytic_type$title)
-figurepath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/figures' 
-figure_name <- str_c(figurepath, '/fft_plot.pdf')
-ggsave(p, height=30, width=30, file = figure_name)
-message('plotted', figure_name)
+#p <- plot_grid(plotlist=ps, labels = analytic_type$title)
 tissue_cor_p <- ps[[3]]
+#figurepath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/figures' 
+#figure_name <- str_c(figurepath, '/fft_plot.pdf')
+#ggsave(p, height=30, width=30, file = figure_name)
+message('plotted', figure_name)
 
 # 
 # dens_y <- ggplot(data=df, aes(x = P1022_UMI_merged, fill=tissue_type))+

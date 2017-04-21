@@ -1,12 +1,12 @@
 for SIDE in 3 5 both no
 do
-	FOLD=1000
+	FOLD=100
 	for PROFILE_PREFIX in 13N_clustered
 	do
 		if [[ $SIDE == both ]]
 		then
 			SAMPLENAME=K12_sim
-			FOLD=10000
+			FOLD=500
 		elif [[ $SIDE == 5 ]]
 		then
 			SAMPLENAME=K12_sim_ligation_only
