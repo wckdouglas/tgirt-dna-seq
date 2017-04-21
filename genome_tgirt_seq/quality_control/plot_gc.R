@@ -146,8 +146,10 @@ linearity <- gc_df %>%
 
 supplemental_df <- df %>%
     filter(grepl('K12_UMI_3|no_bias|13N',samplename)) %>%
+    filter(grepl('amp|UMI_[123]',samplename)) %>%
+    #filter(!grepl('amp',samplename)) %>%
     filter(grepl('[0-9]$', samplename)) %>%
-    filter(grepl('13N_clustered_K12_sim_template_switch|75bp_K12_UMI_3|13N_clustered_K12_sim|13N_clustered_K12_sim_ligation_only|no_bias',samplename)) %>%
+    filter(grepl('13N_clustered_K12_sim_template_switch|75bp_K12_UMI_[123]|13N_clustered_K12_sim|13N_clustered_K12_sim_ligation_only|no_bias',samplename)) %>%
 #    filter(grepl('13N_K12_sim_template_switch|75bp_K12_UMI_3|13N_K12_sim|13N_K12_sim_ligation_only|no_bias',samplename)) %>%
 #    filter(grepl('13N_kmer_K12_sim_template_switch|75bp_K12_UMI_1|13N_kmer_K12_sim|13N_K12_sim_ligation_only|no_bias',samplename)) %>%
     mutate(prep = case_when(grepl('no_bias',.$samplename) ~ 'Simulation: No bias',
@@ -163,21 +165,27 @@ supplement_df <- supplemental_df %>%
     filter(prep == 'Experimental') %>% 
     select(GC,NORMALIZED_COVERAGE) %>% 
     group_by(GC) %>%
-    summarize(experiment = median(NORMALIZED_COVERAGE)) %>%
+    summarize(experiment = mean(NORMALIZED_COVERAGE)) %>%
     inner_join(supplemental_df) %>%
 #    filter(grepl('UMI|.2$',samplename)) %>%
     tbl_df
 
 rmse_df <- supplement_df %>% 
-    #filter(GC <= 80, GC>=12) %>% 
-    group_by(prep) %>% 
+#    filter(GC <= 80, GC>=12) %>% 
+    group_by(samplename, prep) %>% 
     summarize(rmse = sqrt(mean((experiment-NORMALIZED_COVERAGE)^2))) %>%
     ungroup() %>%
-    mutate(rmse = signif(rmse, 3)) %>%
+    group_by(prep) %>%
+    summarize(mean_rmse = mean(rmse),
+              sd_rmse = sd(rmse),
+              rmse = str_c('RMSE: ', signif(mean_rmse, 3), '±', signif(sd_rmse,3))
+    ) %>%
+    ungroup() %>%
     inner_join(supplement_df) %>%
-    mutate(prep = str_c(prep, ' (RMSE: ',rmse,')')) %>%
+    mutate(rmse = ifelse(is.na(rmse),0, rmse)) %>%
+    mutate(prep = str_c(prep, ' (', rmse,')')) %>%
     mutate(prep = ifelse(grepl('Experimental',prep),'Experimental', prep)) %>%
-    mutate(prep = fct_reorder(prep, rmse)) %>%
+    mutate(prep = fct_reorder(prep, mean_rmse)) %>%
     tbl_df
 
 colors <- c('black','red','goldenrod4','springgreen4','navyblue','grey72')

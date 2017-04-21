@@ -23,9 +23,10 @@ datapath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/fragment_ends'
 simulation_annotation <- c('Experimental',"5' and 3' bias","5' bias","3' bias","No bias")
 files <- list.files(path = datapath, pattern = '.csv')
 df <- files %>%
+    .[grepl('amp|UMI', .)] %>%
+    .[grepl('13N_clustered_K12_sim|no_bias|UMI', .)] %>%
     map(read_files) %>%
     purrr::reduce(rbind) %>%
-    filter(grepl('13N_K12_sim|13N_K12_sim_ligation_only|no_bias|UMI',filename)) %>%
     #filter(grepl('13N_kmer_K12_sim|13N_K12_sim_ligation_only|no_bias|UMI',filename)) %>%
     filter(grepl('MarkDuplicate',filename)) %>%
     filter(grepl('sim|umi2id',filename)) %>%

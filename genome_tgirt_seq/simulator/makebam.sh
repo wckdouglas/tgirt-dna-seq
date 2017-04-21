@@ -20,8 +20,8 @@ do
 			\| sed 1d \
 			\| awk \''{print $4,$NF}'\' OFS=\'\\t\'\
 			\| python seq_to_pe_reads.py 75 \
-			\| bwa mem -t 4 -p $GENOME - \
-			\| samtools sort -@ 4 -O bam -T $BAM_FILE/$SAMPLENAME \
-			\> $BAM_FILE/${SAMPLENAME}.${i}.bam
+			\| bwa mem  -p $GENOME - \
+			\| samtools sort  -O bam -T $BAM_FILE/$SAMPLENAME \
+			\> $BAM_FILE/amp_${SAMPLENAME}.${i}.bam
 	done
 done
