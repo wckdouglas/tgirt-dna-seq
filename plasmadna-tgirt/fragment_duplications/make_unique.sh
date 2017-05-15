@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#PROJECT_PATH=$WORK/cdw2854/plasmaDNA
-PROJECT_PATH=$SCRATCH/plasmaDNA
+PROJECT_PATH=$WORK/cdw2854/plasmaDNA
+#PROJECT_PATH=$SCRATCH/plasmaDNA
 BED_PATH=$PROJECT_PATH/bedFiles/chrom_split_bed
 OUT_PATH=$BED_PATH/demultiplexed
 PROGRAM_PATH=$HOME/TGIRT_UMI/dedup_bed

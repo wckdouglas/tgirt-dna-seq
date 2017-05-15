@@ -52,6 +52,7 @@ make_prep <- function(x){
 
 read_data <- function(data_path, annotation){
     tables <- list.files(path = data_path, pattern = '.alignment.metrics', full.names = T)
+    tables <- tables[grepl('30X',tables)]
     tablenames <- data_frame( samplename= tables) %>%
         filter(grepl('nextera|umi2id|cluster',samplename)) %>%
         filter(grepl('^75|UMI|kh|kq|NEB', basename(samplename))) %>%
@@ -91,7 +92,7 @@ read_data <- function(data_path, annotation){
 }
 
 path_list <- c(data_path1,data_path2)
-label_list <- c('WGS','Homopolymer length < 4')
+label_list <- c('WGS','Mononucleotide runs < 4 nt')
 df <- map2_df(path_list, 
               label_list, 
               read_data) %>%

@@ -48,7 +48,7 @@ def renameDinucleotide(di):
     return label
 
 def medianFilter(dt):
-    dt['adjusted_signal'] = dt['fraction'] - medfilt(dt['fraction'],101)
+    dt['adjusted_signal'] = dt['fraction'] - dt['fraction'].mean() #medfilt(dt['fraction'],101)
     return dt
 
 def analyze_bam(ref_fasta, window_size, outputpath, bed_file):

@@ -37,6 +37,7 @@ plot_tissue <- function(datapath){
                                       mutate(cells = ifelse(cells == 'testis','Testis', cells)) %>%
                                       arrange(-tgirt),
                                   aes(label = cells),
+                                color = 'black',
                                 #point.padding = unit(1.6, 'lines'),
                                 nudge_x = c(0, -0.005, 0.01, 0.01, 0.0005),
                                 nudge_y = c(0.001, 0, 0.002,-0.002,0.005),
@@ -72,7 +73,7 @@ tissue_cor_p <- ps[[3]]
 #figurepath <- '/stor/work/Lambowitz/cdw2854/plasmaDNA/figures' 
 #figure_name <- str_c(figurepath, '/fft_plot.pdf')
 #ggsave(p, height=30, width=30, file = figure_name)
-message('plotted', figure_name)
+#message('plotted', figure_name)
 
 # 
 # dens_y <- ggplot(data=df, aes(x = P1022_UMI_merged, fill=tissue_type))+

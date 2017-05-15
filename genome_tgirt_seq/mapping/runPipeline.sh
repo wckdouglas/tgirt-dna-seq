@@ -12,7 +12,11 @@ PYTHON=$(which python)
 ADAPTORS=adaptors.fa
 CORES=6
 
-for DATAPATH in $DATAPATH1 $DATAPATH2
+DATAPATH1=/stor/work/Lambowitz/Data/NGS/JA17263/umi2id
+PROJECTPATH=$DATAPATH1/mappings
+mkdir -p $PROJECTPATH
+
+for DATAPATH in $DATAPATH1  #$DATAPATH2
 do
 	for FQ in $DATAPATH/*R1_001.fastq.gz 
 	do

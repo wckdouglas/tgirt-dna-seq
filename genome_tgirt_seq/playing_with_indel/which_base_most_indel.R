@@ -13,6 +13,7 @@ indel_tables <- list.files(path = datapath,
                            pattern = '.tsv',
                            full.names = T)
 indel_tables <- indel_tables[grepl('clustered_fam',indel_tables)]
+indel_tables <- indel_tables[grepl('30X',indel_tables)]
 
 complementary_base <- function(b){
     return (str_replace(b, 'ACTG','TGAC'))
@@ -55,7 +56,7 @@ base_indel_p<-ggplot(data = df,
     facet_grid(indel~mononucleotide, scale='free_y')+
     panel_border()+
     #viridis::scale_color_viridis() +
-    labs(color = ' ', x = 'Homopolymer length (nt)',
+    labs(color = ' ', x = 'Mononucleotide runs (nt)',
          y = 'Indel rate',
          shape = '') +
     theme(text = element_text(size=30,  family = 'Arial')) +
@@ -70,6 +71,7 @@ base_indel_p<-ggplot(data = df,
 source('~/R/legend_to_color.R')
 base_indel_p<-ggdraw(coloring_legend_text_match(base_indel_p,colors))
     
-figurename <- str_c(datapath, '/base_mononucleotide.pdf')
+figure_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/figures'
+figurename <- str_c(figure_path, '/base_mononucleotide.pdf')
 ggsave(base_indel_p, file =  figurename, height = 7, width = 10)
 message('plotted: ', figurename)

@@ -25,7 +25,7 @@ rename_enzyme <- function(x){
 }
 
 read_wgs_table <- function(filename, datapath){
-    samplename <- str_replace_all(filename,'.subsampled.wgs_metrics','')
+    samplename <- str_replace_all(filename,'subsampled.wgs_metrics','')
     df <- datapath %>%
 		str_c(filename, sep='/') %>%
 		read_tsv(skip = 10) %>%
@@ -42,7 +42,8 @@ project_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/'
 picard_path <- str_c( project_path, '/picard_results')
 figure_path <- str_c( project_path, '/figures')
 figurename <- str_c( figure_path, '/wgs_plot.pdf')
-table_names <- list.files(path = picard_path , pattern = '.subsampled.wgs.metrics') 
+table_names <- list.files(path = picard_path , pattern = 'subsampled.wgs.metrics') 
+table_names <- table_names[grepl('30X',table_names)]
 table_names <- data.frame(samplename = table_names) %>%
     #    select(-subsampled) %>%
     filter(grepl('^75|UMI', samplename)) %>%
@@ -96,11 +97,14 @@ rsqrd_df <- plot_df %>%
     ) %>%
     ungroup() %>%
     mutate(rsqrd = 1 - sum_res/ sum_var) 
+tt <- t.test(formula = rsqrd~prep, data=rsqrd_df)
 
 rsqrd <- rsqrd_df %>%
     group_by(prep) %>%
-    summarize(mean_rsqd = format(signif(mean(rsqrd),2)),
-              sd_rsqd = format(signif(sd(rsqrd),1))) %>%
+    summarize(mean_rsqd = mean(rsqrd),
+              sd_rsqd = sd(rsqrd)) %>%
+    mutate(mean_rsqd = round(mean_rsqd, 2)) %>%
+    mutate(sd_rsqd = round(sd_rsqd, 2)) %>%
     tbl_df
 
 plot_df <- inner_join(plot_df, rsqrd) %>%
@@ -108,10 +112,9 @@ plot_df <- inner_join(plot_df, rsqrd) %>%
     mutate(prep = ifelse(grepl('13N', prep),'TGIRT-seq', prep)) %>%
     mutate(clustered = ifelse(grepl('cluster',samplename),' Clustered','')) %>%
     mutate(prep = str_c(prep, clustered)) %>%
-    mutate(prep = str_c(prep, '~(R^{2}:~', mean_rsqd,'%+-%','~',sd_rsqd,')')) %>%
-    mutate(prep = factor(prep, levels = rev(unique(prep)))) %>%
+    mutate(prep = str_c(prep, '(R : ', format(mean_rsqd,digits=2),'±',sd_rsqd ,')')) %>%
     tbl_df
-preps <- plot_df$prep %>% unique
+preps <- plot_df$prep %>% as.character %>% unique
 
     
 colors <- c('salmon','black')
@@ -122,20 +125,33 @@ wgs_p <- ggplot() +
     geom_line(data = plot_df %>% filter(line_type != 'WGS'), 
 	          aes(x = coverage, y = density * 100, 
 	              color = prep, group=samplename), alpha = 0.5, linetype=2) +
-	xlim(1,30) +
+    #xlim(1,30) +
+    scale_x_continuous(breaks=seq(0,40,10),labels=seq(0,40,10), limits=c(0,55)) +
     scale_color_manual(values = colors) +
     scale_linetype_discrete(guide = guide_legend(ncol = 1))+
     theme(text = element_text(size=30,face='plain',family = 'Arial')) +
 	theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
 	labs(x ='Fold coverage', y = '% Bases', color =' ') +
     theme(legend.position = 'none') +
-    annotate(geom='text',x=10,y=10.5,label=preps[1],parse=T, 
-           hjust = 0, color = colors[1], size = 8) +
-    annotate(geom='text',x=10,y=12,label=preps[2],parse=T, 
+#    annotate(geom='text',x=10,y=10.5,label=preps[1],parse=T, 
+#           hjust = 0, color = colors[1], size = 8) +
+#    annotate(geom='text',x=10,y=12,label=preps[2],parse=T, 
+#           hjust = 0, color = colors[2], size = 8) +
+#    annotate(geom='text',x=20,y=10.5,label=preps[1],parse=T, 
+#           hjust = 0, color = colors[1], size = 8) +
+#    annotate(geom='text',x=20,y=12,label=preps[2],parse=T, 
+#           hjust = 0, color = colors[2], size = 8) +
+    annotate(geom='text',x=20,y=10.5,label=preps[1] , #parse=T, 
+             hjust = 0, color = colors[1], size = 8) +
+    annotate(geom='text',x=20,y=12,label=preps[2],#parse=T, 
            hjust = 0, color = colors[2], size = 8) +
-    annotate(geom='segment',x = 14, xend = 16, y = 8, yend = 8, linetype=1,size = 1) +
-    annotate(geom='segment',x = 14, xend = 16, y = 7, yend = 7, linetype=2,size = 1) +
-    annotate(geom='text', x = 17, y = 8, label = 'Experimental', size = 8, hjust =0, family='Arial') +
-    annotate(geom='text', x = 17, y = 7, label = 'Theoretical (Poisson)', size = 8, hjust=0, family='Arial')
+    annotate(geom='segment',x = 24, xend = 26, y = 8, yend = 8, linetype=1,size = 1) +
+    annotate(geom='segment',x = 24, xend = 26, y = 7, yend = 7, linetype=2,size = 1) +
+    annotate(geom='text', x = 27, y = 8, label = 'Experimental', size = 8, hjust =0, family='Arial') +
+    annotate(geom='text', x = 27, y = 7, label = 'Theoretical (Poisson)', size = 8, hjust=0, family='Arial')
+#    annotate(geom='segment',x = 14, xend = 16, y = 8, yend = 8, linetype=1,size = 1) +
+#    annotate(geom='segment',x = 14, xend = 16, y = 7, yend = 7, linetype=2,size = 1) +
+#    annotate(geom='text', x = 17, y = 8, label = 'Experimental', size = 8, hjust =0, family='Arial') +
+#    annotate(geom='text', x = 17, y = 7, label = 'Theoretical (Poisson)', size = 8, hjust=0, family='Arial')
 ggsave(wgs_p, file = figurename, height=8,width=9)
 message('Plotted: ', figurename)

@@ -15,8 +15,10 @@ sns.set_style('white')
 
 def get_gene_table():
     gene_expression_table = '/stor/work/Lambowitz/cdw2854/plasmaDNA/genes/rna.csv'
+    gene_expression_table = '/stor/work/Lambowitz/cdw2854/plasmaDNA/genes/rna_type.csv'
     ge = pd.read_csv(gene_expression_table)
-    ge.columns = ['id','name','cells','TPM','unit']
+    ge.columns = ['id','name','cells','TPM','unit','cat',
+                  'tissue_type','cell_type','description','rname']
     ge = ge \
         .query('TPM > 0')\
         .groupby(['id'], as_index=False)\
@@ -25,13 +27,6 @@ def get_gene_table():
         .drop('TPM', axis=1)\
         .merge(ge, how='inner') 
 
-
-    cell_Table = '/stor/work/Lambowitz/cdw2854/plasmaDNA/genes/labels.txt'
-    cells = pd.read_table(cell_Table)
-    cells.columns = ['tissue_type','cells','cell_type','description','rname']
-
-
-    ge = pd.merge(cells, ge, how='inner') 
     return ge
 
 def read_file(filename):

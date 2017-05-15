@@ -8,7 +8,7 @@ library(tidyr)
 library(purrr)
 
 datapath <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/base_insertion_table'
-datapath <- '/stor/work/Lambowitz/Data/archived_work/TGIRT_ERCC_project/base_insertion_table'
+#datapath <- '/stor/work/Lambowitz/Data/archived_work/TGIRT_ERCC_project/base_insertion_table'
 table_files <- list.files(path = datapath, pattern = '.tsv', full.names = T)
 
 paste_and_split <- function(x){
@@ -87,3 +87,28 @@ indel_base_df %>%
         patterns = .$patterns
     )) %>%
     filter(mononucleotide==patterns | patterns == str_c(mononucleotide,mononucleotide))
+
+
+sum_indel <- table_files%>%
+    map_df(read_df)  %>%
+    group_by(run_length, indel, mononucleotide, coverage,samplename) %>% 
+    summarize(indel_count = sum(freq)) %>%
+    ungroup() %>%
+    mutate(rate = indel_count/coverage) %>%
+    tbl_df
+p <- ggplot(data = sum_indel, aes(x = run_length, y = rate, color = mononucleotide)) +
+    geom_jitter() +
+    facet_grid(indel~mononucleotide, scale='free_y') +
+    panel_border() +
+    labs(color = ' ', x = 'Homopolymer length (nt)',
+         y = 'Indel rate',
+         shape = '') +
+    theme(text = element_text(size=30,  family = 'Arial')) +
+    theme(strip.text = element_text(size = 30,  family = 'Arial'))+
+    theme(axis.text = element_text(size = 30, family = 'Arial'))+
+    theme(legend.key.size = unit(2,'line')) +
+    #    scale_color_manual(values=colors, 
+    #                       guide= guide_legend(ncol=2)) +
+    #    theme(legend.position = c(0.2,0.9)) +
+    #    scale_x_continuous(breaks = 4:9, labels=4:9)+
+    theme(legend.position = 'none') 

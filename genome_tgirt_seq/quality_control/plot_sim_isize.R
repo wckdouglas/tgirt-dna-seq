@@ -22,7 +22,7 @@ tablenames <- list.files(path = data_path,
 simulation_annotation <- c('Experimental',"5' and 3' bias","5' bias","3' bias","No bias")
 df <- tablenames %>%
     map_df(read_file)  %>%
-    filter(grepl('UMI|NEB|sim',filename)) %>%
+    filter(grepl('UMI|NEB|amp',filename)) %>%
     filter(grepl('MarkDuplicate',filename)) %>%
     filter(grepl('sim|umi2id',filename)) %>%
     mutate(prep = case_when(

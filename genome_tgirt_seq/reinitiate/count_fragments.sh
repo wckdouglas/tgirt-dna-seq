@@ -5,7 +5,7 @@ BED_PATH=$PROJECT_PATH/bedFiles
 COUNT_PATH=$PROJECT_PATH/frag_counts
 mkdir -p $COUNT_PATH
 
-for BED in $BED_PATH/*unique.bed
+for BED in $BED_PATH/*.two_error.unique.bed
 do
 	SAMPLENAME=$(basename ${BED%.bed})
 	echo cat $BED \

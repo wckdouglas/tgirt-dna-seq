@@ -153,7 +153,7 @@ def main():
     if not os.path.isdir(out_path):
         os.mkdir(out_path)
     bam_files = glob.glob(bam_path + '/K12*UMI*clustered_family*.subsampled.bam')
-    bam_files = filter(lambda x: re.search('[0-9].subsampled.bam',x), bam_files)
+    bam_files = filter(lambda x: re.search('[0-9].30X.subsampled.bam',x), bam_files)
 
     analyzing_function = partial(analyze_bam_files, out_path, indel_table)
     p = Pool(24)

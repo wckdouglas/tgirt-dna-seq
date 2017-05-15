@@ -4,7 +4,7 @@ from matplotlib import use as mpl_use, ticker
 mpl_use('Agg')
 import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.stats import poisson, chisquare
+from scipy.stats import poisson, chisquare, chi2_contingency
 import glob
 import os
 import seaborn as sns
@@ -29,7 +29,7 @@ def rename(x):
 
 def make_simulation_data():
     sim = pd.DataFrame({
-            'counts':[18511210, 132626, 2130, 51, 0, 0],
+            'counts':[2068076,14893,239,6,0, 0],
             'fragment_counts':[1 ,2, 3,4, 5, 6]
             }) \
         .append(padding) \
@@ -53,7 +53,7 @@ def plot_bar(d, k, pv, figurename):
                      y = 'normalized_count',
                      hue='samplename',
                      palette=palette)
-    ax.annotate('$\chi^{2}$: %.3f\nP-value: %.3f' %(k,pv),
+    ax.annotate('$\chi^{2}$: %.2f\nP-value: %.3f' %(k,pv),
                 xy=(2,1), fontsize=fs)
     ax.legend(title= ' ', fontsize=fs, loc = (0.5,0.4))
     ax.set_xlim(-0.5,5)
@@ -79,15 +79,20 @@ def main():
     figurename = data_path + '/reinitiate_model.pdf'
     bar_figurename = figurename.replace('.pdf','_bar.pdf')
     sim_Df = make_simulation_data()
-    df = map(read_file, glob.glob(data_path + '/*UMI_1*tsv'))
+    files = glob.glob(data_path + '/*UMI_1*unique.tsv')
+    files = filter(lambda x: 'two_error' in x, files)
+    df = map(read_file, files )
     df = pd.concat(df, axis = 0)
     df = pd.concat([df,sim_Df],axis=0) \
             .assign(normalized_count = lambda d: d.normalized_count * 100)
 
     how_many = 5
     chi_df = df.query('fragment_counts < %i' %how_many)
-    k, pv = chisquare(chi_df[~chi_df.samplename.str.contains('sim')].normalized_count, 
-                      chi_df[chi_df.samplename.str.contains('sim')].normalized_count)
+    sim_vector = chi_df[chi_df.samplename.str.contains('sim')]['counts']
+    sample_vector = chi_df[~chi_df.samplename.str.contains('sim')]['counts']
+    #k, pv = chisquare(chi_df[~chi_df.samplename.str.contains('sim')].normalized_count, 
+    #                  chi_df[chi_df.samplename.str.contains('sim')].normalized_count)
+    k, pv, dof, t = chi2_contingency([sample_vector,sim_vector])
 
     d = df[df.samplename.str.contains('UMI_1|sim')]\
         .assign(samplename = lambda d: map(rename, d.samplename))

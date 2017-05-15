@@ -31,9 +31,10 @@ figure_path  <- str_c(project_path, '/figures')
 table_names <- list.files(path = picard_path, pattern = 'gc_metrics')
 table_names<- table_names[grepl('^75|sim|10X',table_names)]
 df <- table_names %>%
-	map(read_gc_table, picard_path) %>%
-	purrr::reduce(rbind) %>%
+    map(read_gc_table, picard_path) %>%
+    purrr::reduce(rbind) %>%
     filter(!grepl('Ecoli',samplename)) %>%
+    filter(!grepl('75bp_5_nexteraXT384',samplename)) %>%
     mutate(prep = case_when(grepl('nextera',.$samplename) ~ 'Nextera-XT',
                             grepl('pb',.$samplename) ~ 'Pacbio',
                             grepl('sim',.$samplename) ~ 'Covaris Sim',
@@ -125,7 +126,7 @@ gc_p <- plot_gc(gc_df) +
 figurename <- str_c(figure_path, '/gc_plot.pdf')
 source('~/R/legend_to_color.R')
 gc_p<-ggdraw(coloring_legend_text_match(gc_p,colors)) +
-  annotate('text', x=0.23, y = 0.41, 
+  annotate('text', x=0.23, y = 0.42, 
            label = 'No bias', size = 7)
 ggsave(gc_p, file = figurename , height = 7, width = 9)
 message('Plotted: ', figurename)

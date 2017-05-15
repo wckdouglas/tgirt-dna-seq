@@ -32,6 +32,7 @@ df <- files %>%
     filter(!grepl('subsampled|sim|Ecoli|q5|phus|SRR',filename)) %>%
     filter(grepl('nextera|kq|kh|UMI|NEB',filename)) %>%
     filter(grepl('MarkDuplicate',filename)) %>%
+    filter(!grepl('75bp_5_nexteraXT384',filename)) %>%
     filter(grepl('nextera|clustered|umi2id',filename)) %>%
     mutate(prep = case_when(grepl('nextera',.$filename) ~ 'Nextera-XT',
                             grepl('pb',.$filename) ~ 'Pacbio',

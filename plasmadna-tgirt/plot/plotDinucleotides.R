@@ -1,6 +1,8 @@
 #!/usr/bin/env Rscript
 
 library(readr)
+library(purrr)
+library(RcppRoll)
 library(dplyr)
 library(tidyr)
 library(stringr)
@@ -24,11 +26,19 @@ df <- filenames %>%
     map_df(read_tsv) %>%
     #filter(grepl('52|P1113_3_S20_umi2id', samplename)) %>%
     mutate( name = ifelse(grepl('SRR',samplename),'ssDNA-seq','TGIRT-seq')) %>%
+    group_by(samplename, name, dinucleotide_type, lenType) %>% 
+    do(data_frame(index=.$index,
+                 position = .$position, 
+                  fraction= .$fraction - median(.$fraction),
+                  adjusted_signal = .$adjusted_signal
+    )) %>%
+    ungroup() %>%
     filter(position > -120) %>%
     filter(position < 120) %>%
     mutate(dinucleotide_type = str_replace_all(dinucleotide_type,"\\|",'/')) %>%
     mutate(name = factor(name, levels = c('TGIRT-seq','ssDNA-seq')))
 dinucleotide_p <- ggplot(data = df, aes(x = position, y = adjusted_signal, color = dinucleotide_type)) +
+#dinucleotide_p <- ggplot(data = df, aes(x = position, y = fraction, color = dinucleotide_type)) +
 	    geom_line(size=1.2) +
 	    facet_grid(.~name) +
 	    theme(axis.text.x = element_text(size=30,angle = 45, hjust= 1,face='plain',family = 'Arial')) +

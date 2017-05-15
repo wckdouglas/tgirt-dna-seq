@@ -51,9 +51,10 @@ def collect_gc(in_bam, figures_path, samplename, result_path, ref):
 
 def subsampling(bam_file):
     fold = 500000
+    fold = 1000000
     subsampled_bams = []
     for seed in xrange(10):
-        subsampled_bam = bam_file.replace('.bam','.%i.subsampled.bam' %(seed))
+        subsampled_bam = bam_file.replace('.bam','.%i.30X.subsampled.bam' %(seed))
         command = 'samtools view -bF 256 -F 4 -F 1024 -F 2048 %s ' %(bam_file) +\
             '| bedtools sample -n %i -seed %i -i - ' %(fold, seed) +\
             '> %s ' %(subsampled_bam)
@@ -115,7 +116,7 @@ def main():
 
     bam_files = glob.glob(bam_path + '/*.bam')
     bam_files = filter(lambda x: 'pb' not in x, bam_files)
-    bam_files = filter(lambda x: re.search('amp_13N_clustered_K12_sim',x), bam_files)
+    #bam_files = filter(lambda x: re.search('amp_13N_clustered_K12_sim',x), bam_files)
     picard_func = partial(pipeline, result_path, figures_path, ref)
     p = Pool(20)
     p.map(picard_func, bam_files)

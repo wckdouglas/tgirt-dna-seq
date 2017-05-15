@@ -6,7 +6,8 @@ OUT_PATH=$BAM_PATH/no_hiINDEL
 REF_PATH=$REF/Ecoli
 mkdir -p $OUT_PATH
 
-for BAM in $BAM_PATH/*.MarkDuplicate.[0-9].subsampled.bam
+#for BAM in $BAM_PATH/*.MarkDuplicate.[0-9].subsampled.bam
+for BAM in $BAM_PATH/*.MarkDuplicate.[0-9].30X.subsampled.bam
 do
 	SAMPLENAME=$(basename ${BAM%.bam})
 	echo bedtools intersect -v \

@@ -17,7 +17,7 @@ do
 		\| sort -k1,1 -k2,2n -k3,3n \
 		\| datamash -g 1,2,3,6 collapse 4 \
 		\| tee $RESULTPATH/${SAMPLENAME}.collapse.bed \
-		\| python ~/TGIRT_UMI/dedup_bed/unique_bed.py -t 1 -i - \
-		\> $RESULTPATH/${SAMPLENAME}.unique.bed
+		\| python ~/TGIRT_UMI/dedup_bed/unique_bed.py -t 2 -i - \
+		\> $RESULTPATH/${SAMPLENAME}.two_error.unique.bed
 done
 

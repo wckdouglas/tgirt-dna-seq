@@ -6,7 +6,7 @@ library(purrr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-library(ggpmisc)
+#library(ggpmisc)
 library(cowplot)
 library(extrafont)
 loadfonts()
@@ -31,6 +31,7 @@ read_indel_table <- function(tablename){
 
 indel_table_path <- '/stor/work/Lambowitz/cdw2854/ecoli_genome/indel_table'
 df <- list.files(path = indel_table_path, pattern = '.tsv', full.names = T) %>%
+    .[grepl('30X',basename(.))] %>%
     .[grepl('^75bp_|UMI',basename(.))] %>%
     .[grepl('_nextera|clustered_fam',.)] %>%
     map_df(read_indel_table) %>%
@@ -77,7 +78,7 @@ indel_p<-ggplot(data = df %>%
 #            aes(x=indel_index, color = prep, y = m)) +
     scale_color_manual(values = colors)+
     labs(y = 'Indel rate', color = ' ')+
-    scale_x_continuous(breaks = seq(0,10),name='Homopolymer length (nt)') +
+    scale_x_continuous(breaks = seq(0,10),name='Mononucleotide runs (nt)') +
     theme(legend.position = c(0.2,0.8)) +
 #    theme(legend.text = element_text(size = 25, color = colors)) +
     theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
