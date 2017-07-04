@@ -76,7 +76,7 @@ p <- ggdraw() +
                     size = 40,
                     family='Arial')
 figurename <- str_c(figurepath, '/simulation.pdf')
-ggsave(p, file = figurename, width = 25, height = 16)
+ggsave(p, file = figurename, width = 25, height = 20)
 message('plotted: ', figurename)
     
 #indel + mismatch

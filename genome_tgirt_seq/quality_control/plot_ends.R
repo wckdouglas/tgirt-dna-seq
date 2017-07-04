@@ -38,9 +38,9 @@ df <- files %>%
                             grepl('pb',.$filename) ~ 'Pacbio',
                             grepl('sim',.$filename) ~ 'Covaris Sim',
                             grepl('SRR',.$filename) ~ 'Covaris SRR',
-                            grepl('UMI',.$filename) ~ 'TGIRT-seq Covaris (UMI direct ligation)',
-                            grepl('kh|kq',.$filename) ~ "TGIRT-seq Covaris (5' CGATG + UMI)",
-                            grepl('NEB',.$filename) ~ "TGIRT-seq Fragmentase (5' CGATG + UMI)")) %>%
+                            grepl('UMI',.$filename) ~ 'TGIRT-seq Covaris (R1R-UMI)',
+                            grepl('kh|kq',.$filename) ~ "TGIRT-seq Covaris (R1R-UMI+CGATG)",
+                            grepl('NEB',.$filename) ~ "TGIRT-seq Fragmentase (R1R-UMI+CGATG)")) %>%
     mutate(read_end = ifelse(read_end == "5'", 'Read 1', 'Read 2')) %>%
     mutate(read_end = factor(read_end, levels=c("Read 1","Read 2"))) %>%
     mutate(actual_positions = ifelse(read_end == "Read 2", positions-20, positions)) %>%
@@ -48,7 +48,7 @@ df <- files %>%
     mutate(read_end = as.character(read_end))
 
 end_p <- ggplot(data = df %>% 
-              filter(grepl('direct|XT',prep)) %>%
+              filter(prep %in% c('Nextera-XT','TGIRT-seq Covaris (R1R-UMI)')) %>%
               mutate(prep = ifelse(grepl('direct',prep),'TGIRT-seq',prep)) %>%
               mutate(prep = factor(prep, level = rev(unique(prep)))), 
             aes(x = actual_positions, 
@@ -65,7 +65,7 @@ end_p <- ggplot(data = df %>%
     theme(strip.text.y = element_text(size = 25, face='plain', angle = 0)) +
     theme(axis.title = element_text(size = 25, face='plain')) +
     theme(axis.text = element_text(size = 18, face='plain'))  +
-    theme(legend.position = c(0.3,0.7))+
+    theme(legend.position = c(0.3,0.75))+
     theme(legend.text = element_text(size = 18, face='plain'))+
     theme(legend.key.size=unit(8,'mm'))
 source('~/R/legend_to_color.R')
@@ -77,7 +77,7 @@ message('Plotted: ', figurename)
 
 pdf <- df %>% 
     filter(prep!='Nextera-XT') %>%
-    mutate(prep = relevel(factor(prep),'TGIRT-seq Covaris (UMI direct ligation)'))
+    mutate(prep = relevel(factor(prep),'TGIRT-seq Covaris (R1R-UMI)'))
 colors <- c('black','orange2','green4','red')
 prep_end_p <- ggplot(data = pdf,
             aes(x = actual_positions, 

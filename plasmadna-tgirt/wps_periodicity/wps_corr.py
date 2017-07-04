@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 
-import seaborn as sns
 import numpy as np
 import pandas as pd
 import os
 import glob
-import matplotlib.pyplot as plt
 import re
 from itertools import izip
-from matplotlib.font_manager import FontProperties
-sns.set_style('white')
+from functools import partial
+from multiprocessing import Pool
 
 
 
@@ -29,28 +27,31 @@ def get_gene_table():
 
     return ge
 
-def read_file(filename):
+def read_file(ge, filename):
+    low_p, hi_p = 190, 199
     return pd.read_table(filename) \
-            .assign(samplename= os.path.basename(filename).replace('.tsv',''))
+            .query('periodicity <= %i & periodicity >= %i' %(hi_p, low_p))\
+            .groupby(['name','type','id'], as_index=False) \
+            .agg({'intensity':'mean'})\
+            .merge(ge,'inner')\
+            .drop(['name','type','id'], axis = 1) \
+            .groupby(['cells','tissue_type'])\
+            .corr(method='pearson')\
+            .reset_index() \
+            .query('level_2 == "TPM"')\
+            .drop(['level_2','TPM'],axis=1)\
+            .rename(columns = {'intensity':'cor'})  \
+            .assign(cor = lambda d: -(d['cor']))  \
+            .assign(samplename= os.path.basename(filename).replace('.tsv','')) 
 
 
 def tissue_cor(selected_files, ge):
-    low_p, hi_p = 190, 199
-    df = map(read_file, selected_files)
+    reading_input = partial(read_file, ge)
+    p = Pool(24)
+    df = p.map(reading_input, selected_files)
+    p.close()
+    p.join()
     df = pd.concat(df, axis=0)\
-            .query('periodicity <= %i & periodicity >= %i' %(hi_p, low_p))\
-            .groupby(['samplename','name','type','id'], as_index=False) \
-            .agg({'intensity':'mean'})\
-            .merge(ge,'inner')\
-            .drop(['name','type','id'], axis = 1)\
-            .groupby(['samplename','cells','tissue_type'])\
-            .corr(method='pearson')\
-            .reset_index() \
-            .query('level_3 == "TPM"')\
-            .drop(['level_3'],axis=1)\
-            .drop(['TPM'],axis = 1) \
-            .rename(columns = {'intensity':'cor'})  \
-            .assign(cor = lambda d: -(d['cor']))  \
             .pipe(pd.pivot_table, index=['cells','tissue_type'],
                         columns = 'samplename',
                         values = 'cor')\
@@ -65,7 +66,7 @@ def main():
             datapath = projectpath + '/periodicity_' + gene_region +'/'+fft
             print datapath
             files = glob.glob(datapath + '/*tsv')
-            selected_files = filter(lambda x: re.search('P1022_1113_13_1016_mix_unique|SRR2130051_rmdup', x), files)
+            selected_files = filter(lambda x: not re.search('cor', x), files)
 
             pdf = tissue_cor(selected_files, ge)
             tablename = datapath + '/cor_table.tsv'

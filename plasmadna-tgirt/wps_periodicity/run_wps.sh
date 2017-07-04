@@ -3,7 +3,7 @@
 PROJECT_PATH=$SCRATCH/plasmaDNA/genomeWPS
 BIGWIG_PATH=$PROJECT_PATH/bigWig_files
 
-for BW in $(ls $BIGWIG_PATH/*Long.bigWig | grep 'P1022_1113_13_1016_mix_unique\|SRR2130051')
+for BW in $(ls $BIGWIG_PATH/*Long.bigWig | grep '^P' | grep -v 'P1022_1113_13_1016_mix_unique\|SRR2130051')
 do
 	SAMPLENAME=$(basename $BW)
 	CHROM=$(echo $SAMPLENAME | rev | cut -d'.' -f3 | rev)

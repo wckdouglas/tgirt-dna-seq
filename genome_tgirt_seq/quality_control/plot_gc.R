@@ -57,9 +57,8 @@ gini_df <- df %>%
     ungroup() %>%
     tbl_df
 
-tg = gini_df %>% filter(prep == 'TGIRT-seq 13N') %>% .$gini
-xt = gini_df %>% filter(prep == 'Nextera-XT') %>% .$gini
-tt = t.test(tg, xt)
+tg <- gini_df %>% filter(prep %in% c('TGIRT-seq 13N', 'Nextera-XT')) 
+tt <- wilcox.test(formula = gini~prep, data=tg)
 
 
 gini_p <- ggplot(data=gini_df, aes(x = prep, y=gini, color=prep)) +

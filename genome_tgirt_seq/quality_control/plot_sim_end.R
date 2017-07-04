@@ -62,6 +62,7 @@ sim_end_p <- ggplot(data = df %>%
     labs(x = 'Position relative to read ends',y='Fraction of Reads',color=' ') +
     theme(text = element_text(size=30,face='plain',family = 'Arial')) +
     theme(axis.text = element_text(size=30,face='plain',family = 'Arial')) +
+    theme(panel.spacing = unit(2, "lines")) +
     theme(strip.text.y = element_text(face='plain',family='Arial', size=30)) +
     panel_border() +
     theme(legend.position = c(0.2,0.95))  +

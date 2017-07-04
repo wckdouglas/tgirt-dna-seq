@@ -97,7 +97,7 @@ rsqrd_df <- plot_df %>%
     ) %>%
     ungroup() %>%
     mutate(rsqrd = 1 - sum_res/ sum_var) 
-tt <- t.test(formula = rsqrd~prep, data=rsqrd_df)
+tt <- wilcox.test(formula = rsqrd~prep, data=rsqrd_df)
 
 rsqrd <- rsqrd_df %>%
     group_by(prep) %>%
@@ -112,7 +112,7 @@ plot_df <- inner_join(plot_df, rsqrd) %>%
     mutate(prep = ifelse(grepl('13N', prep),'TGIRT-seq', prep)) %>%
     mutate(clustered = ifelse(grepl('cluster',samplename),' Clustered','')) %>%
     mutate(prep = str_c(prep, clustered)) %>%
-    mutate(prep = str_c(prep, '(R : ', format(mean_rsqd,digits=2),'±',sd_rsqd ,')')) %>%
+    mutate(prep = str_c(prep, ' (R : ', format(mean_rsqd,digits=2),'±',sd_rsqd ,')')) %>%
     tbl_df
 preps <- plot_df$prep %>% as.character %>% unique
 

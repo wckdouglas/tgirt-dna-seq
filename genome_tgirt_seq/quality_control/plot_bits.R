@@ -29,8 +29,8 @@ df <- list.files(path = datapath,
     mutate(entropy = -base_fraction * log2(base_fraction)) %>%
     mutate(method = case_when(
                     grepl('7N', .$samplename) ~ '7N',
-                    grepl('UMI', .$samplename) ~ 'UMI direct ligation',
-                    grepl('K12_k', .$samplename) ~ "5' CGATG + UMI")) %>%
+                    grepl('UMI', .$samplename) ~ 'R1R-UMI',
+                    grepl('K12_k', .$samplename) ~ "R1R-UMI+CGATG")) %>%
     mutate(read_end = ifelse(read_end == "5'", 'Read 1', 'Read 2')) %>%
     filter(!grepl('7N',method)) %>%
     tbl_df()
@@ -76,7 +76,7 @@ message('Plotted ', fig_name)
 colors <- c('black','orange2','green4')
 small_en_p <- ggplot(data = df %>% 
                          filter(read_end=='Read 1') %>% 
-                         mutate(method = relevel(factor(method),'UMI direct ligation')), 
+                         mutate(method = relevel(factor(method),'R1R-UMI')), 
                      aes(color = method, x = adjusted_position, 
                         y = entropy, group=samplename)) +
     geom_line(size = 1.5, alpha=0.7) +
